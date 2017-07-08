@@ -4,10 +4,12 @@
 #
 # Classes relating to time period data
 
+import numpy as np
 
 class Candlestick:
-    def __init__(self, first_trade=None):
+    def __init__(self, first_trade=None, isotime=None):
         if first_trade:
+            self.time = first_trade.time.replace(second=0, microsecond=0)
             self.open = first_trade.price
             self.high = first_trade.price
             self.low = first_trade.price
@@ -16,7 +18,8 @@ class Candlestick:
 
             print("Trade Added!")
             first_trade.print_trade()
-        else:
+        elif isotime:
+            self.time = isotime.replace(second=0, microsecond=0)
             self.open = None
             self.high = None
             self.low = None
@@ -47,18 +50,20 @@ class Candlestick:
         self.close = self._last
         print("Candlestick Closed!")
         self.print_stick()
+        return [self.time, self.open, self.high, self.low, self.close, self.volume]
 
     def print_stick(self):
-        print("Open: %s High: %s Low: %s Close: %s Vol: %s" %
-              (self.open, self.high, self.low, self.close, self.volume))
+        print("Time: %s Open: %s High: %s Low: %s Close: %s Vol: %s" %
+              (self.time, self.open, self.high, self.low, self.close, self.volume))
 
 
 class Period:
     def __init__(self, first_trade):
-        self.cur_candlestick = Candlestick(first_trade)
-        self.candlesticks = [self.cur_candlestick]
+        self.cur_candlestick = Candlestick(first_trade=first_trade)
+        self.candlesticks = np.array([])
 
-    def new_candlestick(self):
-        self.cur_candlestick.close()
-        self.cur_candlestick = Candlestick()
-        self.candlesticks.append(self.cur_candlestick)
+    def new_candlestick(self, isotime):
+        self.cur_candlestick = Candlestick(isotime=isotime)
+
+    def close_candlestick(self):
+        np.append(self.candlesticks, np.array(self.cur_candlestick.close()))
