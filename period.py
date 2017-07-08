@@ -13,6 +13,9 @@ class Candlestick:
             self.low = first_trade.price
             self.volume = first_trade.volume
             self._last = first_trade.price
+
+            print("Trade Added!")
+            first_trade.print_trade()
         else:
             self.open = None
             self.high = None

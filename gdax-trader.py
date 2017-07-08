@@ -5,59 +5,59 @@
 # Main program for interacting with GDAX websocket and managing trade data
 
 import gdax
-import time
 import dateutil.parser
 import period
 import trade
+import Queue
 
-minute_period = None
+websocket_queue = Queue.Queue()
 
 
-class WebsocketMatchClient(gdax.WebsocketClient):
+class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
     def on_open(self):
         self.products = ["BTC-USD"]
-
-    def on_message(self, msg):
-        global minute_period
-
-        if msg.get('type') == "match":
-            cur_trade = trade.Trade(msg)
-            if minute_period is None:
-                minute_period = period.Period(cur_trade)
-            else:
-                minute_period.cur_candlestick.add_trade(cur_trade)
-
-
-class HeartbeatClient(gdax.WebsocketClient):
-    def on_open(self):
         self.type = "heartbeat"
-        self.prev_minute = None
 
     def on_message(self, msg):
-        global minute_period
+        global websocket_queue
 
-        if msg.get('type') == "heartbeat":
-            isotime = dateutil.parser.parse(msg.get('time'))
-            if isotime:
-                print str(isotime) + " " + str(msg.get('last_trade_id'))
-
-            if self.prev_minute is None:
-                self.prev_minute = isotime.minute
-            elif isotime.minute != self.prev_minute:
-                minute_period.new_candlestick()
-                self.prev_minute = isotime.minute
+        if msg.get('type') == "heartbeat" or msg.get('type') == "match":
+            websocket_queue.put(msg)
 
 
-gdax_websocket = WebsocketMatchClient()
-heartbeat_websocket = HeartbeatClient()
+def process_trade(msg, cur_period):
+    cur_trade = trade.Trade(msg)
+    if cur_period is None:
+        return period.Period(cur_trade)
+    else:
+        cur_period.cur_candlestick.add_trade(cur_trade)
+        return cur_period
+
+
+def process_heartbeat(msg, cur_period, prev_minute):
+    isotime = dateutil.parser.parse(msg.get('time'))
+    if isotime:
+        print str(isotime) + " " + str(msg.get('last_trade_id'))
+        if prev_minute and isotime.minute != prev_minute:
+            cur_period.new_candlestick()
+        return isotime.minute
+
+
+gdax_websocket = TradeAndHeartbeatWebsocket()
 
 gdax_websocket.start()
-heartbeat_websocket.start()
+
+cur_period = None
+prev_minute = None
 
 while(True):
     try:
-        time.sleep(1)
+        if not websocket_queue.empty():
+            msg = websocket_queue.get_nowait()
+            if msg.get('type') == "match":
+                cur_period = process_trade(msg, cur_period)
+            elif msg.get('type') == "heartbeat":
+                prev_minute = process_heartbeat(msg, cur_period, prev_minute)
     except KeyboardInterrupt:
         gdax_websocket.close()
-        heartbeat_websocket.close()
         exit()
