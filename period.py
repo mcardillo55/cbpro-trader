@@ -6,6 +6,7 @@
 
 import numpy as np
 
+
 class Candlestick:
     def __init__(self, first_trade=None, isotime=None):
         if first_trade:
@@ -50,11 +51,13 @@ class Candlestick:
         self.close = self._last
         print("Candlestick Closed!")
         self.print_stick()
-        return [self.time, self.open, self.high, self.low, self.close, self.volume]
+        return [self.time, self.open, self.high, self.low,
+                self.close, self.volume]
 
     def print_stick(self):
         print("Time: %s Open: %s High: %s Low: %s Close: %s Vol: %s" %
-              (self.time, self.open, self.high, self.low, self.close, self.volume))
+              (self.time, self.open, self.high, self.low,
+               self.close, self.volume))
 
 
 class Period:
