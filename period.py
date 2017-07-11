@@ -51,8 +51,8 @@ class Candlestick:
         self.close = self._last
         print("Candlestick Closed!")
         self.print_stick()
-        return [self.time, self.open, self.high, self.low,
-                self.close, self.volume]
+        return np.array([self.time, self.open, self.high, self.low,
+                        self.close, self.volume])
 
     def print_stick(self):
         print("Time: %s Open: %s High: %s Low: %s Close: %s Vol: %s" %
@@ -69,4 +69,8 @@ class Period:
         self.cur_candlestick = Candlestick(isotime=isotime)
 
     def close_candlestick(self):
-        np.append(self.candlesticks, np.array(self.cur_candlestick.close()))
+        if len(self.candlesticks) > 0:
+            self.candlesticks = np.row_stack((self.candlesticks,
+                                              self.cur_candlestick.close()))
+        else:
+            self.candlesticks = self.cur_candlestick.close()
