@@ -1,6 +1,8 @@
 bintrees==2.0.7
 gdax==1.0.6
+numpy==1.13.1
 python-dateutil==2.6.0
 requests==2.13.0
 six==1.10.0
+TA-Lib==0.4.10
 websocket-client==0.40.0
