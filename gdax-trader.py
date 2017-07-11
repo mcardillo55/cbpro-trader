@@ -8,6 +8,7 @@ import gdax
 import dateutil.parser
 import period
 import trade
+import indicators
 import Queue
 
 websocket_queue = Queue.Queue()
@@ -52,6 +53,7 @@ gdax_websocket = TradeAndHeartbeatWebsocket()
 
 gdax_websocket.start()
 
+indicator_subsys = indicators.IndicatorSubsystem()
 cur_period = None
 prev_minute = None
 
@@ -61,6 +63,7 @@ while(True):
             msg = websocket_queue.get_nowait()
             if msg.get('type') == "match":
                 cur_period = process_trade(msg, cur_period)
+                indicator_subsys.recalculate_indicators(cur_period)
             elif msg.get('type') == "heartbeat":
                 prev_minute = process_heartbeat(msg, cur_period, prev_minute)
     except KeyboardInterrupt:
