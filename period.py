@@ -66,10 +66,10 @@ class Period:
         self.candlesticks = np.array([])
 
     def get_closing_prices(self):
-        return self.candlesticks[:, 4]
+        return np.array(self.candlesticks[:, 4], dtype='f8')
 
     def get_volumes(self):
-        return self.candlesticks[:, 5]
+        return np.array(self.candlesticks[:, 5], dtype='f8')
 
     def new_candlestick(self, isotime):
         self.cur_candlestick = Candlestick(isotime=isotime)
