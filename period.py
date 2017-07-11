@@ -65,6 +65,9 @@ class Period:
         self.cur_candlestick = Candlestick(first_trade=first_trade)
         self.candlesticks = np.array([])
 
+    def get_closing_prices(self):
+        return self.candlesticks[:, 4]
+
     def new_candlestick(self, isotime):
         self.cur_candlestick = Candlestick(isotime=isotime)
 
@@ -73,4 +76,4 @@ class Period:
             self.candlesticks = np.row_stack((self.candlesticks,
                                               self.cur_candlestick.close()))
         else:
-            self.candlesticks = self.cur_candlestick.close()
+            self.candlesticks = np.array([self.cur_candlestick.close()])
