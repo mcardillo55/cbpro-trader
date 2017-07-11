@@ -68,6 +68,9 @@ class Period:
     def get_closing_prices(self):
         return self.candlesticks[:, 4]
 
+    def get_volumes(self):
+        return self.candlesticks[:, 5]
+
     def new_candlestick(self, isotime):
         self.cur_candlestick = Candlestick(isotime=isotime)
 
