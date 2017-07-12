@@ -43,7 +43,7 @@ def process_heartbeat(msg, cur_period, prev_minute):
     isotime = dateutil.parser.parse(msg.get('time'))
     if isotime:
         print str(isotime) + " " + str(msg.get('last_trade_id'))
-        if prev_minute and isotime.minute != prev_minute:
+        if cur_period and prev_minute and isotime.minute != prev_minute:
             cur_period.close_candlestick()
             cur_period.new_candlestick(isotime)
         return isotime.minute
