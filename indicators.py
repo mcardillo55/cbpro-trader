@@ -5,6 +5,7 @@
 # System for containing all technical indicators and processing associated data
 
 import talib
+import numpy as np
 
 
 class IndicatorSubsystem:
@@ -14,8 +15,14 @@ class IndicatorSubsystem:
     def recalculate_indicators(self, cur_period):
         total_periods = len(cur_period.candlesticks)
         if total_periods > 0:
-            self.calculate_macd(cur_period.get_closing_prices())
-            self.calculate_avg_volume(cur_period.get_volumes())
+            closing_prices = np.append(cur_period.get_closing_prices(),
+                                       cur_period.cur_candlestick.close)
+            volumes = np.append(cur_period.get_volumes(),
+                                cur_period.cur_candlestick.volume)
+
+            self.calculate_macd(closing_prices)
+            self.calculate_avg_volume(volumes)
+
             self.current_indicators['total_periods'] = total_periods
 
         print self.current_indicators
