@@ -21,13 +21,13 @@ class IndicatorSubsystem:
         print self.current_indicators
 
     def calculate_macd(self, closing_prices):
-        macd, macd_sig, macd_hist = talib.MACD(closing_prices, fastperiod=12,
+        macd, macd_sig, macd_hist = talib.MACD(closing_prices, fastperiod=10,
                                                slowperiod=26, signalperiod=9)
         self.current_indicators['macd'] = macd[-1]
         self.current_indicators['macd_sig'] = macd_sig[-1]
         self.current_indicators['macd_hist'] = macd_hist[-1]
 
     def calculate_avg_volume(self, volumes):
-        avg_vol = talib.EMA(volumes)
+        avg_vol = talib.SMA(volumes, timeperiod=15)
 
         self.current_indicators['avg_volume'] = avg_vol[-1]
