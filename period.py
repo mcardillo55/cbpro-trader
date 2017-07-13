@@ -16,8 +16,8 @@ class Candlestick:
             self.open = first_trade.price
             self.high = first_trade.price
             self.low = first_trade.price
+            self.close = first_trade.price
             self.volume = first_trade.volume
-            self._last = first_trade.price
 
             print("Trade Added!")
             first_trade.print_trade()
@@ -26,11 +26,10 @@ class Candlestick:
             self.open = None
             self.high = None
             self.low = None
+            self.close = None
             self.volume = 0
-            self._last = None
         elif existing_candlestick is not None:
             self.time, self.low, self.high, self.open, self.close, self.volume = existing_candlestick
-            self._last = self.close
 
     def add_trade(self, new_trade):
         if not self.open:
@@ -46,14 +45,13 @@ class Candlestick:
         elif new_trade.price < self.low:
             self.low = new_trade.price
 
-        self._last = new_trade.price
+        self.close = new_trade.price
         self.volume = self.volume + new_trade.volume
 
         print("Trade Added!")
         new_trade.print_trade()
 
     def close_candlestick(self):
-        self.close = self._last
         print("Candlestick Closed!")
         self.print_stick()
         return np.array([self.time, self.open, self.high, self.low,
