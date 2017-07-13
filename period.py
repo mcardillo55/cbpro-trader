@@ -5,10 +5,12 @@
 # Classes relating to time period data
 
 import numpy as np
+import gdax
+import datetime
 
 
 class Candlestick:
-    def __init__(self, first_trade=None, isotime=None):
+    def __init__(self, first_trade=None, isotime=None, existing_candlestick=None):
         if first_trade:
             self.time = first_trade.time.replace(second=0, microsecond=0)
             self.open = first_trade.price
@@ -26,6 +28,9 @@ class Candlestick:
             self.low = None
             self.volume = 0
             self._last = None
+        elif existing_candlestick is not None:
+            self.time, self.low, self.high, self.open, self.close, self.volume = existing_candlestick
+            self._last = self.close
 
     def add_trade(self, new_trade):
         if not self.open:
@@ -47,7 +52,7 @@ class Candlestick:
         print("Trade Added!")
         new_trade.print_trade()
 
-    def close(self):
+    def close_candlestick(self):
         self.close = self._last
         print("Candlestick Closed!")
         self.print_stick()
@@ -61,9 +66,26 @@ class Candlestick:
 
 
 class Period:
-    def __init__(self, first_trade):
-        self.cur_candlestick = Candlestick(first_trade=first_trade)
-        self.candlesticks = np.array([])
+    def __init__(self, first_trade, initialize=True):
+        if initialize:
+            self.candlesticks = self.get_historical_data()
+            if first_trade.time.minute == self.candlesticks[-1][0].minute:
+                self.cur_candlestick = Candlestick(existing_candlestick=self.candlesticks[-1])
+                self.candlesticks = self.candlesticks[:-1]
+            else:
+                self.cur_candlestick = Candlestick(first_trade=first_trade)
+        else:
+            self.candlesticks = np.array([])
+            self.cur_candlestick = Candlestick(first_trade=first_trade)
+
+    def get_historical_data(self, period_size=60):
+        gdax_client = gdax.PublicClient()
+        gdax_hist_data = np.array(gdax_client.get_product_historic_rates('BTC-USD', granularity=period_size), dtype='object')
+
+        for row in gdax_hist_data:
+            row[0] = datetime.datetime.fromtimestamp(row[0])
+
+        return np.flipud(gdax_hist_data)
 
     def get_closing_prices(self):
         return np.array(self.candlesticks[:, 4], dtype='f8')
@@ -77,6 +99,6 @@ class Period:
     def close_candlestick(self):
         if len(self.candlesticks) > 0:
             self.candlesticks = np.row_stack((self.candlesticks,
-                                              self.cur_candlestick.close()))
+                                              self.cur_candlestick.close_candlestick()))
         else:
-            self.candlesticks = np.array([self.cur_candlestick.close()])
+            self.candlesticks = np.array([self.cur_candlestick.close_candlestick()])
