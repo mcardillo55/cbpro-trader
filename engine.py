@@ -37,17 +37,16 @@ class TradeEngine():
         return self.auth_client.sell(type='market', size=amount, product_id='BTC-USD')
 
     def determine_trades(self, indicators, cur_period):
+        self.update_amounts()
         if cur_period.cur_candlestick.volume > indicators['avg_volume']:
             if indicators['macd_hist'] > 0.0:
                 # buy btc
                 if float(self.usd) > 0.0:
                     print "BUYING BTC!"
                     self.buy()
-                    self.update_amounts()
             elif indicators['macd_hist'] < 0.0:
                 # sell btc
                 if float(self.btc) > 0.0:
                     print "SELLING BTC!"
                     self.sell()
-                    self.update_amounts()
         self.print_amounts()
