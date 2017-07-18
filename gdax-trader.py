@@ -9,6 +9,8 @@ import dateutil.parser
 import period
 import trade
 import indicators
+import engine
+import config
 import Queue
 
 websocket_queue = Queue.Queue()
@@ -32,6 +34,8 @@ def process_trade(msg, cur_period):
         return period.Period(cur_trade)
     else:
         cur_period.cur_candlestick.add_trade(cur_trade)
+        print cur_period.candlesticks[-10:]
+        print cur_period.cur_candlestick.print_stick()
         return cur_period
 
 
@@ -47,6 +51,8 @@ def process_heartbeat(msg, cur_period, prev_minute):
 
 gdax_websocket = TradeAndHeartbeatWebsocket()
 indicator_subsys = indicators.IndicatorSubsystem()
+auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
+trade_engine = engine.TradeEngine(auth_client)
 cur_period = None
 prev_minute = None
 
@@ -58,6 +64,7 @@ try:
         if msg.get('type') == "match":
             cur_period = process_trade(msg, cur_period)
             indicator_subsys.recalculate_indicators(cur_period)
+            trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period)
         elif msg.get('type') == "heartbeat":
             prev_minute = process_heartbeat(msg, cur_period, prev_minute)
 except Queue.Empty:
