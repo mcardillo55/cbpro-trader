@@ -20,8 +20,8 @@ class TradeEngine():
         return self.auth_client.get_accounts()[3]['available']
 
     def update_amounts(self):
-        self.get_btc()
-        self.get_usd()
+        self.btc = self.get_btc()
+        self.usd = self.get_usd()
 
     def print_amounts(self):
         print "USD: %s BTC: %s" % (self.usd, self.btc)
