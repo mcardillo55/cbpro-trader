@@ -19,8 +19,6 @@ class Candlestick:
             self.close = first_trade.price
             self.volume = first_trade.volume
 
-            print("Trade Added!")
-            first_trade.print_trade()
         elif isotime:
             self.time = isotime.replace(second=0, microsecond=0)
             self.open = None
@@ -48,9 +46,6 @@ class Candlestick:
         self.close = new_trade.price
         self.volume = self.volume + new_trade.volume
 
-        print("Trade Added!")
-        new_trade.print_trade()
-
     def close_candlestick(self):
         print("Candlestick Closed!")
         self.print_stick()
@@ -58,7 +53,7 @@ class Candlestick:
                         self.close, self.volume])
 
     def print_stick(self):
-        print("Time: %s Open: %s High: %s Low: %s Close: %s Vol: %s" %
+        print("[CANDLESTICK] Time: %s Open: %s High: %s Low: %s Close: %s Vol: %s" %
               (self.time, self.open, self.high, self.low,
                self.close, self.volume))
 

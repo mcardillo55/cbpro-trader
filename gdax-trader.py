@@ -34,15 +34,14 @@ def process_trade(msg, cur_period):
         return period.Period(cur_trade)
     else:
         cur_period.cur_candlestick.add_trade(cur_trade)
-        print cur_period.candlesticks[-10:]
-        print cur_period.cur_candlestick.print_stick()
+        cur_period.cur_candlestick.print_stick()
         return cur_period
 
 
 def process_heartbeat(msg, cur_period, prev_minute):
     isotime = dateutil.parser.parse(msg.get('time'))
     if isotime:
-        print str(isotime) + " " + str(msg.get('last_trade_id'))
+        print "[HEARTBEAT] " + str(isotime) + " " + str(msg.get('last_trade_id'))
         if cur_period and prev_minute and isotime.minute != prev_minute:
             cur_period.close_candlestick()
             cur_period.new_candlestick(isotime)

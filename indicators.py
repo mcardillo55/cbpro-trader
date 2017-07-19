@@ -25,7 +25,9 @@ class IndicatorSubsystem:
 
             self.current_indicators['total_periods'] = total_periods
 
-        print self.current_indicators
+        print "[INDICATORS] Periods: %d MACD Hist: %f Avg Vol: %f" % \
+              (self.current_indicators['total_periods'], self.current_indicators['macd_hist'],
+               self.current_indicators['avg_volume'])
 
     def calculate_macd(self, closing_prices):
         macd, macd_sig, macd_hist = talib.MACD(closing_prices, fastperiod=10,

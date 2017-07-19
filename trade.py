@@ -16,5 +16,5 @@ class Trade:
         self.volume = float(msg.get('size'))
 
     def print_trade(self):
-        print("Trade ID: %d Price: %f Volume: %f" %
+        print("[TRADE] Trade ID: %d Price: %f Volume: %f" %
               (self.trade_id, self.price, self.volume))

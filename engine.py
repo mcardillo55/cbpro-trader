@@ -24,7 +24,7 @@ class TradeEngine():
         self.usd = self.get_usd()
 
     def print_amounts(self):
-        print "USD: %s BTC: %s" % (self.usd, self.btc)
+        print "[BALANCES] USD: %s BTC: %s" % (self.usd, self.btc)
 
     def buy(self, amount=None):
         if not amount:
