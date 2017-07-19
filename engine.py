@@ -48,10 +48,11 @@ class TradeEngine():
                 ret = self.auth_client.buy(type='limit', size=size, post_only=True, price=ask, product_id='BTC-USD')
                 print ret
             if ret.get('status') == 'pending' or ret.get('status') == 'open':
-                time.sleep(5)
+                time.sleep(6)
                 ret = self.auth_client.get_order(ret.get('id'))
                 print ret
                 print "ASK: " + str(ask)
+                print "skew: " + str(skew)
                 print "ASK(new): " + self.auth_client.get_product_ticker('BTC-USD')['bid']
                 if ret.get('status') != 'done' and ret.get('id') and ask < float(self.auth_client.get_product_ticker('BTC-USD')['bid']):
                     self.auth_client.cancel_order(ret.get('id'))
@@ -79,10 +80,11 @@ class TradeEngine():
                     ret = self.auth_client.sell(type='limit', size=amount, post_only=True, price=bid, product_id='BTC-USD')
                 print ret
             if ret.get('status') == 'pending' or ret.get('status') == 'open':
-                time.sleep(5)
+                time.sleep(6)
                 ret = self.auth_client.get_order(ret.get('id'))
                 print ret
                 print "BID: " + str(bid)
+                print "skew: " + str(skew)
                 print "BID(new)" + self.auth_client.get_product_ticker('BTC-USD')['ask']
                 if ret.get('status') != 'done' and ret.get('id') and bid > float(self.auth_client.get_product_ticker('BTC-USD')['ask']):
                     self.auth_client.cancel_order(ret.get('id'))
