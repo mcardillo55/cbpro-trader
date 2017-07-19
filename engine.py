@@ -16,6 +16,7 @@ class TradeEngine():
         self.btc = self.get_btc()
         self.last_balance_update = time.time()
         self.order_book.start()
+        self.last_balance_update = time.time()
 
     def get_usd(self):
         usd_str = self.auth_client.get_accounts()[0]['available']
