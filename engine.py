@@ -3,6 +3,7 @@
 # Mike Cardillo
 #
 # Subsystem containing all trading logic and execution
+import time
 
 
 class TradeEngine():
@@ -10,6 +11,7 @@ class TradeEngine():
         self.auth_client = auth_client
         self.usd = self.get_usd()
         self.btc = self.get_btc()
+        self.last_balance_update = time.time()
 
     def get_usd(self):
         usd_str = self.auth_client.get_accounts()[0]['available']
@@ -20,8 +22,10 @@ class TradeEngine():
         return self.auth_client.get_accounts()[3]['available']
 
     def update_amounts(self):
-        self.btc = self.get_btc()
-        self.usd = self.get_usd()
+        if time.time() - self.last_balance_update > 10.0:
+            self.btc = self.get_btc()
+            self.usd = self.get_usd()
+            self.last_balance_update = time.time()
 
     def print_amounts(self):
         print "[BALANCES] USD: %s BTC: %s" % (self.usd, self.btc)
