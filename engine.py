@@ -33,12 +33,64 @@ class TradeEngine():
     def buy(self, amount=None):
         if not amount:
             amount = self.get_usd()
-        return self.auth_client.buy(type='market', funds=amount, product_id='BTC-USD')
+        ret = {}
+        skew = 0.01
+        print "HELLO FROM buy()"
+        while ret.get('status') != 'done':
+            if ret.get('status') != 'open' and ret.get('status') != 'pending':
+                spread = float(self.auth_client.get_product_ticker('BTC-USD')['ask']) - float(self.auth_client.get_product_ticker('BTC-USD')['bid'])
+                if spread > 0.01:
+                    skew += 0.01
+                else:
+                    skew = 0.0
+                ask = round(float(self.auth_client.get_product_ticker('BTC-USD')['bid']) + skew, 2)
+                size = round(float(amount) / float(ask), 8)
+                ret = self.auth_client.buy(type='limit', size=size, post_only=True, price=ask, product_id='BTC-USD')
+                print ret
+            if ret.get('status') == 'pending' or ret.get('status') == 'open':
+                time.sleep(5)
+                ret = self.auth_client.get_order(ret.get('id'))
+                print ret
+                print "ASK: " + str(ask)
+                print "ASK(new): " + self.auth_client.get_product_ticker('BTC-USD')['bid']
+                if ret.get('status') != 'done' and ret.get('id') and ask < float(self.auth_client.get_product_ticker('BTC-USD')['bid']):
+                    self.auth_client.cancel_order(ret.get('id'))
+                    ret = self.auth_client.get_order(ret.get('id'))
+                    print "FROM DONEEEEEEEE*******"
+                    print ret
+            amount = self.get_usd()
+        return ret
 
     def sell(self, amount=None):
         if not amount:
             amount = self.get_btc()
-        return self.auth_client.sell(type='market', size=amount, product_id='BTC-USD')
+        ret = {}
+        skew = 0.01
+        while ret.get('status') != 'done':
+            if ret.get('status') != 'open' and ret.get('status') != 'pending':
+                spread = float(self.auth_client.get_product_ticker('BTC-USD')['ask']) - float(self.auth_client.get_product_ticker('BTC-USD')['bid'])
+                if spread > 0.01:
+                    skew += 0.01
+                else:
+                    skew = 0.0
+                bid = round(float(self.auth_client.get_product_ticker('BTC-USD')['ask']) - skew, 2)
+                print bid
+                if amount > 0.0:
+                    ret = self.auth_client.sell(type='limit', size=amount, post_only=True, price=bid, product_id='BTC-USD')
+                print ret
+            if ret.get('status') == 'pending' or ret.get('status') == 'open':
+                time.sleep(5)
+                ret = self.auth_client.get_order(ret.get('id'))
+                print ret
+                print "BID: " + str(bid)
+                print "BID(new)" + self.auth_client.get_product_ticker('BTC-USD')['ask']
+                if ret.get('status') != 'done' and ret.get('id') and bid > float(self.auth_client.get_product_ticker('BTC-USD')['ask']):
+                    self.auth_client.cancel_order(ret.get('id'))
+                    ret = self.auth_client.get_order(ret.get('id'))
+                    print "FROM DONEEEEEEEE*******"
+                    print ret
+            amount = self.get_btc()
+        return ret
 
     def determine_trades(self, indicators, cur_period):
         self.update_amounts()
@@ -51,7 +103,7 @@ class TradeEngine():
                     self.usd = self.get_usd()
             elif indicators['macd_hist'] < 0.0:
                 # sell btc
-                if float(self.btc) > 0.0:
+                if float(self.btc) >= 0.01:
                     print "SELLING BTC!"
                     self.sell()
                     self.btc = self.get_btc()
