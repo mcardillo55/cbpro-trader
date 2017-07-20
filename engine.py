@@ -42,7 +42,7 @@ class TradeEngine():
 
     def determine_trades(self, indicators, cur_period):
         self.update_amounts()
-        if cur_period.cur_candlestick.volume > indicators['avg_volume']:
+        if indicators['vol_macd_hist'] > 0.0:
             if indicators['macd_hist'] > 0.0:
                 # buy btc
                 if float(self.usd) > 0.0:
