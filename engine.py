@@ -26,10 +26,10 @@ class TradeEngine():
     def get_btc(self):
         return Decimal(self.auth_client.get_accounts()[3]['available'])
 
-    def round_usd(money):
+    def round_usd(self, money):
         return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
 
-    def round_btc(money):
+    def round_btc(self, money):
         return Decimal(money).quantize(Decimal('.00000001'), rounding=ROUND_DOWN)
 
     def update_amounts(self):
@@ -41,10 +41,10 @@ class TradeEngine():
     def print_amounts(self):
         print "[BALANCES] USD: %s BTC: %.8f" % (self.usd, self.btc)
 
-    def place_buy():
+    def place_buy(self):
         amount = self.get_usd()
         bid = self.order_book.get_ask() - Decimal('0.01')
-        amount = round_btc(Decimal(amount) / Decimal(bid))
+        amount = self.round_btc(Decimal(amount) / Decimal(bid))
 
         return self.auth_client.buy(type='limit', size=str(amount),
                                     price=str(bid), post_only=True,
@@ -70,7 +70,7 @@ class TradeEngine():
             if ret.get('id'):
                 ret = self.auth_client.get_order(ret.get('id'))
 
-    def place_sell():
+    def place_sell(self):
         amount = self.get_btc()
         ask = self.order_book.get_bid() + Decimal('0.01')
 
@@ -83,7 +83,7 @@ class TradeEngine():
         ask = ret.get('price')
         while ret.get('status') != 'done':
             if ret.get('status') == 'rejected':
-                ret = place_sell()
+                ret = self.place_sell()
                 ask = ret.get('price')
             elif Decimal(ask) > self.order_book.get_bid() + Decimal('0.01'):
                 if ret.get('id'):
@@ -91,7 +91,7 @@ class TradeEngine():
                 while self.get_btc() == Decimal('0.0') and ret.get('status') != 'done':
                     time.sleep(1)
                     if ret.get('id'):
-                        ret = auth_client.get_order(ret.get('id'))
+                        ret = self.auth_client.get_order(ret.get('id'))
                 if ret.get('status') != 'done':
                     ret = self.place_sell()
                     ask = ret.get('price')
