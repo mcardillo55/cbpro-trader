@@ -5,6 +5,7 @@
 # Subsystem containing all trading logic and execution
 import time
 import gdax
+from decimal import *
 
 
 class TradeEngine():
@@ -14,17 +15,21 @@ class TradeEngine():
         self.usd = self.get_usd()
         self.btc = self.get_btc()
         self.last_balance_update = time.time()
+        self.order_book.start()
 
     def get_usd(self):
         usd_str = self.auth_client.get_accounts()[0]['available']
         usd_str = usd_str.split('.')
-        return usd_str[0] + '.' + usd_str[1][:2]
+        return Decimal(usd_str[0] + '.' + usd_str[1][:2])
 
     def get_btc(self):
-        return self.auth_client.get_accounts()[3]['available']
+        return Decimal(self.auth_client.get_accounts()[3]['available'])
 
-    def get_spread(self):
-        return self.order_book.get_ask() - self.order_book.get_bid()
+    def round_usd(money):
+        return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
+
+    def round_btc(money):
+        return Decimal(money).quantize(Decimal('.00000001'), rounding=ROUND_DOWN)
 
     def update_amounts(self):
         if time.time() - self.last_balance_update > 10.0:
@@ -35,48 +40,62 @@ class TradeEngine():
     def print_amounts(self):
         print "[BALANCES] USD: %s BTC: %s" % (self.usd, self.btc)
 
+    def place_buy():
+        amount = self.get_usd()
+        bid = self.order_book.get_ask() - Decimal('0.01')
+        amount = round_btc(Decimal(amount) / Decimal(bid))
+
+        return self.auth_client.buy(type='limit', size=str(amount),
+                                    price=str(bid), post_only=True,
+                                    product_id='BTC-USD')
+
     def buy(self, amount=None):
-        if not amount:
-            amount = self.get_usd()
-        spread = self.get_spread()
-        if spread > 0.01:
-            skew = round(spread / 2.0, 2)
-        else:
-            skew = 0.0
-        ask = self.order_book.get_ask() + skew
-        ret = self.auth_client.buy(type='limit', size=amount, price=ask, post_only=True)
+        ret = self.place_buy()
+        bid = ret.get('price')
+        while ret.get('status') != 'done':
+            if ret.get('status') == 'rejected':
+                ret = self.place_buy()
+                bid = ret.get('price')
+            elif Decimal(bid) < self.order_book.get_ask() - Decimal('0.01'):
+                if ret.get('id'):
+                    self.auth_client.cancel_order(ret.get('id'))
+                while self.get_usd() == Decimal('0.0') and ret.get('status') != 'done':
+                    time.sleep(1)
+                    if ret.get('id'):
+                        ret = self.auth_client.get_order(ret.get('id'))
+                if ret.get('status') != 'done':
+                    ret = self.place_buy()
+                    bid = ret.get('price')
+            if ret.get('id'):
+                ret = self.auth_client.get_order(ret.get('id'))
+
+    def place_sell():
+        amount = self.get_btc()
+        ask = self.order_book.get_bid() + Decimal('0.01')
+
+        return self.auth_client.sell(type='limit', size=str(amount),
+                                     price=str(ask), post_only=True,
+                                     product_id='BTC-USD')
 
     def sell(self, amount=None):
-        if not amount:
-            amount = self.get_btc()
-        ret = {}
-        skew = 0.01
+        ret = self.place_sell()
+        ask = ret.get('price')
         while ret.get('status') != 'done':
-            if ret.get('status') != 'open' and ret.get('status') != 'pending':
-                spread = float(self.auth_client.get_product_ticker('BTC-USD')['ask']) - float(self.auth_client.get_product_ticker('BTC-USD')['bid'])
-                if spread > 0.01:
-                    skew += 0.01
-                else:
-                    skew = 0.0
-                bid = round(float(self.auth_client.get_product_ticker('BTC-USD')['ask']) - skew, 2)
-                print bid
-                if amount > 0.0:
-                    ret = self.auth_client.sell(type='limit', size=amount, post_only=True, price=bid, product_id='BTC-USD')
-                print ret
-            if ret.get('status') == 'pending' or ret.get('status') == 'open':
-                time.sleep(6)
-                ret = self.auth_client.get_order(ret.get('id'))
-                print ret
-                print "BID: " + str(bid)
-                print "skew: " + str(skew)
-                print "BID(new)" + self.auth_client.get_product_ticker('BTC-USD')['ask']
-                if ret.get('status') != 'done' and ret.get('id') and bid > float(self.auth_client.get_product_ticker('BTC-USD')['ask']):
+            if ret.get('status') == 'rejected':
+                ret = place_sell()
+                ask = ret.get('price')
+            elif Decimal(ask) > self.order_book.get_bid() + Decimal('0.01'):
+                if ret.get('id'):
                     self.auth_client.cancel_order(ret.get('id'))
-                    ret = self.auth_client.get_order(ret.get('id'))
-                    print "FROM DONEEEEEEEE*******"
-                    print ret
-            amount = self.get_btc()
-        return ret
+                while self.get_btc() == Decimal('0.0') and ret.get('status') != 'done':
+                    time.sleep(1)
+                    if ret.get('id'):
+                        ret = auth_client.get_order(ret.get('id'))
+                if ret.get('status') != 'done':
+                    ret = self.place_sell()
+                    ask = ret.get('price')
+            if ret.get('id'):
+                ret = self.auth_client.get_order(ret.get('id'))
 
     def determine_trades(self, indicators, cur_period):
         self.update_amounts()

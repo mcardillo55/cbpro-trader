@@ -49,7 +49,6 @@ def process_heartbeat(msg, cur_period, prev_minute):
 
 
 gdax_websocket = TradeAndHeartbeatWebsocket()
-order_book = gdax.OrderBook()
 indicator_subsys = indicators.IndicatorSubsystem()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
 trade_engine = engine.TradeEngine(auth_client)
@@ -64,7 +63,7 @@ try:
         if msg.get('type') == "match":
             cur_period = process_trade(msg, cur_period)
             indicator_subsys.recalculate_indicators(cur_period)
-            trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period, order_book)
+            trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period)
         elif msg.get('type') == "heartbeat":
             prev_minute = process_heartbeat(msg, cur_period, prev_minute)
 except Queue.Empty:
