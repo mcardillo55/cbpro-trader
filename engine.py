@@ -48,9 +48,11 @@ class TradeEngine():
                 if float(self.usd) > 0.0:
                     print "BUYING BTC!"
                     self.buy()
+                    self.usd = self.get_usd()
             elif indicators['macd_hist'] < 0.0:
                 # sell btc
                 if float(self.btc) > 0.0:
                     print "SELLING BTC!"
                     self.sell()
+                    self.btc = self.get_btc()
         self.print_amounts()
