@@ -39,7 +39,7 @@ class TradeEngine():
             self.last_balance_update = time.time()
 
     def print_amounts(self):
-        print "[BALANCES] USD: %s BTC: %.8f" % (self.usd, self.btc)
+        print "[BALANCES] USD: %.2f BTC: %.8f" % (self.usd, self.btc)
 
     def place_buy(self):
         amount = self.get_usd()
