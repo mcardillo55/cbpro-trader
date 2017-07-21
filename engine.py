@@ -8,10 +8,15 @@ import gdax
 from decimal import *
 
 
+class OrderBookNoRestart(gdax.OrderBook):
+    def on_error(self, e):
+        print e
+
+
 class TradeEngine():
     def __init__(self, auth_client):
         self.auth_client = auth_client
-        self.order_book = gdax.OrderBook()
+        self.order_book = OrderBookNoRestart()
         self.usd = self.get_usd()
         self.btc = self.get_btc()
         self.last_balance_update = time.time()
