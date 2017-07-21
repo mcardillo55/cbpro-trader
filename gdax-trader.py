@@ -27,6 +27,10 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         if msg.get('type') == "heartbeat" or msg.get('type') == "match":
             websocket_queue.put(msg)
 
+    def on_error(self, e):
+        print e
+        self.start()
+
 
 def process_trade(msg, cur_period):
     cur_trade = trade.Trade(msg)
