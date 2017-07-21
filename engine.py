@@ -19,12 +19,10 @@ class TradeEngine():
         self.last_balance_update = time.time()
 
     def get_usd(self):
-        usd_str = self.auth_client.get_accounts()[0]['available']
-        usd_str = usd_str.split('.')
-        return Decimal(usd_str[0] + '.' + usd_str[1][:2])
+        return self.round_usd(self.auth_client.get_accounts()[1]['available'])
 
     def get_btc(self):
-        return Decimal(self.auth_client.get_accounts()[3]['available'])
+        return self.round_btc(self.auth_client.get_accounts()[0]['available'])
 
     def round_usd(self, money):
         return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
