@@ -24,9 +24,14 @@ class TradeEngine():
         self.last_balance_update = time.time()
 
     def get_usd(self):
-        return self.round_usd(self.auth_client.get_accounts()[1]['available'])
+        for account in self.auth_client.get_accounts():
+            if account.get('currency') == 'USD':
+                return self.round_usd(account.get('available'))
 
     def get_btc(self):
+        for account in self.auth_client.get_accounts():
+            if account.get('currency') == 'BTC':
+                return self.round_btc(account.get('available'))
         return self.round_btc(self.auth_client.get_accounts()[0]['available'])
 
     def round_usd(self, money):
