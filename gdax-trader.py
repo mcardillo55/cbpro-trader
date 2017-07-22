@@ -12,6 +12,8 @@ import indicators
 import engine
 import config
 import Queue
+import time
+from websocket import WebSocketConnectionClosedException
 
 
 
@@ -21,8 +23,15 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         self.type = "heartbeat"
         self.websocket_queue = Queue.Queue()
 
-    def on_message(self, msg):
-        global websocket_queue
+    def on_close(self):
+        if not self.stop:
+            self.on_close()
+            self.stop = True
+            try:
+                if self.ws:
+                    self.ws.close()
+            except WebSocketConnectionClosedException as e:
+                pass
 
     def on_message(self, msg):
         if msg.get('type') == "heartbeat" or msg.get('type') == "match":
@@ -30,6 +39,10 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
 
     def on_error(self, e):
         print e
+        print "websocket onerror"
+        self.close()
+        self.websocket_queue = Queue.Queue()
+        time.sleep(10)
         self.start()
 
 
