@@ -61,9 +61,14 @@ class TradeEngine():
         bid = self.order_book.get_ask() - Decimal('0.01')
         amount = self.round_btc(Decimal(amount) / Decimal(bid))
 
-        return self.auth_client.buy(type='limit', size=str(amount),
-                                    price=str(bid), post_only=True,
-                                    product_id='BTC-USD')
+        if amount > Decimal('0.01'):
+            return self.auth_client.buy(type='limit', size=str(amount),
+                                        price=str(bid), post_only=True,
+                                        product_id='BTC-USD')
+        else:
+            ret = {'status': 'done'}
+            return ret
+
 
     def buy(self, amount=None):
         ret = self.place_buy()
@@ -89,9 +94,13 @@ class TradeEngine():
         amount = self.get_btc()
         ask = self.order_book.get_bid() + Decimal('0.01')
 
-        return self.auth_client.sell(type='limit', size=str(amount),
-                                     price=str(ask), post_only=True,
-                                     product_id='BTC-USD')
+        if amount > Decimal('0.01'):
+            return self.auth_client.sell(type='limit', size=str(amount),
+                                         price=str(ask), post_only=True,
+                                         product_id='BTC-USD')
+        else:
+            ret = {'status': 'done'}
+            return ret
 
     def sell(self, amount=None):
         ret = self.place_sell()
