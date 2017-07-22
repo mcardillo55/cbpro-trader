@@ -21,6 +21,7 @@ class TradeEngine():
         self.btc = self.get_btc()
         self.last_balance_update = time.time()
         self.order_book.start()
+        time.sleep(10)
         self.last_balance_update = time.time()
 
     def get_usd(self):
