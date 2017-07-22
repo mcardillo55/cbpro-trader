@@ -124,16 +124,16 @@ class TradeEngine():
 
     def determine_trades(self, indicators, cur_period):
         self.update_amounts()
-        if indicators['vol_macd_hist'] > 0.0:
-            if indicators['macd_hist'] > 0.0:
+        if Decimal(indicators['vol_macd_hist']) > Decimal('-0.15'):
+            if Decimal(indicators['macd_hist']) >= Decimal('0.2'):
                 # buy btc
-                if float(self.usd) > 0.0:
+                if (self.get_usd() / self.order_book.get_bid()) >= Decimal('0.01'):
                     print "BUYING BTC!"
                     self.buy()
                     self.usd = self.get_usd()
-            elif indicators['macd_hist'] < 0.0:
+            elif Decimal(indicators['macd_hist']) <= Decimal('-0.2'):
                 # sell btc
-                if float(self.btc) >= 0.01:
+                if self.get_btc() >= Decimal('0.01'):
                     print "SELLING BTC!"
                     self.sell()
                     self.btc = self.get_btc()
