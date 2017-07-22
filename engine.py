@@ -24,15 +24,21 @@ class TradeEngine():
         self.last_balance_update = time.time()
 
     def get_usd(self):
-        for account in self.auth_client.get_accounts():
-            if account.get('currency') == 'USD':
-                return self.round_usd(account.get('available'))
+        try:
+            for account in self.auth_client.get_accounts():
+                if account.get('currency') == 'USD':
+                    return self.round_usd(account.get('available'))
+        except AttributeError:
+            return self.round_usd('0.0')
 
     def get_btc(self):
-        for account in self.auth_client.get_accounts():
-            if account.get('currency') == 'BTC':
-                return self.round_btc(account.get('available'))
-        return self.round_btc(self.auth_client.get_accounts()[0]['available'])
+        try:
+            for account in self.auth_client.get_accounts():
+                if account.get('currency') == 'BTC':
+                    return self.round_btc(account.get('available'))
+            return self.round_btc(self.auth_client.get_accounts()[0]['available'])
+        except AttributeError:
+            return self.round_btc('0.0')
 
     def round_usd(self, money):
         return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
