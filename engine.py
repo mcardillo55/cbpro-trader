@@ -5,6 +5,7 @@
 # Subsystem containing all trading logic and execution
 import time
 import gdax
+import threading
 from decimal import *
 
 
@@ -21,8 +22,13 @@ class TradeEngine():
         self.btc = self.get_btc()
         self.last_balance_update = time.time()
         self.order_book.start()
+        self.order_thread = threading.Thread()
         time.sleep(10)
         self.last_balance_update = time.time()
+
+        self.buy_flag = False
+        self.sell_flag = False
+        self.order_thread.daemon = True
 
     def get_usd(self):
         try:
@@ -73,7 +79,7 @@ class TradeEngine():
     def buy(self, amount=None):
         ret = self.place_buy()
         bid = ret.get('price')
-        while ret.get('status') != 'done':
+        while ret.get('status') != 'done' and self.buy_flag:
             if ret.get('status') == 'rejected':
                 ret = self.place_buy()
                 bid = ret.get('price')
@@ -89,6 +95,9 @@ class TradeEngine():
                     bid = ret.get('price')
             if ret.get('id'):
                 ret = self.auth_client.get_order(ret.get('id'))
+        if not self.buy_flag and ret.get('id'):
+            self.auth_client.cancel_order(ret.get('id'))
+        self.usd = self.get_usd()
 
     def place_sell(self):
         amount = self.get_btc()
@@ -105,7 +114,7 @@ class TradeEngine():
     def sell(self, amount=None):
         ret = self.place_sell()
         ask = ret.get('price')
-        while ret.get('status') != 'done':
+        while ret.get('status') != 'done' and self.sell_flag:
             if ret.get('status') == 'rejected':
                 ret = self.place_sell()
                 ask = ret.get('price')
@@ -121,6 +130,9 @@ class TradeEngine():
                     ask = ret.get('price')
             if ret.get('id'):
                 ret = self.auth_client.get_order(ret.get('id'))
+        if not self.sell_flag and ret.get('id'):
+            self.auth_client.cancel_order(ret.get('id'))
+        self.btc = self.get_btc()
 
     def determine_trades(self, indicators, cur_period):
         self.update_amounts()
@@ -129,12 +141,41 @@ class TradeEngine():
                 # buy btc
                 if (self.get_usd() / self.order_book.get_bid()) >= Decimal('0.01'):
                     print "BUYING BTC!"
-                    self.buy()
-                    self.usd = self.get_usd()
-            elif Decimal(indicators['macd_hist']) <= Decimal('-0.2'):
+                    self.buy_flag = True
+                    if self.order_thread.is_alive():
+                        if self.order_thread.name == 'sell_thread':
+                            # Wait for thread to close
+                            while self.order_thread.is_alive():
+                                self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
+                                self.order_thread.start()
+                        else:
+                            pass
+                    else:
+                        self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
+                        self.order_thread.start()
+            else:
+                self.buy_flag = False
+
+            if Decimal(indicators['macd_hist']) <= Decimal('-0.2'):
                 # sell btc
                 if self.get_btc() >= Decimal('0.01'):
                     print "SELLING BTC!"
-                    self.sell()
-                    self.btc = self.get_btc()
+                    self.sell_flag = True
+                    if self.order_thread.is_alive():
+                        if self.order_thread.name == 'buy_thread':
+                            # Wait for thread to close
+                            while self.order_thread.is_alive():
+                                self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
+                                self.order_thread.start()
+                        else:
+                            pass
+                    else:
+                        self.order_thread = threading.Thread(target=self.sell, name='sell_thread')
+                        self.order_thread.start()
+            else:
+                self.sell_flag = False
+        else:
+            self.buy_flag = False
+            self.sell_flag = False
+
         self.print_amounts()
