@@ -7,6 +7,7 @@
 import numpy as np
 import gdax
 import datetime
+import dateutil.parser
 
 
 class Candlestick:
@@ -64,7 +65,9 @@ class Candlestick:
 
 
 class Period:
-    def __init__(self, first_trade, initialize=True):
+    def __init__(self, first_trade, period_size=60, initialize=True):
+        self.period_size = period_size
+        self.prev_minute = first_trade.time.minute
         if initialize:
             self.candlesticks = self.get_historical_data()
             if first_trade.time.minute == self.candlesticks[-1][0].minute:
@@ -76,14 +79,23 @@ class Period:
             self.candlesticks = np.array([])
             self.cur_candlestick = Candlestick(first_trade=first_trade)
 
-    def get_historical_data(self, period_size=60):
+    def get_historical_data(self):
         gdax_client = gdax.PublicClient()
-        gdax_hist_data = np.array(gdax_client.get_product_historic_rates('BTC-USD', granularity=period_size), dtype='object')
+        gdax_hist_data = np.array(gdax_client.get_product_historic_rates('BTC-USD', granularity=self.period_size), dtype='object')
 
         for row in gdax_hist_data:
             row[0] = datetime.datetime.fromtimestamp(row[0])
 
         return np.flipud(gdax_hist_data)
+
+    def process_heartbeat(self, msg):
+        isotime = dateutil.parser.parse(msg.get('time'))
+        if isotime:
+            print "[HEARTBEAT] " + str(isotime) + " " + str(msg.get('last_trade_id'))
+            if self.prev_minute and isotime.minute != self.prev_minute:
+                self.close_candlestick()
+                self.new_candlestick(isotime)
+            self.prev_minute = isotime.minute
 
     def get_closing_prices(self):
         return np.array(self.candlesticks[:, 4], dtype='f8')

@@ -56,16 +56,6 @@ def process_trade(msg, cur_period):
         return cur_period
 
 
-def process_heartbeat(msg, cur_period, prev_minute):
-    isotime = dateutil.parser.parse(msg.get('time'))
-    if isotime:
-        print "[HEARTBEAT] " + str(isotime) + " " + str(msg.get('last_trade_id'))
-        if cur_period and prev_minute and isotime.minute != prev_minute:
-            cur_period.close_candlestick()
-            cur_period.new_candlestick(isotime)
-        return isotime.minute
-
-
 gdax_websocket = TradeAndHeartbeatWebsocket()
 indicator_subsys = indicators.IndicatorSubsystem()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
@@ -85,4 +75,5 @@ while(True):
             trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period)
             last_indicator_update = time.time()
     elif msg.get('type') == "heartbeat":
-        prev_minute = process_heartbeat(msg, cur_period, prev_minute)
+        if cur_period:
+            cur_period.process_heartbeat(msg)
