@@ -38,6 +38,9 @@ class TradeEngine():
         except AttributeError:
             return self.round_usd('0.0')
 
+    def get_half_usd(self):
+        return self.round_usd(self.get_usd() / Decimal('2.0'))
+
     def get_btc(self):
         try:
             for account in self.auth_client.get_accounts():
@@ -46,6 +49,9 @@ class TradeEngine():
             return self.round_btc(self.auth_client.get_accounts()[0]['available'])
         except AttributeError:
             return self.round_btc('0.0')
+
+    def get_half_btc(self):
+        return self.round_btc(self.get_btc() / Decimal('2.0'))
 
     def round_usd(self, money):
         return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
@@ -63,7 +69,7 @@ class TradeEngine():
         print "[BALANCES] USD: %.2f BTC: %.8f" % (self.usd, self.btc)
 
     def place_buy(self):
-        amount = self.get_usd()
+        amount = self.get_half_usd()
         bid = self.order_book.get_ask() - Decimal('0.01')
         amount = self.round_btc(Decimal(amount) / Decimal(bid))
 
@@ -100,7 +106,7 @@ class TradeEngine():
         self.usd = self.get_usd()
 
     def place_sell(self):
-        amount = self.get_btc()
+        amount = self.get_half_btc()
         ask = self.order_book.get_bid() + Decimal('0.01')
 
         if amount > Decimal('0.01'):
@@ -140,7 +146,7 @@ class TradeEngine():
             self.sell_flag = False
             if Decimal(indicators['macd_hist']) >= Decimal('0.0'):
                 # buy btc
-                if (self.get_usd() / self.order_book.get_bid()) >= Decimal('0.01'):
+                if (self.get_half_usd() / self.order_book.get_bid()) >= Decimal('0.01'):
                     print "BUYING BTC!"
                     self.buy_flag = True
                     if self.order_thread.is_alive():
@@ -160,7 +166,7 @@ class TradeEngine():
             self.buy_flag = False
             if Decimal(indicators['macd_hist']) <= Decimal('0.0'):
                 # sell btc
-                if self.get_btc() >= Decimal('0.01'):
+                if self.get_half_btc() >= Decimal('0.01'):
                     print "SELLING BTC!"
                     self.sell_flag = True
                     if self.order_thread.is_alive():
