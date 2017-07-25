@@ -174,8 +174,5 @@ class TradeEngine():
                         self.order_thread.start()
             else:
                 self.sell_flag = False
-        else:
-            self.buy_flag = False
-            self.sell_flag = False
 
         self.print_amounts()
