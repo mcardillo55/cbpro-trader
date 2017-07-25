@@ -8,6 +8,7 @@ import numpy as np
 import gdax
 import datetime
 import dateutil.parser
+import trade
 
 
 class Candlestick:
@@ -65,19 +66,16 @@ class Candlestick:
 
 
 class Period:
-    def __init__(self, first_trade, period_size=60, initialize=True):
+    def __init__(self, period_size=60, initialize=True):
         self.period_size = period_size
-        self.prev_minute = first_trade.time.minute
+        self.first_trade = True
         if initialize:
             self.candlesticks = self.get_historical_data()
-            if first_trade.time.minute == self.candlesticks[-1][0].minute:
-                self.cur_candlestick = Candlestick(existing_candlestick=self.candlesticks[-1])
-                self.candlesticks = self.candlesticks[:-1]
-            else:
-                self.cur_candlestick = Candlestick(first_trade=first_trade)
+            self.cur_candlestick = Candlestick(existing_candlestick=self.candlesticks[-1])
+            self.candlesticks = self.candlesticks[:-1]
+            self.prev_minute = self.cur_candlestick.time.minute
         else:
             self.candlesticks = np.array([])
-            self.cur_candlestick = Candlestick(first_trade=first_trade)
 
     def get_historical_data(self):
         gdax_client = gdax.PublicClient()
@@ -96,6 +94,17 @@ class Period:
                 self.close_candlestick()
                 self.new_candlestick(isotime)
             self.prev_minute = isotime.minute
+
+    def process_trade(self, msg):
+        cur_trade = trade.Trade(msg)
+        if self.first_trade:
+            if cur_trade.time.minute != self.candlesticks[-1][0].minute:
+                self.close_candlestick()
+                self.cur_candlestick = Candlestick(first_trade=cur_trade)
+            self.first_trade = False
+        else:
+            self.cur_candlestick.add_trade(cur_trade)
+        self.cur_candlestick.print_stick()
 
     def get_closing_prices(self):
         return np.array(self.candlesticks[:, 4], dtype='f8')

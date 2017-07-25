@@ -5,9 +5,7 @@
 # Main program for interacting with GDAX websocket and managing trade data
 
 import gdax
-import dateutil.parser
 import period
-import trade
 import indicators
 import engine
 import config
@@ -46,22 +44,11 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         self.start()
 
 
-def process_trade(msg, cur_period):
-    cur_trade = trade.Trade(msg)
-    if cur_period is None:
-        return period.Period(cur_trade)
-    else:
-        cur_period.cur_candlestick.add_trade(cur_trade)
-        cur_period.cur_candlestick.print_stick()
-        return cur_period
-
-
 gdax_websocket = TradeAndHeartbeatWebsocket()
 indicator_subsys = indicators.IndicatorSubsystem()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
 trade_engine = engine.TradeEngine(auth_client)
-cur_period = None
-prev_minute = None
+cur_period = period.Period()
 last_indicator_update = time.time()
 
 gdax_websocket.start()
@@ -69,7 +56,7 @@ gdax_websocket.start()
 while(True):
     msg = gdax_websocket.websocket_queue.get(timeout=1000)
     if msg.get('type') == "match":
-        cur_period = process_trade(msg, cur_period)
+        cur_period.process_trade(msg)
         if time.time() - last_indicator_update >= 1.0:
             indicator_subsys.recalculate_indicators(cur_period)
             trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period)
