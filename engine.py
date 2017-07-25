@@ -83,7 +83,7 @@ class TradeEngine():
             if ret.get('status') == 'rejected' or ret.get('message') == 'NotFound':
                 ret = self.place_buy()
                 bid = ret.get('price')
-            elif Decimal(bid) < self.order_book.get_ask() - Decimal('0.01'):
+            elif not bid or Decimal(bid) < self.order_book.get_ask() - Decimal('0.01'):
                 if ret.get('id'):
                     self.auth_client.cancel_order(ret.get('id'))
                 while self.get_usd() == Decimal('0.0') and ret.get('status') != 'done':
@@ -118,7 +118,7 @@ class TradeEngine():
             if ret.get('status') == 'rejected' or ret.get('message') == 'NotFound':
                 ret = self.place_sell()
                 ask = ret.get('price')
-            elif Decimal(ask) > self.order_book.get_bid() + Decimal('0.01'):
+            elif not ask or Decimal(ask) > self.order_book.get_bid() + Decimal('0.01'):
                 if ret.get('id'):
                     self.auth_client.cancel_order(ret.get('id'))
                 while self.get_btc() == Decimal('0.0') and ret.get('status') != 'done':
