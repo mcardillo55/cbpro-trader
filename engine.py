@@ -73,6 +73,11 @@ class TradeEngine():
         bid = self.order_book.get_ask() - Decimal('0.01')
         amount = self.round_btc(Decimal(amount) / Decimal(bid))
 
+        if amount < Decimal('0.01'):
+            amount = self.get_usd()
+            bid = self.order_book.get_ask() - Decimal('0.01')
+            amount = self.round_btc(Decimal(amount) / Decimal(bid))
+
         if amount > Decimal('0.01'):
             return self.auth_client.buy(type='limit', size=str(amount),
                                         price=str(bid), post_only=True,
@@ -107,6 +112,8 @@ class TradeEngine():
 
     def place_sell(self):
         amount = self.get_half_btc()
+        if amount < Decimal('0.01'):
+            amount = self.get_btc()
         ask = self.order_book.get_bid() + Decimal('0.01')
 
         if amount > Decimal('0.01'):
