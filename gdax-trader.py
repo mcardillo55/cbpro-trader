@@ -23,7 +23,7 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         self.type = "heartbeat"
         self.websocket_queue = Queue.Queue()
 
-    def on_close(self):
+    def close(self):
         if not self.stop:
             self.on_close()
             self.stop = True
