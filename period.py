@@ -46,8 +46,13 @@ class Candlestick:
         self.close = new_trade.price
         self.volume = self.volume + new_trade.volume
 
-    def close_candlestick(self):
+    def close_candlestick(self, prev_stick=None):
         print("Candlestick Closed!")
+        if self.close is None:
+            self.open = prev_stick[4]  # Closing price
+            self.high = prev_stick[4]
+            self.low = prev_stick[4]
+            self.close = prev_stick[4]
         self.print_stick()
         return np.array([self.time, self.open, self.high, self.low,
                         self.close, self.volume])
@@ -92,6 +97,6 @@ class Period:
     def close_candlestick(self):
         if len(self.candlesticks) > 0:
             self.candlesticks = np.row_stack((self.candlesticks,
-                                              self.cur_candlestick.close_candlestick()))
+                                              self.cur_candlestick.close_candlestick(prev_stick=self.candlesticks[-1])))
         else:
             self.candlesticks = np.array([self.cur_candlestick.close_candlestick()])
