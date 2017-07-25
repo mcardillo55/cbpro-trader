@@ -80,7 +80,7 @@ class TradeEngine():
         ret = self.place_buy()
         bid = ret.get('price')
         while ret.get('status') != 'done' and self.buy_flag:
-            if ret.get('status') == 'rejected':
+            if ret.get('status') == 'rejected' or ret.get('message') == 'NotFound':
                 ret = self.place_buy()
                 bid = ret.get('price')
             elif Decimal(bid) < self.order_book.get_ask() - Decimal('0.01'):
@@ -115,7 +115,7 @@ class TradeEngine():
         ret = self.place_sell()
         ask = ret.get('price')
         while ret.get('status') != 'done' and self.sell_flag:
-            if ret.get('status') == 'rejected':
+            if ret.get('status') == 'rejected' or ret.get('message') == 'NotFound':
                 ret = self.place_sell()
                 ask = ret.get('price')
             elif Decimal(ask) > self.order_book.get_bid() + Decimal('0.01'):
