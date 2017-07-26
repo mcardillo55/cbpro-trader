@@ -151,43 +151,37 @@ class TradeEngine():
         self.update_amounts()
         if Decimal(indicators['obv']) > Decimal(indicators['obv_ema']):
             self.sell_flag = False
-            if Decimal(indicators['macd_hist']) >= Decimal('0.0'):
-                # buy btc
-                if (self.get_half_usd() / self.order_book.get_bid()) >= Decimal('0.01'):
-                    print "BUYING BTC!"
-                    self.buy_flag = True
-                    if self.order_thread.is_alive():
-                        if self.order_thread.name == 'sell_thread':
-                            # Wait for thread to close
-                            while self.order_thread.is_alive():
-                                self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
-                                self.order_thread.start()
-                        else:
-                            pass
+            # buy btc
+            if (self.get_half_usd() / self.order_book.get_bid()) >= Decimal('0.01'):
+                print "BUYING BTC!"
+                self.buy_flag = True
+                if self.order_thread.is_alive():
+                    if self.order_thread.name == 'sell_thread':
+                        # Wait for thread to close
+                        while self.order_thread.is_alive():
+                            self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
+                            self.order_thread.start()
                     else:
-                        self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
-                        self.order_thread.start()
-            else:
-                self.buy_flag = False
+                        pass
+                else:
+                    self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
+                    self.order_thread.start()
         else:  # OBV < OBV_EMA
             self.buy_flag = False
-            if Decimal(indicators['macd_hist']) <= Decimal('0.0'):
-                # sell btc
-                if self.get_half_btc() >= Decimal('0.01'):
-                    print "SELLING BTC!"
-                    self.sell_flag = True
-                    if self.order_thread.is_alive():
-                        if self.order_thread.name == 'buy_thread':
-                            # Wait for thread to close
-                            while self.order_thread.is_alive():
-                                self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
-                                self.order_thread.start()
-                        else:
-                            pass
+            # sell btc
+            if self.get_half_btc() >= Decimal('0.01'):
+                print "SELLING BTC!"
+                self.sell_flag = True
+                if self.order_thread.is_alive():
+                    if self.order_thread.name == 'buy_thread':
+                        # Wait for thread to close
+                        while self.order_thread.is_alive():
+                            self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
+                            self.order_thread.start()
                     else:
-                        self.order_thread = threading.Thread(target=self.sell, name='sell_thread')
-                        self.order_thread.start()
-            else:
-                self.sell_flag = False
+                        pass
+                else:
+                    self.order_thread = threading.Thread(target=self.sell, name='sell_thread')
+                    self.order_thread.start()
 
         self.print_amounts()
