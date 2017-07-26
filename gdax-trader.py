@@ -64,3 +64,5 @@ while(True):
     elif msg.get('type') == "heartbeat":
         if cur_period:
             cur_period.process_heartbeat(msg)
+            if len(indicator_subsys.current_indicators) > 0:
+                trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period)
