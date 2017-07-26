@@ -38,9 +38,6 @@ class TradeEngine():
         except AttributeError:
             return self.round_usd('0.0')
 
-    def get_half_usd(self):
-        return self.round_usd(self.get_usd() / Decimal('2.0'))
-
     def get_btc(self):
         try:
             for account in self.auth_client.get_accounts():
@@ -49,9 +46,6 @@ class TradeEngine():
             return self.round_btc(self.auth_client.get_accounts()[0]['available'])
         except AttributeError:
             return self.round_btc('0.0')
-
-    def get_half_btc(self):
-        return self.round_btc(self.get_btc() / Decimal('2.0'))
 
     def round_usd(self, money):
         return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
@@ -68,8 +62,8 @@ class TradeEngine():
     def print_amounts(self):
         print "[BALANCES] USD: %.2f BTC: %.8f" % (self.usd, self.btc)
 
-    def place_buy(self):
-        amount = self.get_half_usd()
+    def place_buy(self, partial='1.0'):
+        amount = self.get_usd() * Decimal(partial)
         bid = self.order_book.get_ask() - Decimal('0.01')
         amount = self.round_btc(Decimal(amount) / Decimal(bid))
 
@@ -89,30 +83,33 @@ class TradeEngine():
 
 
     def buy(self, amount=None):
-        ret = self.place_buy()
+        ret = self.place_buy('0.5')
         bid = ret.get('price')
         while ret.get('status') != 'done' and self.buy_flag:
             if ret.get('status') == 'rejected' or ret.get('message') == 'NotFound':
-                ret = self.place_buy()
+                ret = self.place_buy('0.5')
                 bid = ret.get('price')
             elif not bid or Decimal(bid) < self.order_book.get_ask() - Decimal('0.01'):
+                print "bid"
+                print bid
+                print "usd:"
+                print self.get_usd()
+                if len(self.auth_client.get_orders()[0]) > 0:
+                    new_ret = self.place_buy('1.0')
+                else:
+                    new_ret = self.place_buy('0.5')
                 if ret.get('id'):
                     self.auth_client.cancel_order(ret.get('id'))
-                while self.get_usd() == Decimal('0.0') and ret.get('status') != 'done':
-                    time.sleep(1)
-                    if ret.get('id'):
-                        ret = self.auth_client.get_order(ret.get('id'))
-                if ret.get('status') != 'done':
-                    ret = self.place_buy()
-                    bid = ret.get('price')
+                ret = new_ret
+                bid = ret.get('price')
             if ret.get('id'):
                 ret = self.auth_client.get_order(ret.get('id'))
         if not self.buy_flag and ret.get('id'):
             self.auth_client.cancel_order(ret.get('id'))
         self.usd = self.get_usd()
 
-    def place_sell(self):
-        amount = self.get_half_btc()
+    def place_sell(self, partial='1.0'):
+        amount = self.get_btc() * Decimal(partial)
         if amount < Decimal('0.01'):
             amount = self.get_btc()
         ask = self.order_book.get_bid() + Decimal('0.01')
@@ -127,22 +124,25 @@ class TradeEngine():
             return ret
 
     def sell(self, amount=None):
-        ret = self.place_sell()
+        ret = self.place_sell('0.5')
         ask = ret.get('price')
         while ret.get('status') != 'done' and self.sell_flag:
             if ret.get('status') == 'rejected' or ret.get('message') == 'NotFound':
-                ret = self.place_sell()
+                ret = self.place_sell('0.5')
                 ask = ret.get('price')
             elif not ask or Decimal(ask) > self.order_book.get_bid() + Decimal('0.01'):
+                print "ask"
+                print ask
+                print "BTC:"
+                print self.get_btc()
+                if len(self.auth_client.get_orders()[0]) > 0:
+                    new_ret = self.place_sell('1.0')
+                else:
+                    new_ret = self.place_sell('0.5')
                 if ret.get('id'):
                     self.auth_client.cancel_order(ret.get('id'))
-                while self.get_btc() == Decimal('0.0') and ret.get('status') != 'done':
-                    time.sleep(1)
-                    if ret.get('id'):
-                        ret = self.auth_client.get_order(ret.get('id'))
-                if ret.get('status') != 'done':
-                    ret = self.place_sell()
-                    ask = ret.get('price')
+                ret = new_ret
+                ask = ret.get('price')
             if ret.get('id'):
                 ret = self.auth_client.get_order(ret.get('id'))
         if not self.sell_flag and ret.get('id'):
