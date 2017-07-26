@@ -90,10 +90,6 @@ class TradeEngine():
                 ret = self.place_buy('0.5')
                 bid = ret.get('price')
             elif not bid or Decimal(bid) < self.order_book.get_ask() - Decimal('0.01'):
-                print "bid"
-                print bid
-                print "usd:"
-                print self.get_usd()
                 if len(self.auth_client.get_orders()[0]) > 0:
                     new_ret = self.place_buy('1.0')
                 else:
@@ -104,12 +100,13 @@ class TradeEngine():
                 bid = ret.get('price')
             if ret.get('id'):
                 ret = self.auth_client.get_order(ret.get('id'))
+            self.usd = self.get_usd()
         if not self.buy_flag and ret.get('id'):
             self.auth_client.cancel_order(ret.get('id'))
         self.usd = self.get_usd()
 
     def place_sell(self, partial='1.0'):
-        amount = self.get_btc() * Decimal(partial)
+        amount = self.round_btc(self.get_btc() * Decimal(partial))
         if amount < Decimal('0.01'):
             amount = self.get_btc()
         ask = self.order_book.get_bid() + Decimal('0.01')
@@ -131,10 +128,6 @@ class TradeEngine():
                 ret = self.place_sell('0.5')
                 ask = ret.get('price')
             elif not ask or Decimal(ask) > self.order_book.get_bid() + Decimal('0.01'):
-                print "ask"
-                print ask
-                print "BTC:"
-                print self.get_btc()
                 if len(self.auth_client.get_orders()[0]) > 0:
                     new_ret = self.place_sell('1.0')
                 else:
@@ -145,6 +138,7 @@ class TradeEngine():
                 ask = ret.get('price')
             if ret.get('id'):
                 ret = self.auth_client.get_order(ret.get('id'))
+            self.btc = self.get_btc()
         if not self.sell_flag and ret.get('id'):
             self.auth_client.cancel_order(ret.get('id'))
         self.btc = self.get_btc()
@@ -159,8 +153,7 @@ class TradeEngine():
                 if self.order_thread.name == 'sell_thread':
                     # Wait for thread to close
                     while self.order_thread.is_alive():
-                        self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
-                        self.order_thread.start()
+                        time.sleep(0.1)
                 else:
                     pass
             else:
@@ -174,8 +167,7 @@ class TradeEngine():
                 if self.order_thread.name == 'buy_thread':
                     # Wait for thread to close
                     while self.order_thread.is_alive():
-                        self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
-                        self.order_thread.start()
+                        time.sleep(0.1)
                 else:
                     pass
             else:
