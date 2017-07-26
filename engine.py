@@ -91,18 +91,18 @@ class TradeEngine():
                 bid = ret.get('price')
             elif not bid or Decimal(bid) < self.order_book.get_ask() - Decimal('0.01'):
                 if len(self.auth_client.get_orders()[0]) > 0:
-                    new_ret = self.place_buy('1.0')
+                    ret = self.place_buy('1.0')
                 else:
-                    new_ret = self.place_buy('0.5')
-                if ret.get('id'):
-                    self.auth_client.cancel_order(ret.get('id'))
-                ret = new_ret
+                    ret = self.place_buy('0.5')
+                for order in self.auth_client.get_orders()[0]:
+                    if order.get('id') != ret.get('id'):
+                        self.auth_client.cancel_order(order.get('id'))
                 bid = ret.get('price')
             if ret.get('id'):
                 ret = self.auth_client.get_order(ret.get('id'))
             self.usd = self.get_usd()
         if not self.buy_flag and ret.get('id'):
-            self.auth_client.cancel_order(ret.get('id'))
+            self.auth_client.cancel_all(product='BTC-USD')
         self.usd = self.get_usd()
 
     def place_sell(self, partial='1.0'):
@@ -129,18 +129,18 @@ class TradeEngine():
                 ask = ret.get('price')
             elif not ask or Decimal(ask) > self.order_book.get_bid() + Decimal('0.01'):
                 if len(self.auth_client.get_orders()[0]) > 0:
-                    new_ret = self.place_sell('1.0')
+                    ret = self.place_sell('1.0')
                 else:
-                    new_ret = self.place_sell('0.5')
-                if ret.get('id'):
-                    self.auth_client.cancel_order(ret.get('id'))
-                ret = new_ret
+                    ret = self.place_sell('0.5')
+                for order in self.auth_client.get_orders()[0]:
+                    if order.get('id') != ret.get('id'):
+                        self.auth_client.cancel_order(order.get('id'))
                 ask = ret.get('price')
             if ret.get('id'):
                 ret = self.auth_client.get_order(ret.get('id'))
             self.btc = self.get_btc()
-        if not self.sell_flag and ret.get('id'):
-            self.auth_client.cancel_order(ret.get('id'))
+        if not self.sell_flag:
+            self.auth_client.cancel_all(product='BTC-USD')
         self.btc = self.get_btc()
 
     def determine_trades(self, indicators, cur_period):
