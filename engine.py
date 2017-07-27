@@ -9,15 +9,21 @@ import threading
 from decimal import *
 
 
-#class OrderBookNoRestart(gdax.OrderBook):
-#    def on_error(self, e):
-#        print e
+class OrderBookCustom(gdax.OrderBook):
+    def on_open(self):
+        print "-- Order Book Opened ---"
+
+    def on_close(self):
+        print "-- Order Book Closed ---"
+
+    def on_error(self, e):
+        raise e
 
 
 class TradeEngine():
     def __init__(self, auth_client):
         self.auth_client = auth_client
-        self.order_book = gdax.OrderBook()
+        self.order_book = OrderBookCustom()
         self.usd = self.get_usd()
         self.btc = self.get_btc()
         self.last_balance_update = time.time()
@@ -29,6 +35,12 @@ class TradeEngine():
         self.buy_flag = False
         self.sell_flag = False
         self.order_thread.daemon = True
+
+    def close(self):
+        self.order_book.close()
+
+    def start(self):
+        self.order_book.start()
 
     def get_usd(self):
         try:

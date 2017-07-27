@@ -14,17 +14,25 @@ import time
 from websocket import WebSocketConnectionClosedException
 
 
-
 class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
     def on_open(self):
         self.products = ["BTC-USD"]
         self.type = "heartbeat"
         self.websocket_queue = Queue.Queue()
+        self.stop = False
+        print "-- GDAX Websocket Opened ---"
+
+    def on_close(self):
+        print "-- GDAX Websocket Closed ---"
+
+    def on_error(self, e):
+        raise e
 
     def close(self):
         if not self.stop:
             self.on_close()
             self.stop = True
+            self.thread.join()
             try:
                 if self.ws:
                     self.ws.close()
@@ -34,14 +42,6 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
     def on_message(self, msg):
         if msg.get('type') == "heartbeat" or msg.get('type') == "match":
             self.websocket_queue.put(msg)
-
-    def on_error(self, e):
-        print e
-        print "websocket onerror"
-        self.close()
-        self.websocket_queue = Queue.Queue()
-        time.sleep(10)
-        self.start()
 
 
 gdax_websocket = TradeAndHeartbeatWebsocket()
@@ -53,16 +53,29 @@ last_indicator_update = time.time()
 
 gdax_websocket.start()
 
+
 while(True):
-    msg = gdax_websocket.websocket_queue.get(timeout=1000)
-    if msg.get('type') == "match":
-        cur_period.process_trade(msg)
-        if time.time() - last_indicator_update >= 1.0:
-            indicator_subsys.recalculate_indicators(cur_period)
-            trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period)
-            last_indicator_update = time.time()
-    elif msg.get('type') == "heartbeat":
-        if cur_period:
-            cur_period.process_heartbeat(msg)
-            if len(indicator_subsys.current_indicators) > 0:
+    try:
+        msg = gdax_websocket.websocket_queue.get(timeout=15)
+        if msg.get('type') == "match":
+            cur_period.process_trade(msg)
+            if time.time() - last_indicator_update >= 1.0:
+                indicator_subsys.recalculate_indicators(cur_period)
                 trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period)
+                last_indicator_update = time.time()
+        elif msg.get('type') == "heartbeat":
+            if cur_period:
+                cur_period.process_heartbeat(msg)
+                if len(indicator_subsys.current_indicators) > 0:
+                    trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period)
+    except KeyboardInterrupt:
+        gdax_websocket.close()
+        trade_engine.close()
+        break
+    except Exception as e:
+        print e
+        gdax_websocket.close()
+        trade_engine.close()
+        time.sleep(10)
+        gdax_websocket.start()
+        trade_engine.start()
