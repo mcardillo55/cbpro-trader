@@ -9,6 +9,7 @@ import gdax
 import datetime
 import dateutil.parser
 import trade
+import pytz
 
 
 class Candlestick:
@@ -73,7 +74,7 @@ class Period:
             self.candlesticks = self.get_historical_data()
             self.cur_candlestick = Candlestick(existing_candlestick=self.candlesticks[-1])
             self.candlesticks = self.candlesticks[:-1]
-            self.prev_minute = self.cur_candlestick.time.minute
+            self.cur_candlestick_start = self.cur_candlestick.time
         else:
             self.candlesticks = np.array([])
 
@@ -82,23 +83,23 @@ class Period:
         gdax_hist_data = np.array(gdax_client.get_product_historic_rates('BTC-USD', granularity=self.period_size), dtype='object')
 
         for row in gdax_hist_data:
-            row[0] = datetime.datetime.fromtimestamp(row[0])
+            row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
 
         return np.flipud(gdax_hist_data)
 
     def process_heartbeat(self, msg):
+        print self.cur_candlestick_start
         isotime = dateutil.parser.parse(msg.get('time'))
         if isotime:
             print "[HEARTBEAT] " + str(isotime) + " " + str(msg.get('last_trade_id'))
-            if self.prev_minute and isotime.minute != self.prev_minute:
+            if isotime - self.cur_candlestick_start >= datetime.timedelta(seconds=self.period_size):
                 self.close_candlestick()
                 self.new_candlestick(isotime)
-            self.prev_minute = isotime.minute
 
     def process_trade(self, msg):
         cur_trade = trade.Trade(msg)
         if self.first_trade:
-            if cur_trade.time.minute != self.candlesticks[-1][0].minute:
+            if cur_trade.time - self.candlesticks[-1][0] >= datetime.timedelta(seconds=self.period_size):
                 self.close_candlestick()
                 self.cur_candlestick = Candlestick(first_trade=cur_trade)
             self.first_trade = False
@@ -114,6 +115,7 @@ class Period:
 
     def new_candlestick(self, isotime):
         self.cur_candlestick = Candlestick(isotime=isotime)
+        self.cur_candlestick_start = isotime.replace(second=0, microsecond=0)
 
     def close_candlestick(self):
         if len(self.candlesticks) > 0:
