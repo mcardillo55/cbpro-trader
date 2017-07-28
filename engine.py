@@ -37,6 +37,11 @@ class TradeEngine():
         self.order_thread.daemon = True
 
     def close(self):
+        # Setting both flags will close any open order threads
+        self.buy_flag = False
+        self.sell_flag = False
+        # Cancel any orders that may still be remaining
+        self.auth_client.cancel_all(product='BTC-USD')
         self.order_book.close()
 
     def start(self):
