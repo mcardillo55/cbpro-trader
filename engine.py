@@ -10,6 +10,23 @@ from decimal import *
 
 
 class OrderBookCustom(gdax.OrderBook):
+    def is_ready(self):
+        try:
+            super(OrderBookCustom, self).get_ask()
+        except ValueError:
+            return False
+        return True
+
+    def get_ask(self):
+        while not self.is_ready():
+            time.sleep(0.01)
+        return super(OrderBookCustom, self).get_ask()
+
+    def get_bid(self):
+        while not self.is_ready():
+            time.sleep(0.01)
+        return super(OrderBookCustom, self).get_bid()
+
     def on_open(self):
         print "-- Order Book Opened ---"
 
@@ -29,12 +46,10 @@ class TradeEngine():
         self.last_balance_update = time.time()
         self.order_book.start()
         self.order_thread = threading.Thread()
-        time.sleep(10)
         self.last_balance_update = time.time()
 
         self.buy_flag = False
         self.sell_flag = False
-        self.order_thread.daemon = True
 
     def close(self):
         # Setting both flags will close any open order threads
