@@ -11,6 +11,7 @@ import engine
 import config
 import Queue
 import time
+import traceback
 from websocket import WebSocketConnectionClosedException
 
 
@@ -45,10 +46,13 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
 
 
 gdax_websocket = TradeAndHeartbeatWebsocket()
-indicator_subsys = indicators.IndicatorSubsystem()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
 trade_engine = engine.TradeEngine(auth_client)
-cur_period = period.Period()
+five_min = period.Period(period_size=(60 * 5), name='5')
+thirty_min = period.Period(period_size=(60 * 30), name='30')
+period_list = [five_min, thirty_min]
+period_list[0].verbose_heartbeat = True
+indicator_subsys = indicators.IndicatorSubsystem(period_list)
 last_indicator_update = time.time()
 
 gdax_websocket.start()
@@ -58,22 +62,25 @@ while(True):
     try:
         msg = gdax_websocket.websocket_queue.get(timeout=15)
         if msg.get('type') == "match":
-            cur_period.process_trade(msg)
+            for cur_period in period_list:
+                cur_period.process_trade(msg)
             if time.time() - last_indicator_update >= 1.0:
-                indicator_subsys.recalculate_indicators(cur_period)
-                trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period)
+                for cur_period in period_list:
+                    indicator_subsys.recalculate_indicators(cur_period)
+                    trade_engine.determine_trades(indicator_subsys.current_indicators)
                 last_indicator_update = time.time()
         elif msg.get('type') == "heartbeat":
-            if cur_period:
+            for cur_period in period_list:
                 cur_period.process_heartbeat(msg)
-                if len(indicator_subsys.current_indicators) > 0:
-                    trade_engine.determine_trades(indicator_subsys.current_indicators, cur_period)
+                if len(indicator_subsys.current_indicators[cur_period.name]) > 0:
+                    trade_engine.determine_trades(indicator_subsys.current_indicators)
+            trade_engine.print_amounts()
     except KeyboardInterrupt:
         gdax_websocket.close()
         trade_engine.close()
         break
     except Exception as e:
-        print e
+        traceback.print_exc()
         gdax_websocket.close()
         trade_engine.close()
         time.sleep(10)

@@ -9,8 +9,10 @@ import numpy as np
 
 
 class IndicatorSubsystem:
-    def __init__(self):
+    def __init__(self, period_list):
         self.current_indicators = {}
+        for period in period_list:
+            self.current_indicators[period.name] = {}
 
     def recalculate_indicators(self, cur_period):
         total_periods = len(cur_period.candlesticks)
@@ -20,39 +22,40 @@ class IndicatorSubsystem:
             volumes = np.append(cur_period.get_volumes(),
                                 cur_period.cur_candlestick.volume)
 
-            self.calculate_macd(closing_prices)
-            self.calculate_vol_macd(volumes)
-            self.calculate_avg_volume(volumes)
-            self.calculate_obv(closing_prices, volumes)
+            self.calculate_macd(cur_period.name, closing_prices)
+            self.calculate_vol_macd(cur_period.name, volumes)
+            self.calculate_avg_volume(cur_period.name, volumes)
+            self.calculate_obv(cur_period.name, closing_prices, volumes)
 
-            self.current_indicators['total_periods'] = total_periods
+            self.current_indicators[cur_period.name]['total_periods'] = total_periods
 
-        print "[INDICATORS] Periods: %d MACD Hist: %f OBV: %f OBV EMA: %f" % \
-              (self.current_indicators['total_periods'], self.current_indicators['macd_hist'],
-               self.current_indicators['obv'], self.current_indicators['obv_ema'])
+        print "[INDICATORS %s] Periods: %d MACD Hist: %f OBV: %f OBV EMA: %f" % \
+              (cur_period.name, self.current_indicators[cur_period.name]['total_periods'],
+               self.current_indicators[cur_period.name]['macd_hist'], self.current_indicators[cur_period.name]['obv'],
+               self.current_indicators[cur_period.name]['obv_ema'])
 
-    def calculate_macd(self, closing_prices):
+    def calculate_macd(self, period_name, closing_prices):
         macd, macd_sig, macd_hist = talib.MACD(closing_prices, fastperiod=10,
                                                slowperiod=26, signalperiod=9)
-        self.current_indicators['macd'] = macd[-1]
-        self.current_indicators['macd_sig'] = macd_sig[-1]
-        self.current_indicators['macd_hist'] = macd_hist[-1]
+        self.current_indicators[period_name]['macd'] = macd[-1]
+        self.current_indicators[period_name]['macd_sig'] = macd_sig[-1]
+        self.current_indicators[period_name]['macd_hist'] = macd_hist[-1]
 
-    def calculate_vol_macd(self, volumes):
+    def calculate_vol_macd(self, period_name, volumes):
         macd, macd_sig, macd_hist = talib.MACD(volumes, fastperiod=10,
                                                slowperiod=26, signalperiod=9)
-        self.current_indicators['vol_macd'] = macd[-1]
-        self.current_indicators['vol_macd_sig'] = macd_sig[-1]
-        self.current_indicators['vol_macd_hist'] = macd_hist[-1]
+        self.current_indicators[period_name]['vol_macd'] = macd[-1]
+        self.current_indicators[period_name]['vol_macd_sig'] = macd_sig[-1]
+        self.current_indicators[period_name]['vol_macd_hist'] = macd_hist[-1]
 
-    def calculate_avg_volume(self, volumes):
+    def calculate_avg_volume(self, period_name, volumes):
         avg_vol = talib.SMA(volumes, timeperiod=15)
 
-        self.current_indicators['avg_volume'] = avg_vol[-1]
+        self.current_indicators[period_name]['avg_volume'] = avg_vol[-1]
 
-    def calculate_obv(self, closing_prices, volumes):
+    def calculate_obv(self, period_name, closing_prices, volumes):
         obv = talib.OBV(closing_prices, volumes)
         obv_ema = talib.EMA(obv, timeperiod=21)
 
-        self.current_indicators['obv_ema'] = obv_ema[-1]
-        self.current_indicators['obv'] = obv[-1]
+        self.current_indicators[period_name]['obv_ema'] = obv_ema[-1]
+        self.current_indicators[period_name]['obv'] = obv[-1]

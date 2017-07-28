@@ -160,9 +160,9 @@ class TradeEngine():
             self.auth_client.cancel_all(product='BTC-USD')
         self.btc = self.get_btc()
 
-    def determine_trades(self, indicators, cur_period):
+    def determine_trades(self, indicators):
         self.update_amounts()
-        if Decimal(indicators['obv']) > Decimal(indicators['obv_ema']):
+        if Decimal(indicators['5']['obv']) > Decimal(indicators['5']['obv_ema']):
             self.sell_flag = False
             # buy btc
             self.buy_flag = True
@@ -190,5 +190,3 @@ class TradeEngine():
             else:
                 self.order_thread = threading.Thread(target=self.sell, name='sell_thread')
                 self.order_thread.start()
-
-        self.print_amounts()

@@ -13,16 +13,8 @@ import pytz
 
 
 class Candlestick:
-    def __init__(self, first_trade=None, isotime=None, existing_candlestick=None):
-        if first_trade:
-            self.time = first_trade.time.replace(second=0, microsecond=0)
-            self.open = first_trade.price
-            self.high = first_trade.price
-            self.low = first_trade.price
-            self.close = first_trade.price
-            self.volume = first_trade.volume
-
-        elif isotime:
+    def __init__(self, isotime=None, existing_candlestick=None):
+        if isotime:
             self.time = isotime.replace(second=0, microsecond=0)
             self.open = None
             self.high = None
@@ -49,27 +41,29 @@ class Candlestick:
         self.close = new_trade.price
         self.volume = self.volume + new_trade.volume
 
-    def close_candlestick(self, prev_stick=None):
+    def close_candlestick(self, period_name, prev_stick=None):
         print("Candlestick Closed!")
         if self.close is None:
             self.open = prev_stick[4]  # Closing price
             self.high = prev_stick[4]
             self.low = prev_stick[4]
             self.close = prev_stick[4]
-        self.print_stick()
+        self.print_stick(period_name)
         return np.array([self.time, self.open, self.high, self.low,
                         self.close, self.volume])
 
-    def print_stick(self):
-        print("[CANDLESTICK] Time: %s Open: %s High: %s Low: %s Close: %s Vol: %s" %
-              (self.time, self.open, self.high, self.low,
+    def print_stick(self, period_name):
+        print("[CANDLESTICK %s] Time: %s Open: %s High: %s Low: %s Close: %s Vol: %s" %
+              (period_name, self.time, self.open, self.high, self.low,
                self.close, self.volume))
 
 
 class Period:
-    def __init__(self, period_size=60, initialize=True):
+    def __init__(self, period_size=60, name='Period', initialize=True):
         self.period_size = period_size
+        self.name = name
         self.first_trade = True
+        self.verbose_heartbeat = False
         if initialize:
             self.candlesticks = self.get_historical_data()
             self.cur_candlestick = Candlestick(existing_candlestick=self.candlesticks[-1])
@@ -88,24 +82,18 @@ class Period:
         return np.flipud(gdax_hist_data)
 
     def process_heartbeat(self, msg):
-        print self.cur_candlestick_start
         isotime = dateutil.parser.parse(msg.get('time'))
         if isotime:
-            print "[HEARTBEAT] " + str(isotime) + " " + str(msg.get('last_trade_id'))
+            if self.verbose_heartbeat:
+                print "[HEARTBEAT] " + str(isotime) + " " + str(msg.get('last_trade_id'))
             if isotime - self.cur_candlestick_start >= datetime.timedelta(seconds=self.period_size):
                 self.close_candlestick()
                 self.new_candlestick(isotime)
 
     def process_trade(self, msg):
         cur_trade = trade.Trade(msg)
-        if self.first_trade:
-            if cur_trade.time - self.candlesticks[-1][0] >= datetime.timedelta(seconds=self.period_size):
-                self.close_candlestick()
-                self.cur_candlestick = Candlestick(first_trade=cur_trade)
-            self.first_trade = False
-        else:
-            self.cur_candlestick.add_trade(cur_trade)
-        self.cur_candlestick.print_stick()
+        self.cur_candlestick.add_trade(cur_trade)
+        self.cur_candlestick.print_stick(self.name)
 
     def get_closing_prices(self):
         return np.array(self.candlesticks[:, 4], dtype='f8')
@@ -120,6 +108,7 @@ class Period:
     def close_candlestick(self):
         if len(self.candlesticks) > 0:
             self.candlesticks = np.row_stack((self.candlesticks,
-                                              self.cur_candlestick.close_candlestick(prev_stick=self.candlesticks[-1])))
+                                              self.cur_candlestick.close_candlestick(period_name=self.name,
+                                                                                     prev_stick=self.candlesticks[-1])))
         else:
-            self.candlesticks = np.array([self.cur_candlestick.close_candlestick()])
+            self.candlesticks = np.array([self.cur_candlestick.close_candlestick(self.name)])
