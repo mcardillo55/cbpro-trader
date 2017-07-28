@@ -76,13 +76,13 @@ while(True):
                     trade_engine.determine_trades(indicator_subsys.current_indicators)
             trade_engine.print_amounts()
     except KeyboardInterrupt:
-        gdax_websocket.close()
         trade_engine.close()
+        gdax_websocket.close()
         break
     except Exception as e:
         traceback.print_exc()
-        gdax_websocket.close()
         trade_engine.close()
+        gdax_websocket.close()
         time.sleep(10)
         gdax_websocket.start()
         trade_engine.start()
