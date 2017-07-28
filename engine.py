@@ -28,6 +28,8 @@ class OrderBookCustom(gdax.OrderBook):
         return super(OrderBookCustom, self).get_bid()
 
     def on_open(self):
+        self.stop = False
+        self._sequence = -1
         print "-- Order Book Opened ---"
 
     def on_close(self):
