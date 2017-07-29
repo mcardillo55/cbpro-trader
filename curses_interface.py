@@ -18,7 +18,7 @@ class cursesDisplay:
     def update_balances(self, btc, usd):
         if not self.enable:
             return
-        self.stdscr.addstr(0, 0, "USD: %f BTC: %f" % (usd, btc))
+        self.stdscr.addstr(0, 0, "USD: %.2f BTC: %.8f" % (usd, btc))
         self.stdscr.refresh()
 
     def update_candlesticks(self, period):
