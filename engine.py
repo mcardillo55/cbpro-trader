@@ -115,7 +115,6 @@ class TradeEngine():
             ret = {'status': 'done'}
             return ret
 
-
     def buy(self, amount=None):
         ret = self.place_buy('0.5')
         bid = ret.get('price')
