@@ -1,4 +1,4 @@
 KEY = ""
 SECRET = ""
 PASSPHRASE = ""
-FRONTEND = "debug"
+FRONTEND = "curses"

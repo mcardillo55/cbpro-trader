@@ -12,6 +12,7 @@ import config
 import Queue
 import time
 import traceback
+import curses_interface
 import logging
 from websocket import WebSocketConnectionClosedException
 
@@ -52,7 +53,10 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
 
 logging.basicConfig(format='%(message)s')
 logger = logging.getLogger('trader-logger')
-logger.setLevel(logging.DEBUG)
+if config.FRONTEND == 'debug':
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.CRITICAL)
 
 gdax_websocket = TradeAndHeartbeatWebsocket()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
@@ -66,6 +70,11 @@ last_indicator_update = time.time()
 
 gdax_websocket.start()
 
+if config.FRONTEND == 'curses':
+    curses_enable = True
+else:
+    curses_enable = False
+interface = curses_interface.cursesDisplay(enable=curses_enable)
 
 while(True):
     try:
@@ -73,10 +82,13 @@ while(True):
         if msg.get('type') == "match":
             for cur_period in period_list:
                 cur_period.process_trade(msg)
+            interface.update_candlesticks(five_min)
             if time.time() - last_indicator_update >= 1.0:
                 for cur_period in period_list:
                     indicator_subsys.recalculate_indicators(cur_period)
                 trade_engine.determine_trades(indicator_subsys.current_indicators)
+                interface.update_indicators(indicator_subsys.current_indicators)
+                interface.update_orders(trade_engine)
                 last_indicator_update = time.time()
         elif msg.get('type') == "heartbeat":
             for cur_period in period_list:
@@ -84,9 +96,12 @@ while(True):
                 if len(indicator_subsys.current_indicators[cur_period.name]) > 0:
                     trade_engine.determine_trades(indicator_subsys.current_indicators)
             trade_engine.print_amounts()
+            interface.update_heartbeat(msg)
+            interface.update_balances(trade_engine.get_btc(), trade_engine.get_usd())
     except KeyboardInterrupt:
         trade_engine.close()
         gdax_websocket.close()
+        interface.close()
         break
     except Exception as e:
         traceback.print_exc()
