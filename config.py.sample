@@ -1,3 +1,4 @@
 KEY = ""
 SECRET = ""
 PASSPHRASE = ""
+FRONTEND = "debug"
