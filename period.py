@@ -10,6 +10,7 @@ import datetime
 import dateutil.parser
 import trade
 import pytz
+import requests
 
 
 class Candlestick:
@@ -73,13 +74,20 @@ class Period:
             self.candlesticks = np.array([])
 
     def get_historical_data(self):
-        gdax_client = gdax.PublicClient()
-        gdax_hist_data = np.array(gdax_client.get_product_historic_rates('BTC-USD', granularity=self.period_size), dtype='object')
-
-        for row in gdax_hist_data:
-            row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
-
-        return np.flipud(gdax_hist_data)
+        r = requests.get('https://api.cryptowat.ch/markets/gdax/btcusd/ohlc', data={'periods': self.period_size})
+        if r.status_code == 200:
+            # Prefer data from cryptowat.ch since it is more up-to-date
+            hist_data = np.array(r.json().get('result').get(str(self.period_size)), dtype='object')
+            for row in hist_data:
+                row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc) - datetime.timedelta(minutes=5)
+            return hist_data
+        else:
+            # Use GDAX API as backup
+            gdax_client = gdax.PublicClient()
+            hist_data = np.array(gdax_client.get_product_historic_rates('BTC-USD', granularity=self.period_size), dtype='object')
+            for row in hist_data:
+                row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
+            return np.flipud(hist_data)
 
     def process_heartbeat(self, msg):
         isotime = dateutil.parser.parse(msg.get('time'))
