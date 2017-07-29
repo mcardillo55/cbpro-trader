@@ -6,10 +6,15 @@
 import time
 import gdax
 import threading
+import logging
 from decimal import *
 
 
 class OrderBookCustom(gdax.OrderBook):
+    def __init__(self):
+        self.logger = logging.getLogger('trader-logger')
+        super(OrderBookCustom, self).__init__()
+
     def is_ready(self):
         try:
             super(OrderBookCustom, self).get_ask()
@@ -30,10 +35,10 @@ class OrderBookCustom(gdax.OrderBook):
     def on_open(self):
         self.stop = False
         self._sequence = -1
-        print "-- Order Book Opened ---"
+        self.logger.debug("-- Order Book Opened ---")
 
     def on_close(self):
-        print "-- Order Book Closed ---"
+        self.logger.debug("-- Order Book Closed ---")
 
     def on_error(self, e):
         raise e
@@ -49,6 +54,7 @@ class TradeEngine():
         self.order_book.start()
         self.order_thread = threading.Thread()
         self.last_balance_update = time.time()
+        self.logger = logging.getLogger('trader-logger')
 
         self.buy_flag = False
         self.sell_flag = False
@@ -94,7 +100,7 @@ class TradeEngine():
             self.last_balance_update = time.time()
 
     def print_amounts(self):
-        print "[BALANCES] USD: %.2f BTC: %.8f" % (self.usd, self.btc)
+        self.logger.debug("[BALANCES] USD: %.2f BTC: %.8f" % (self.usd, self.btc))
 
     def place_buy(self, partial='1.0'):
         amount = self.get_usd() * Decimal(partial)
@@ -107,7 +113,7 @@ class TradeEngine():
             amount = self.round_btc(Decimal(amount) / Decimal(bid))
 
         if amount >= Decimal('0.01'):
-            print "BUYING BTC!"
+            self.logger.debug("BUYING BTC!")
             return self.auth_client.buy(type='limit', size=str(amount),
                                         price=str(bid), post_only=True,
                                         product_id='BTC-USD')
@@ -145,7 +151,7 @@ class TradeEngine():
         ask = self.order_book.get_bid() + Decimal('0.01')
 
         if amount >= Decimal('0.01'):
-            print "SELLING BTC!"
+            self.logger.debug("SELLING BTC!")
             return self.auth_client.sell(type='limit', size=str(amount),
                                          price=str(ask), post_only=True,
                                          product_id='BTC-USD')

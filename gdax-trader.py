@@ -12,19 +12,24 @@ import config
 import Queue
 import time
 import traceback
+import logging
 from websocket import WebSocketConnectionClosedException
 
 
 class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
+    def __init__(self):
+        self.logger = logging.getLogger('trader-logger')
+        super(TradeAndHeartbeatWebsocket, self).__init__()
+
     def on_open(self):
         self.products = ["BTC-USD"]
         self.type = "heartbeat"
         self.websocket_queue = Queue.Queue()
         self.stop = False
-        print "-- GDAX Websocket Opened ---"
+        self.logger.debug("-- GDAX Websocket Opened ---")
 
     def on_close(self):
-        print "-- GDAX Websocket Closed ---"
+        self.logger.debug("-- GDAX Websocket Closed ---")
 
     def on_error(self, e):
         raise e
@@ -44,6 +49,10 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         if msg.get('type') == "heartbeat" or msg.get('type') == "match":
             self.websocket_queue.put(msg)
 
+
+logging.basicConfig(format='%(message)s')
+logger = logging.getLogger('trader-logger')
+logger.setLevel(logging.DEBUG)
 
 gdax_websocket = TradeAndHeartbeatWebsocket()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)

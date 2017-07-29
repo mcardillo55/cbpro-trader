@@ -5,11 +5,13 @@
 # System for containing all technical indicators and processing associated data
 
 import talib
+import logging
 import numpy as np
 
 
 class IndicatorSubsystem:
     def __init__(self, period_list):
+        self.logger = logging.getLogger('trader-logger')
         self.current_indicators = {}
         for period in period_list:
             self.current_indicators[period.name] = {}
@@ -29,10 +31,10 @@ class IndicatorSubsystem:
 
             self.current_indicators[cur_period.name]['total_periods'] = total_periods
 
-        print "[INDICATORS %s] Periods: %d MACD Hist: %f OBV: %f OBV EMA: %f" % \
-              (cur_period.name, self.current_indicators[cur_period.name]['total_periods'],
-               self.current_indicators[cur_period.name]['macd_hist'], self.current_indicators[cur_period.name]['obv'],
-               self.current_indicators[cur_period.name]['obv_ema'])
+        self.logger.debug("[INDICATORS %s] Periods: %d MACD Hist: %f OBV: %f OBV EMA: %f" %
+                          (cur_period.name, self.current_indicators[cur_period.name]['total_periods'],
+                           self.current_indicators[cur_period.name]['macd_hist'], self.current_indicators[cur_period.name]['obv'],
+                           self.current_indicators[cur_period.name]['obv_ema']))
 
     def calculate_macd(self, period_name, closing_prices):
         macd, macd_sig, macd_hist = talib.MACD(closing_prices, fastperiod=10,

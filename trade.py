@@ -5,6 +5,7 @@
 # Objects relating to individual trade data
 
 import dateutil.parser
+import logging
 
 
 class Trade:
@@ -14,7 +15,8 @@ class Trade:
         self.time = dateutil.parser.parse(msg.get('time'))
         self.price = float(msg.get('price'))
         self.volume = float(msg.get('size'))
+        self.logger = logging.getLogger('trader-logger')
 
     def print_trade(self):
-        print("[TRADE] Trade ID: %d Price: %f Volume: %f" %
-              (self.trade_id, self.price, self.volume))
+        self.logger.debug("[TRADE] Trade ID: %d Price: %f Volume: %f" %
+                          (self.trade_id, self.price, self.volume))

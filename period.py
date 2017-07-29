@@ -11,10 +11,12 @@ import dateutil.parser
 import trade
 import pytz
 import requests
+import logging
 
 
 class Candlestick:
     def __init__(self, isotime=None, existing_candlestick=None):
+        self.logger = logging.getLogger('trader-logger')
         if isotime:
             self.time = isotime.replace(second=0, microsecond=0)
             self.open = None
@@ -43,7 +45,7 @@ class Candlestick:
         self.volume = self.volume + new_trade.volume
 
     def close_candlestick(self, period_name, prev_stick=None):
-        print("Candlestick Closed!")
+        self.logger.debug("Candlestick Closed!")
         if self.close is None:
             self.open = prev_stick[4]  # Closing price
             self.high = prev_stick[4]
@@ -54,9 +56,9 @@ class Candlestick:
                         self.close, self.volume])
 
     def print_stick(self, period_name):
-        print("[CANDLESTICK %s] Time: %s Open: %s High: %s Low: %s Close: %s Vol: %s" %
-              (period_name, self.time, self.open, self.high, self.low,
-               self.close, self.volume))
+        self.logger.debug("[CANDLESTICK %s] Time: %s Open: %s High: %s Low: %s Close: %s Vol: %s" %
+                          (period_name, self.time, self.open, self.high, self.low,
+                           self.close, self.volume))
 
 
 class Period:
@@ -65,6 +67,7 @@ class Period:
         self.name = name
         self.first_trade = True
         self.verbose_heartbeat = False
+        self.logger = logging.getLogger('trader-logger')
         if initialize:
             self.candlesticks = self.get_historical_data()
             self.cur_candlestick = Candlestick(existing_candlestick=self.candlesticks[-1])
@@ -93,7 +96,7 @@ class Period:
         isotime = dateutil.parser.parse(msg.get('time'))
         if isotime:
             if self.verbose_heartbeat:
-                print "[HEARTBEAT] " + str(isotime) + " " + str(msg.get('last_trade_id'))
+                self.logger.debug("[HEARTBEAT] " + str(isotime) + " " + str(msg.get('last_trade_id')))
             if isotime - self.cur_candlestick_start >= datetime.timedelta(seconds=self.period_size):
                 self.close_candlestick()
                 self.new_candlestick(isotime)
