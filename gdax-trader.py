@@ -67,7 +67,7 @@ while(True):
             if time.time() - last_indicator_update >= 1.0:
                 for cur_period in period_list:
                     indicator_subsys.recalculate_indicators(cur_period)
-                    trade_engine.determine_trades(indicator_subsys.current_indicators)
+                trade_engine.determine_trades(indicator_subsys.current_indicators)
                 last_indicator_update = time.time()
         elif msg.get('type') == "heartbeat":
             for cur_period in period_list:
