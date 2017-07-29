@@ -85,7 +85,7 @@ class cursesDisplay:
         self.stdscr.refresh()
 
     def print_color(self, a, b):
-        if a <= b:
+        if a < b:
             return curses.color_pair(1)
         else:
             return curses.color_pair(2)
