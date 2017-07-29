@@ -57,13 +57,23 @@ class cursesDisplay:
     def update_orders(self, trade_engine):
         if not self.enable:
             return
-        self.stdscr.addstr(11, 0, "Open Orders")
+
+        self.stdscr.addstr(11, 0, "Recent Fills")
+        starty = 12
+        for fill in trade_engine.auth_client.get_fills(limit=5)[0]:
+            self.stdscr.addstr(starty, 0, "%s Price: %s Size: %s Time: %s" %
+                               (fill.get('side').upper(), fill.get('price'),
+                                fill.get('size'), fill.get('created_at')))
+            starty += 1
+
+
+        self.stdscr.addstr(18, 0, "Open Orders")
 
         # Clear the next 5 rows
-        for idx in xrange(12, 17):
+        for idx in xrange(19, 24):
             self.stdscr.addstr(idx, 0, " " * 70)
 
-        starty = 12
+        starty = 19
         if trade_engine.order_thread.is_alive():
             for order in trade_engine.auth_client.get_orders()[0]:
                 self.stdscr.addstr(starty, 0, "%s Price: %s Size: %s Status: %s" %
@@ -71,7 +81,7 @@ class cursesDisplay:
                                     order.get('size'), order.get('status')))
                 starty += 1
         else:
-            self.stdscr.addstr(3, 0, "None")
+            self.stdscr.addstr(19, 0, "None")
         self.stdscr.refresh()
 
     def print_color(self, a, b):
