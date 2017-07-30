@@ -25,7 +25,7 @@ class Candlestick:
             self.close = None
             self.volume = 0
         elif existing_candlestick is not None:
-            self.time, self.low, self.high, self.open, self.close, self.volume = existing_candlestick
+            self.time, self.open, self.high, self.low, self.close, self.volume = existing_candlestick
 
     def add_trade(self, new_trade):
         if not self.open:
