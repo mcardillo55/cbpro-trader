@@ -105,8 +105,10 @@ class Period:
 
     def process_trade(self, msg):
         cur_trade = trade.Trade(msg)
-        isotime = dateutil.parser.parse(msg.get('time'))
-        if isotime < self.cur_candlestick.time:
+        isotime = dateutil.parser.parse(msg.get('time')).replace(microsecond=0)
+        if isotime <= self.cur_candlestick.time:
+            # Trades at the new period time, but with 0 seconds, get counted as
+            # in the previous period
             prev_stick = Candlestick(existing_candlestick=self.candlesticks[-1])
             self.candlesticks = self.candlesticks[:-1]
             prev_stick.add_trade(cur_trade)
