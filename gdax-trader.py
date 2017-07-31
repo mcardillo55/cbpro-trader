@@ -62,8 +62,7 @@ gdax_websocket = TradeAndHeartbeatWebsocket()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
 trade_engine = engine.TradeEngine(auth_client)
 five_min = period.Period(period_size=(60 * 5), name='5')
-thirty_min = period.Period(period_size=(60 * 30), name='30')
-period_list = [five_min, thirty_min]
+period_list = [five_min]
 gdax_websocket.start()
 period_list[0].verbose_heartbeat = True
 indicator_subsys = indicators.IndicatorSubsystem(period_list)
