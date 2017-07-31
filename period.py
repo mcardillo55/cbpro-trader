@@ -99,22 +99,20 @@ class Period:
         if isotime:
             if self.verbose_heartbeat:
                 self.logger.debug("[HEARTBEAT] " + str(isotime) + " " + str(msg.get('last_trade_id')))
-            if isotime - self.cur_candlestick_start >= datetime.timedelta(seconds=self.period_size):
+            if isotime - self.cur_candlestick_start > datetime.timedelta(seconds=self.period_size):
                 self.close_candlestick()
                 self.new_candlestick(isotime)
 
     def process_trade(self, msg):
         cur_trade = trade.Trade(msg)
         isotime = dateutil.parser.parse(msg.get('time')).replace(microsecond=0)
-        if isotime <= self.cur_candlestick.time:
-            # Trades at the new period time, but with 0 seconds, get counted as
-            # in the previous period
+        if isotime < self.cur_candlestick.time:
             prev_stick = Candlestick(existing_candlestick=self.candlesticks[-1])
             self.candlesticks = self.candlesticks[:-1]
             prev_stick.add_trade(cur_trade)
             self.add_stick(prev_stick)
         else:
-            if isotime >= self.cur_candlestick.time + datetime.timedelta(seconds=self.period_size):
+            if isotime > self.cur_candlestick.time + datetime.timedelta(seconds=self.period_size):
                 self.close_candlestick()
                 self.new_candlestick(isotime)
             self.cur_candlestick.add_trade(cur_trade)
