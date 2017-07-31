@@ -104,11 +104,17 @@ class Period:
     def process_trade(self, msg):
         cur_trade = trade.Trade(msg)
         isotime = dateutil.parser.parse(msg.get('time'))
-        if isotime >= self.cur_candlestick.time + datetime.timedelta(seconds=self.period_size):
-            self.close_candlestick()
-            self.new_candlestick(isotime)
-        self.cur_candlestick.add_trade(cur_trade)
-        self.cur_candlestick.print_stick(self.name)
+        if isotime < self.cur_candlestick.time:
+            prev_stick = Candlestick(existing_candlestick=self.candlesticks[-1])
+            self.candlesticks = self.candlesticks[:-1]
+            prev_stick.add_trade(cur_trade)
+            self.add_stick(prev_stick)
+        else:
+            if isotime >= self.cur_candlestick.time + datetime.timedelta(seconds=self.period_size):
+                self.close_candlestick()
+                self.new_candlestick(isotime)
+            self.cur_candlestick.add_trade(cur_trade)
+            self.cur_candlestick.print_stick(self.name)
 
     def get_closing_prices(self):
         return np.array(self.candlesticks[:, 4], dtype='f8')
@@ -119,6 +125,9 @@ class Period:
     def new_candlestick(self, isotime):
         self.cur_candlestick = Candlestick(isotime=isotime)
         self.cur_candlestick_start = isotime.replace(second=0, microsecond=0)
+
+    def add_stick(self, stick_to_add):
+        self.candlesticks = np.row_stack((self.candlesticks, stick_to_add.close_candlestick(self.name)))
 
     def close_candlestick(self):
         if len(self.candlesticks) > 0:
