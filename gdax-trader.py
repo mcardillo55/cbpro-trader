@@ -103,7 +103,7 @@ while(True):
         interface.close()
         break
     except Exception as e:
-        traceback.print_exc()
+        logger.debug(traceback.format_exc())
         trade_engine.close()
         gdax_websocket.close()
         time.sleep(10)
