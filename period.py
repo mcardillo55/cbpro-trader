@@ -43,6 +43,8 @@ class Candlestick:
 
         self.close = new_trade.price
         self.volume = self.volume + new_trade.volume
+        self.logger.debug("[TRADE] Time: %s Price: %f Vol: %f" %
+                          (new_trade.time, new_trade.price, new_trade.volume))
 
     def close_candlestick(self, period_name, prev_stick=None):
         self.logger.debug("Candlestick Closed!")
