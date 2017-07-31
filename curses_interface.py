@@ -48,7 +48,7 @@ class cursesDisplay:
     def update_indicators(self, indicators):
         if not self.enable:
             return
-        self.stdscr.addstr(2, 0, "5 - OBV: %f OBV_EMA: %f" %
+        self.stdscr.addstr(1, 0, "5 - OBV: %f OBV_EMA: %f" %
                            (indicators['5']['obv'], indicators['5']['obv_ema']))
         self.stdscr.refresh()
 
