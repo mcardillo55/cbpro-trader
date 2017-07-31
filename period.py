@@ -103,6 +103,10 @@ class Period:
 
     def process_trade(self, msg):
         cur_trade = trade.Trade(msg)
+        isotime = dateutil.parser.parse(msg.get('time'))
+        if isotime >= self.cur_candlestick.time + datetime.timedelta(seconds=self.period_size):
+            self.close_candlestick()
+            self.new_candlestick(isotime)
         self.cur_candlestick.add_trade(cur_trade)
         self.cur_candlestick.print_stick(self.name)
 
