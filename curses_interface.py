@@ -33,8 +33,8 @@ class cursesDisplay:
         starty = 5
         for cur_stick in period.candlesticks[:-6:-1]:
             self.stdscr.addstr(starty, 0, "%s O: %f H: %f L: %f C: %f V: %f" %
-                               (cur_stick[0], cur_stick[1], cur_stick[2],
-                                cur_stick[3], cur_stick[4], cur_stick[5]),
+                               (cur_stick[0], cur_stick[3], cur_stick[2],
+                                cur_stick[1], cur_stick[4], cur_stick[5]),
                                self.print_color(cur_stick[1], cur_stick[4]))
             starty += 1
         self.stdscr.refresh()
