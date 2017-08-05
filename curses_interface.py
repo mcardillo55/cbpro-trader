@@ -48,8 +48,9 @@ class cursesDisplay:
     def update_indicators(self, indicators):
         if not self.enable:
             return
-        self.stdscr.addstr(1, 0, "5 - OBV: %f OBV_EMA: %f" %
-                           (indicators['5']['obv'], indicators['5']['obv_ema']))
+        self.stdscr.addstr(1, 0, "5 - OBV_BID: %f OBV_BID_EMA: %f OBV_ASK: %f OBV_ASK_EMA: %f" %
+                           (indicators['5']['bid']['obv'], indicators['5']['bid']['obv_ema'],
+                            indicators['5']['ask']['obv'], indicators['5']['ask']['obv_ema']))
         self.stdscr.refresh()
 
     def update_orders(self, trade_engine):
@@ -63,7 +64,6 @@ class cursesDisplay:
                                (fill.get('side').upper(), fill.get('price'),
                                 fill.get('size'), fill.get('created_at')))
             starty += 1
-
 
         self.stdscr.addstr(18, 0, "Open Orders")
 

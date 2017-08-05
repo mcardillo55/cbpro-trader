@@ -184,7 +184,8 @@ class TradeEngine():
 
     def determine_trades(self, indicators):
         self.update_amounts()
-        if Decimal(indicators['5']['obv']) > Decimal(indicators['5']['obv_ema']):
+        if Decimal(indicators['5']['bid']['obv']) > Decimal(indicators['5']['bid']['obv_ema']) \
+           and Decimal(indicators['5']['ask']['obv']) > Decimal(indicators['5']['ask']['obv_ema']):
             self.sell_flag = False
             # buy btc
             self.buy_flag = True

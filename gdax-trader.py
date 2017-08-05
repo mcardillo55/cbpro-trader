@@ -83,7 +83,7 @@ while(True):
             interface.update_candlesticks(five_min)
             if time.time() - last_indicator_update >= 1.0:
                 for cur_period in period_list:
-                    indicator_subsys.recalculate_indicators(cur_period)
+                    indicator_subsys.recalculate_indicators(cur_period, trade_engine.order_book)
                 trade_engine.determine_trades(indicator_subsys.current_indicators)
                 interface.update_indicators(indicator_subsys.current_indicators)
                 interface.update_orders(trade_engine)
@@ -91,7 +91,7 @@ while(True):
         elif msg.get('type') == "heartbeat":
             for cur_period in period_list:
                 cur_period.process_heartbeat(msg)
-                if len(indicator_subsys.current_indicators[cur_period.name]) > 0:
+                if len(indicator_subsys.current_indicators[cur_period.name]['bid']) > 0:
                     trade_engine.determine_trades(indicator_subsys.current_indicators)
             trade_engine.print_amounts()
             interface.update_heartbeat(msg)
