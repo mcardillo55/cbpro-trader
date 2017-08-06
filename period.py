@@ -71,12 +71,15 @@ class Period:
         self.verbose_heartbeat = False
         self.logger = logging.getLogger('trader-logger')
         if initialize:
-            self.candlesticks = self.get_historical_data()
-            self.cur_candlestick = Candlestick(existing_candlestick=self.candlesticks[-1])
-            self.candlesticks = self.candlesticks[:-1]
-            self.cur_candlestick_start = self.cur_candlestick.time
+            self.initialize()
         else:
             self.candlesticks = np.array([])
+
+    def initialize(self):
+        self.candlesticks = self.get_historical_data()
+        self.cur_candlestick = Candlestick(existing_candlestick=self.candlesticks[-1])
+        self.candlesticks = self.candlesticks[:-1]
+        self.cur_candlestick_start = self.cur_candlestick.time
 
     def get_historical_data(self):
         gdax_client = gdax.PublicClient()

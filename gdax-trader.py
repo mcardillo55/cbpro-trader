@@ -105,6 +105,9 @@ while(True):
         logger.debug(traceback.format_exc())
         trade_engine.close()
         gdax_websocket.close()
+        # Period data cannot be trusted. Re-initialize
+        for cur_period in period_list:
+            cur_period.initialize()
         time.sleep(10)
         gdax_websocket.start()
         trade_engine.start()
