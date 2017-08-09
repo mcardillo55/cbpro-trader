@@ -64,7 +64,7 @@ class TradeEngine():
         self.buy_flag = False
         self.sell_flag = False
         # Cancel any orders that may still be remaining
-        self.auth_client.cancel_all(product='BTC-USD')
+        self.auth_client.cancel_all(product_id='BTC-USD')
         self.order_book.close()
 
     def start(self):
@@ -141,7 +141,7 @@ class TradeEngine():
                 ret = self.auth_client.get_order(ret.get('id'))
             self.usd = self.get_usd()
         if not self.buy_flag and ret.get('id'):
-            self.auth_client.cancel_all(product='BTC-USD')
+            self.auth_client.cancel_all(product_id='BTC-USD')
         self.usd = self.get_usd()
 
     def place_sell(self, partial='1.0'):
@@ -179,7 +179,7 @@ class TradeEngine():
                 ret = self.auth_client.get_order(ret.get('id'))
             self.btc = self.get_btc()
         if not self.sell_flag:
-            self.auth_client.cancel_all(product='BTC-USD')
+            self.auth_client.cancel_all(product_id='BTC-USD')
         self.btc = self.get_btc()
 
     def determine_trades(self, indicators):
