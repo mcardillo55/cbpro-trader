@@ -51,12 +51,11 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
             self.websocket_queue.put(msg)
 
 
-logging.basicConfig(format='%(message)s')
 logger = logging.getLogger('trader-logger')
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.FileHandler("debug.log"))
 if config.FRONTEND == 'debug':
-    logger.setLevel(logging.DEBUG)
-else:
-    logger.setLevel(logging.CRITICAL)
+    logger.addHandler(logging.StreamHandler())
 
 gdax_websocket = TradeAndHeartbeatWebsocket()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
