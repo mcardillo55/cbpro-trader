@@ -22,6 +22,8 @@ Also note that the TA-Lib python library is actually a wrapper for the ta-lib C 
 
 Copy config.py.sample to config.py and include your KEY, SECRET, and PASSPHRASE values from your GDAX API key.
 
+Set LIVE to True **only if** you want the bot to execute **actual trades.** The bot will still collect data and calculate indicators when LIVE is set to FALSE.
+
 INTERFACE can be set to `curses` which is an ncurses display of balances, indicator values, recent candlesticks and trades and current open orders or `debug` which will print the same infromation to the console, line-by-line, as it is available.
 
 I'm throwing around an idea of making a local web frontend, maybe in React or something similar, to better visualize the current data recorded by the bot.

@@ -45,8 +45,9 @@ class OrderBookCustom(gdax.OrderBook):
 
 
 class TradeEngine():
-    def __init__(self, auth_client):
+    def __init__(self, auth_client, is_live=False):
         self.auth_client = auth_client
+        self.is_live = is_live
         self.order_book = OrderBookCustom()
         self.usd = self.get_usd()
         self.btc = self.get_btc()
@@ -183,6 +184,8 @@ class TradeEngine():
         self.btc = self.get_btc()
 
     def determine_trades(self, indicators):
+        if not self.is_live:
+            return
         self.update_amounts()
         if Decimal(indicators['5']['bid']['obv']) > Decimal(indicators['5']['bid']['obv_ema']) \
            and Decimal(indicators['5']['ask']['obv']) > Decimal(indicators['5']['ask']['obv_ema']):

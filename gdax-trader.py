@@ -59,7 +59,7 @@ if config.FRONTEND == 'debug':
 
 gdax_websocket = TradeAndHeartbeatWebsocket()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
-trade_engine = engine.TradeEngine(auth_client)
+trade_engine = engine.TradeEngine(auth_client, is_live=config.LIVE)
 five_min = period.Period(period_size=(60 * 5), name='5')
 period_list = [five_min]
 gdax_websocket.start()
