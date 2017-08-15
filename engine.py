@@ -187,8 +187,7 @@ class TradeEngine():
         if not self.is_live:
             return
         self.update_amounts()
-        if Decimal(indicators['5']['bid']['obv']) > Decimal(indicators['5']['bid']['obv_ema']) \
-           and Decimal(indicators['5']['ask']['obv']) > Decimal(indicators['5']['ask']['obv_ema']):
+        if Decimal(indicators['5']['macd_hist_diff']) < Decimal('0.0'):
             self.sell_flag = False
             # buy btc
             self.buy_flag = True

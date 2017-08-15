@@ -45,8 +45,8 @@ class IndicatorSubsystem:
 
             self.current_indicators[cur_period.name]['total_periods'] = total_periods
 
-            self.logger.debug("[INDICATORS %s] Periods: %d OBV_ASK: %f OBV_ASK EMA: %f OBV_BID: %f OBV_BID EMA: %f BBAND_UPPER: %f BBAND_LOWER %f" %
-                              (cur_period.name, self.current_indicators[cur_period.name]['total_periods'],
+            self.logger.debug("[INDICATORS %s] Periods: %d MACD_DIFF: %f OBV_ASK: %f OBV_ASK EMA: %f OBV_BID: %f OBV_BID EMA: %f BBAND_UPPER: %f BBAND_LOWER %f" %
+                              (cur_period.name, self.current_indicators[cur_period.name]['total_periods'], self.current_indicators[cur_period.name]['macd_hist_diff'],
                                self.current_indicators[cur_period.name]['ask']['obv'], self.current_indicators[cur_period.name]['ask']['obv_ema'],
                                self.current_indicators[cur_period.name]['bid']['obv'], self.current_indicators[cur_period.name]['ask']['obv_ema'],
                                self.current_indicators[cur_period.name]['bband_upper'], self.current_indicators[cur_period.name]['bband_lower']))
@@ -63,6 +63,7 @@ class IndicatorSubsystem:
         self.current_indicators[period_name]['macd'] = macd[-1]
         self.current_indicators[period_name]['macd_sig'] = macd_sig[-1]
         self.current_indicators[period_name]['macd_hist'] = macd_hist[-1]
+        self.current_indicators[period_name]['macd_hist_diff'] = Decimal(macd_hist[-2]) - Decimal(macd_hist[-1])
 
     def calculate_vol_macd(self, period_name, volumes):
         macd, macd_sig, macd_hist = talib.MACD(volumes, fastperiod=10,
