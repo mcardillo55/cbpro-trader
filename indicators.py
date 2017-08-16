@@ -33,9 +33,12 @@ class IndicatorSubsystem:
 
             volumes = np.append(cur_period.get_volumes(),
                                 cur_period.cur_candlestick.volume)
+            highs = np.append(cur_period.get_highs(), cur_period.cur_candlestick.high)
+            lows = np.append(cur_period.get_lows(), cur_period.cur_candlestick.low)
 
             # Need to calculate Bollinger Bands first, to use in OBV
             self.calculate_bbands(cur_period.name, closing_prices_ask)
+            self.calculate_sar(cur_period.name, highs, lows)
 
             self.calculate_macd(cur_period.name, closing_prices_ask, 'ask')
             self.calculate_obv(cur_period.name, closing_prices_ask, volumes, 'ask')
@@ -85,3 +88,8 @@ class IndicatorSubsystem:
 
         self.current_indicators[period_name][bid_or_ask]['obv_ema'] = obv_ema[-1]
         self.current_indicators[period_name][bid_or_ask]['obv'] = obv[-1]
+
+    def calculate_sar(self, period_name, highs, lows):
+        sar = talib.SAR(highs, lows)
+
+        self.current_indicators[period_name]['sar'] = sar[-1]

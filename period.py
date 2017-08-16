@@ -112,6 +112,12 @@ class Period:
             self.cur_candlestick.add_trade(cur_trade)
             self.cur_candlestick.print_stick(self.name)
 
+    def get_highs(self):
+        return np.array(self.candlesticks[:, 2], dtype='f8')
+
+    def get_lows(self):
+        return np.array(self.candlesticks[:, 1], dtype='f8')
+
     def get_closing_prices(self):
         return np.array(self.candlesticks[:, 4], dtype='f8')
 
