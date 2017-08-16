@@ -26,10 +26,9 @@ class IndicatorSubsystem:
             cur_bid = float(order_book.get_bid() + Decimal('0.01'))
             cur_ask = float(order_book.get_ask() - Decimal('0.01'))
             closing_prices = cur_period.get_closing_prices()
-            closing_prices_bid = np.append(closing_prices,
-                                           cur_bid)
-            closing_prices_ask = np.append(closing_prices,
-                                           cur_ask)
+            closing_prices_bid = np.append(closing_prices, cur_bid)
+            closing_prices_ask = np.append(closing_prices, cur_ask)
+            closing_prices_close = np.append(closing_prices, cur_period.cur_candlestick.close)
 
             volumes = np.append(cur_period.get_volumes(),
                                 cur_period.cur_candlestick.volume)
@@ -39,6 +38,7 @@ class IndicatorSubsystem:
             # Need to calculate Bollinger Bands first, to use in OBV
             self.calculate_bbands(cur_period.name, closing_prices_ask)
             self.calculate_sar(cur_period.name, highs, lows)
+            self.calculate_mfi(cur_period.name, highs, lows, closing_prices_close, volumes)
 
             self.calculate_macd(cur_period.name, closing_prices_ask, 'ask')
             self.calculate_obv(cur_period.name, closing_prices_ask, volumes, 'ask')
@@ -93,3 +93,8 @@ class IndicatorSubsystem:
         sar = talib.SAR(highs, lows)
 
         self.current_indicators[period_name]['sar'] = sar[-1]
+
+    def calculate_mfi(self, period_name, highs, lows, closing_prices, volumes):
+        mfi = talib.MFI(highs, lows, closing_prices, volumes)
+
+        self.current_indicators[period_name]['mfi'] = mfi[-1]
