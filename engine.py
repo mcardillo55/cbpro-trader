@@ -187,7 +187,8 @@ class TradeEngine():
         if not self.is_live:
             return
         self.update_amounts()
-        if Decimal(indicators['5']['macd_hist_diff']) > Decimal('0.0'):
+        if Decimal(indicators['1']['macd_hist_diff']) > Decimal('0.0') \
+           and Decimal(indicators['1']['mfi']) < Decimal('20.0'):
             self.sell_flag = False
             # buy btc
             self.buy_flag = True
@@ -201,7 +202,8 @@ class TradeEngine():
             else:
                 self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
                 self.order_thread.start()
-        else:  # OBV < OBV_EMA
+        elif Decimal(indicators['1']['macd_hist_diff']) < Decimal('0.0') \
+             and Decimal(indicators['1']['macd_hist']) < Decimal('0.0'):
             self.buy_flag = False
             # sell btc
             self.sell_flag = True

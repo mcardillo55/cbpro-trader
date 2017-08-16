@@ -60,8 +60,8 @@ if config.FRONTEND == 'debug':
 gdax_websocket = TradeAndHeartbeatWebsocket()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
 trade_engine = engine.TradeEngine(auth_client, is_live=config.LIVE)
-five_min = period.Period(period_size=(60 * 5), name='5')
-period_list = [five_min]
+one_min = period.Period(period_size=(60 * 1), name='1')
+period_list = [one_min]
 gdax_websocket.start()
 period_list[0].verbose_heartbeat = True
 indicator_subsys = indicators.IndicatorSubsystem(period_list)
@@ -79,7 +79,7 @@ while(True):
         if msg.get('type') == "match":
             for cur_period in period_list:
                 cur_period.process_trade(msg)
-            interface.update_candlesticks(five_min)
+            interface.update_candlesticks(one_min)
             if time.time() - last_indicator_update >= 1.0:
                 for cur_period in period_list:
                     indicator_subsys.recalculate_indicators(cur_period, trade_engine.order_book)
