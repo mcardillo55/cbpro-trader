@@ -48,11 +48,9 @@ class IndicatorSubsystem:
 
             self.current_indicators[cur_period.name]['total_periods'] = total_periods
 
-            self.logger.debug("[INDICATORS %s] Periods: %d MACD_DIFF: %f OBV_ASK: %f OBV_ASK EMA: %f OBV_BID: %f OBV_BID EMA: %f BBAND_UPPER: %f BBAND_LOWER %f" %
+            self.logger.debug("[INDICATORS %s] Periods: %d MACD_DIFF: %f MACD_HIST: %f MFI: %f" %
                               (cur_period.name, self.current_indicators[cur_period.name]['total_periods'], self.current_indicators[cur_period.name]['macd_hist_diff'],
-                               self.current_indicators[cur_period.name]['ask']['obv'], self.current_indicators[cur_period.name]['ask']['obv_ema'],
-                               self.current_indicators[cur_period.name]['bid']['obv'], self.current_indicators[cur_period.name]['ask']['obv_ema'],
-                               self.current_indicators[cur_period.name]['bband_upper'], self.current_indicators[cur_period.name]['bband_lower']))
+                               self.current_indicators[cur_period.name]['macd_hist'], self.current_indicators[cur_period.name]['mfi']))
 
     def calculate_bbands(self, period_name, close):
         upperband, middleband, lowerband = talib.BBANDS(close, timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)

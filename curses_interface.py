@@ -48,10 +48,8 @@ class cursesDisplay:
     def update_indicators(self, indicators):
         if not self.enable:
             return
-        self.stdscr.addstr(1, 0, "5 - MACD_DIFF: %f OBV_BID: %f OBV_BID_EMA: %f OBV_ASK: %f OBV_ASK_EMA: %f UPPER_BBAND: %f LOWER_BBAND: %f" %
-                           (indicators['5']['macd_hist_diff'], indicators['5']['bid']['obv'], indicators['5']['bid']['obv_ema'],
-                            indicators['5']['ask']['obv'], indicators['5']['ask']['obv_ema'], indicators['5']['bband_upper'],
-                            indicators['5']['bband_lower']))
+        self.stdscr.addstr(1, 0, "5 - MACD_DIFF: %f MACD_HIST: %f MFI: %f" %
+                           (indicators['5']['macd_hist_diff'], indicators['5']['macd_hist'], indicators['5']['mfi']))
         self.stdscr.refresh()
 
     def update_orders(self, trade_engine):
