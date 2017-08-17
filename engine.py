@@ -150,7 +150,7 @@ class TradeEngine():
                             self.auth_client.cancel_order(order.get('id'))
                     bid = ret.get('price')
                 if ret.get('id'):
-                    ret = self.get_order(ret.get('id'))
+                    ret = self.auth_client.get_order(ret.get('id'))
                 self.usd = self.get_usd()
             if not self.buy_flag and ret.get('id'):
                 self.auth_client.cancel_all(product_id='BTC-USD')
@@ -167,7 +167,7 @@ class TradeEngine():
 
         if amount >= Decimal('0.01'):
             self.logger.debug("SELLING BTC!")
-            self.auth_client.sell(type='limit', size=str(amount),
+            return self.auth_client.sell(type='limit', size=str(amount),
                                   price=str(ask), post_only=True,
                                   product_id='BTC-USD')
         else:
