@@ -14,6 +14,7 @@ import time
 import traceback
 import curses_interface
 import logging
+import datetime
 from websocket import WebSocketConnectionClosedException
 
 
@@ -56,6 +57,8 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.FileHandler("debug.log"))
 if config.FRONTEND == 'debug':
     logger.addHandler(logging.StreamHandler())
+error_logger = logging.getLogger('error-logger')
+error_logger.addHandler(logging.FileHandler("error.log"))
 
 gdax_websocket = TradeAndHeartbeatWebsocket()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
@@ -101,7 +104,7 @@ while(True):
         interface.close()
         break
     except Exception as e:
-        logger.debug(traceback.format_exc())
+        error_logger.exception(datetime.datetime.now())
         trade_engine.close()
         gdax_websocket.close()
         # Period data cannot be trusted. Re-initialize
