@@ -24,7 +24,7 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         super(TradeAndHeartbeatWebsocket, self).__init__()
 
     def on_open(self):
-        self.products = ["BTC-USD"]
+        self.products = ["BTC-USD", 'ETH-USD', 'LTC-USD']
         self.type = "heartbeat"
         self.websocket_queue = Queue.Queue()
         self.stop = False
@@ -63,8 +63,10 @@ error_logger.addHandler(logging.FileHandler("error.log"))
 gdax_websocket = TradeAndHeartbeatWebsocket()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
 trade_engine = engine.TradeEngine(auth_client, is_live=config.LIVE)
-one_min = period.Period(period_size=(60 * 1), name='1')
-period_list = [one_min]
+btc_30 = period.Period(period_size=(60 * 30), product='BTC-USD', name='BTC30')
+eth_30 = period.Period(period_size=(60 * 30), product='ETH-USD', name='ETH30')
+ltc_30 = period.Period(period_size=(60 * 30), product='LTC-USD', name='LTC30')
+period_list = [btc_30, eth_30, ltc_30]
 gdax_websocket.start()
 period_list[0].verbose_heartbeat = True
 indicator_subsys = indicators.IndicatorSubsystem(period_list)
@@ -82,7 +84,7 @@ while(True):
         if msg.get('type') == "match":
             for cur_period in period_list:
                 cur_period.process_trade(msg)
-            interface.update_candlesticks(one_min)
+            interface.update_candlesticks(period_list)
             if time.time() - last_indicator_update >= 1.0:
                 for cur_period in period_list:
                     indicator_subsys.recalculate_indicators(cur_period, trade_engine.order_book)

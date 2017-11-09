@@ -21,21 +21,17 @@ class cursesDisplay:
         self.stdscr.addstr(0, 0, "USD: %.2f BTC: %.8f" % (usd, btc))
         self.stdscr.refresh()
 
-    def update_candlesticks(self, period):
+    def update_candlesticks(self, period_list):
         if not self.enable:
             return
-        cur_stick = period.cur_candlestick
 
-        self.stdscr.addstr(4, 0, "%s O: %f H: %f L: %f C: %f V: %f" %
-                           (cur_stick.time, cur_stick.open, cur_stick.high,
-                            cur_stick.low, cur_stick.close, cur_stick.volume),
-                           self.print_color(cur_stick.open, cur_stick.close))
         starty = 5
-        for cur_stick in period.candlesticks[:-6:-1]:
+        for cur_period in period_list:
+            cur_stick = cur_period.cur_candlestick
             self.stdscr.addstr(starty, 0, "%s O: %f H: %f L: %f C: %f V: %f" %
-                               (cur_stick[0], cur_stick[3], cur_stick[2],
-                                cur_stick[1], cur_stick[4], cur_stick[5]),
-                               self.print_color(cur_stick[3], cur_stick[4]))
+                               (cur_stick.time, cur_stick.open, cur_stick.high,
+                                cur_stick.low, cur_stick.close, cur_stick.volume),
+                               self.print_color(cur_stick.open, cur_stick.close))
             starty += 1
         self.stdscr.refresh()
 
@@ -48,29 +44,33 @@ class cursesDisplay:
     def update_indicators(self, indicators):
         if not self.enable:
             return
-        self.stdscr.addstr(1, 0, "1 - MACD_DIFF: %f MACD_HIST: %f MFI: %f" %
-                           (indicators['1']['macd_hist_diff'], indicators['1']['macd_hist'], indicators['1']['mfi']))
+        self.stdscr.addstr(1, 0, "BTC30 - BBAND_TOP: %f MACD_HIST_DIFF: %f" %
+                           (indicators['BTC30']['bband_upper'], indicators['BTC30']['macd_hist']))
+        self.stdscr.addstr(2, 0, "ETH30 - BBAND_TOP: %f MACD_HIST_DIFF: %f" %
+                           (indicators['ETH30']['bband_upper'], indicators['ETH30']['macd_hist']))
+        self.stdscr.addstr(3, 0, "LTC30 - BBAND_TOP: %f MACD_HIST_DIFF: %f" %
+                           (indicators['LTC30']['bband_upper'], indicators['LTC30']['macd_hist']))
         self.stdscr.refresh()
 
     def update_orders(self, trade_engine):
         if not self.enable:
             return
 
-        self.stdscr.addstr(11, 0, "Recent Fills")
-        starty = 12
+        self.stdscr.addstr(9, 0, "Recent Fills")
+        starty = 10
         for fill in trade_engine.auth_client.get_fills(limit=5)[0]:
             self.stdscr.addstr(starty, 0, "%s Price: %s Size: %s Time: %s" %
                                (fill.get('side').upper(), fill.get('price'),
                                 fill.get('size'), fill.get('created_at')))
             starty += 1
 
-        self.stdscr.addstr(18, 0, "Open Orders")
+        self.stdscr.addstr(16, 0, "Open Orders")
 
         # Clear the next 5 rows
-        for idx in xrange(19, 24):
+        for idx in xrange(17, 22):
             self.stdscr.addstr(idx, 0, " " * 70)
 
-        starty = 19
+        starty = 17
         if trade_engine.order_thread.is_alive():
             for order in trade_engine.auth_client.get_orders()[0]:
                 self.stdscr.addstr(starty, 0, "%s Price: %s Size: %s Status: %s" %
@@ -78,7 +78,7 @@ class cursesDisplay:
                                     order.get('size'), order.get('status')))
                 starty += 1
         else:
-            self.stdscr.addstr(19, 0, "None")
+            self.stdscr.addstr(17, 0, "None")
         self.stdscr.refresh()
 
     def print_color(self, a, b):

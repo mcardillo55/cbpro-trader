@@ -64,9 +64,10 @@ class Candlestick:
 
 
 class Period:
-    def __init__(self, period_size=60, name='Period', initialize=True):
+    def __init__(self, period_size=60, name='Period', product='BTC-USD', initialize=True):
         self.period_size = period_size
         self.name = name
+        self.product = product
         self.first_trade = True
         self.verbose_heartbeat = False
         self.logger = logging.getLogger('trader-logger')
@@ -83,7 +84,7 @@ class Period:
 
     def get_historical_data(self):
         gdax_client = gdax.PublicClient()
-        hist_data = np.array(gdax_client.get_product_historic_rates('BTC-USD', granularity=self.period_size), dtype='object')
+        hist_data = np.array(gdax_client.get_product_historic_rates(self.product, granularity=self.period_size), dtype='object')
         for row in hist_data:
             row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
         return np.flipud(hist_data)
@@ -98,19 +99,20 @@ class Period:
                 self.new_candlestick(isotime)
 
     def process_trade(self, msg):
-        cur_trade = trade.Trade(msg)
-        isotime = dateutil.parser.parse(msg.get('time')).replace(microsecond=0)
-        if isotime < self.cur_candlestick.time:
-            prev_stick = Candlestick(existing_candlestick=self.candlesticks[-1])
-            self.candlesticks = self.candlesticks[:-1]
-            prev_stick.add_trade(cur_trade)
-            self.add_stick(prev_stick)
-        else:
-            if isotime > self.cur_candlestick.time + datetime.timedelta(seconds=self.period_size):
-                self.close_candlestick()
-                self.new_candlestick(isotime)
-            self.cur_candlestick.add_trade(cur_trade)
-            self.cur_candlestick.print_stick(self.name)
+        if msg.get('product_id') == self.product:
+            cur_trade = trade.Trade(msg)
+            isotime = dateutil.parser.parse(msg.get('time')).replace(microsecond=0)
+            if isotime < self.cur_candlestick.time:
+                prev_stick = Candlestick(existing_candlestick=self.candlesticks[-1])
+                self.candlesticks = self.candlesticks[:-1]
+                prev_stick.add_trade(cur_trade)
+                self.add_stick(prev_stick)
+            else:
+                if isotime > self.cur_candlestick.time + datetime.timedelta(seconds=self.period_size):
+                    self.close_candlestick()
+                    self.new_candlestick(isotime)
+                self.cur_candlestick.add_trade(cur_trade)
+                self.cur_candlestick.print_stick(self.name)
 
     def get_highs(self):
         return np.array(self.candlesticks[:, 2], dtype='f8')
