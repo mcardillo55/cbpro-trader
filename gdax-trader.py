@@ -99,7 +99,7 @@ while(True):
                     trade_engine.determine_trades(indicator_subsys.current_indicators)
             trade_engine.print_amounts()
             interface.update_heartbeat(msg)
-            interface.update_balances(trade_engine.get_btc(), trade_engine.get_usd())
+            interface.update_balances(trade_engine)
     except KeyboardInterrupt:
         trade_engine.close()
         gdax_websocket.close()

@@ -15,10 +15,12 @@ class cursesDisplay:
         self.stdscr.keypad(1)
         self.stdscr.addstr(1, 0, "Waiting for a trade...")
 
-    def update_balances(self, btc, usd):
+    def update_balances(self, trade_engine):
         if not self.enable:
             return
-        self.stdscr.addstr(0, 0, "USD: %.2f BTC: %.8f" % (usd, btc))
+        self.stdscr.addstr(0, 0, "USD: %.2f BTC: %.8f ETH: %.8f LTC: %.8f" %
+                          (trade_engine.usd, trade_engine.btc,
+                           trade_engine.eth, trade_engine.ltc))
         self.stdscr.refresh()
 
     def update_candlesticks(self, period_list):
@@ -38,7 +40,7 @@ class cursesDisplay:
     def update_heartbeat(self, msg):
         if not self.enable:
             return
-        self.stdscr.addstr(0, 35, msg.get('time'))
+        self.stdscr.addstr(0, 65, msg.get('time'))
         self.stdscr.refresh()
 
     def update_indicators(self, indicators):

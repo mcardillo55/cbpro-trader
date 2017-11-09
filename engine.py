@@ -52,12 +52,11 @@ class TradeEngine():
         self.auth_client = auth_client
         self.is_live = is_live
         self.order_book = OrderBookCustom()
-        self.usd = self.get_usd()
-        self.btc = self.get_btc()
+        self.last_balance_update = 0
+        self.update_amounts()
         self.last_balance_update = time.time()
         self.order_book.start()
         self.order_thread = threading.Thread()
-        self.last_balance_update = time.time()
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
 
@@ -86,26 +85,24 @@ class TradeEngine():
         except AttributeError:
             return self.round_usd('0.0')
 
-    def get_btc(self):
-        try:
-            for account in self.auth_client.get_accounts():
-                if account.get('currency') == 'BTC':
-                    return self.round_btc(account.get('available'))
-            return self.round_btc(self.auth_client.get_accounts()[0]['available'])
-        except AttributeError:
-            return self.round_btc('0.0')
-
     def round_usd(self, money):
         return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
 
-    def round_btc(self, money):
+    def round_coin(self, money):
         return Decimal(money).quantize(Decimal('.00000001'), rounding=ROUND_DOWN)
 
     def update_amounts(self):
         if time.time() - self.last_balance_update > 10.0:
             try:
-                self.btc = self.get_btc()
-                self.usd = self.get_usd()
+                for account in self.auth_client.get_accounts():
+                    if account.get('currency') == 'BTC':
+                        self.btc = self.round_coin(account.get('available'))
+                    elif account.get('currency') == 'ETH':
+                        self.eth = self.round_coin(account.get('available'))
+                    elif account.get('currency') == 'LTC':
+                        self.ltc = self.round_coin(account.get('available'))
+                    elif account.get('currency') == 'USD':
+                        self.usd = self.round_usd(account.get('available'))
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
             self.last_balance_update = time.time()
@@ -116,12 +113,12 @@ class TradeEngine():
     def place_buy(self, partial='1.0'):
         amount = self.get_usd() * Decimal(partial)
         bid = self.order_book.get_ask() - Decimal('0.01')
-        amount = self.round_btc(Decimal(amount) / Decimal(bid))
+        amount = self.round_coin(Decimal(amount) / Decimal(bid))
 
         if amount < Decimal('0.01'):
             amount = self.get_usd()
             bid = self.order_book.get_ask() - Decimal('0.01')
-            amount = self.round_btc(Decimal(amount) / Decimal(bid))
+            amount = self.round_coin(Decimal(amount) / Decimal(bid))
 
         if amount >= Decimal('0.01'):
             self.logger.debug("BUYING BTC!")
@@ -160,9 +157,10 @@ class TradeEngine():
 
 
     def place_sell(self, partial='1.0'):
-        amount = self.round_btc(self.get_btc() * Decimal(partial))
+        self.update_amounts()
+        amount = self.round_coin(self.btc * Decimal(partial))
         if amount < Decimal('0.01'):
-            amount = self.get_btc()
+            amount = self.btc
         ask = self.order_book.get_bid() + Decimal('0.01')
 
         if amount >= Decimal('0.01'):
@@ -193,10 +191,10 @@ class TradeEngine():
                     ask = ret.get('price')
                 if ret.get('id'):
                     ret = self.auth_client.get_order(ret.get('id'))
-                self.btc = self.get_btc()
+                self.update_amounts()
             if not self.sell_flag:
                 self.auth_client.cancel_all(product_id='BTC-USD')
-            self.btc = self.get_btc()
+            self.update_amounts
         except Exception:
             self.error_logger.exception(datetime.datetime.now())
 
