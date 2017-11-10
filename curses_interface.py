@@ -46,12 +46,12 @@ class cursesDisplay:
     def update_indicators(self, indicators):
         if not self.enable:
             return
-        self.stdscr.addstr(1, 0, "BTC30 - BBAND_TOP: %f MACD_HIST_DIFF: %f" %
-                           (indicators['BTC30']['bband_upper'], indicators['BTC30']['macd_hist']))
-        self.stdscr.addstr(2, 0, "ETH30 - BBAND_TOP: %f MACD_HIST_DIFF: %f" %
-                           (indicators['ETH30']['bband_upper'], indicators['ETH30']['macd_hist']))
-        self.stdscr.addstr(3, 0, "LTC30 - BBAND_TOP: %f MACD_HIST_DIFF: %f" %
-                           (indicators['LTC30']['bband_upper'], indicators['LTC30']['macd_hist']))
+        self.stdscr.addstr(1, 0, "BTC30 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                           (indicators['BTC30']['bband_upper_1'], indicators['BTC30']['bband_upper_2']))
+        self.stdscr.addstr(2, 0, "ETH30 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                           (indicators['ETH30']['bband_upper_1'], indicators['ETH30']['bband_upper_2']))
+        self.stdscr.addstr(3, 0, "LTC30 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                           (indicators['LTC30']['bband_upper_1'], indicators['LTC30']['bband_upper_2']))
         self.stdscr.refresh()
 
     def update_orders(self, trade_engine):

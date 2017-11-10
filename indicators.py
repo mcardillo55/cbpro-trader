@@ -53,10 +53,15 @@ class IndicatorSubsystem:
                                self.current_indicators[cur_period.name]['macd_sig'], self.current_indicators[cur_period.name]['macd_hist']))
 
     def calculate_bbands(self, period_name, close):
-        upperband, middleband, lowerband = talib.BBANDS(close, timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
+        upperband_1, middleband_1, lowerband_1 = talib.BBANDS(close, timeperiod=20, nbdevup=1, nbdevdn=1, matype=0)
 
-        self.current_indicators[period_name]['bband_upper'] = upperband[-1]
-        self.current_indicators[period_name]['bband_lower'] = lowerband[-1]
+        self.current_indicators[period_name]['bband_upper_1'] = upperband_1[-1]
+        self.current_indicators[period_name]['bband_lower_1'] = lowerband_1[-1]
+
+        upperband_2, middleband_2, lowerband_2 = talib.BBANDS(close, timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
+
+        self.current_indicators[period_name]['bband_upper_2'] = upperband_2[-1]
+        self.current_indicators[period_name]['bband_lower_2'] = lowerband_2[-1]
 
     def calculate_macd(self, period_name, closing_prices):
         macd, macd_sig, macd_hist = talib.MACD(closing_prices, fastperiod=10,
