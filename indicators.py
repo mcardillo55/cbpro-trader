@@ -67,8 +67,8 @@ class IndicatorSubsystem:
         self.current_indicators[period_name]['macd_hist_diff'] = Decimal(macd_hist[-1]) - Decimal(macd_hist[-2])
 
     def calculate_vol_macd(self, period_name, volumes):
-        macd, macd_sig, macd_hist = talib.MACD(volumes, fastperiod=10,
-                                               slowperiod=26, signalperiod=14)
+        macd, macd_sig, macd_hist = talib.MACD(volumes, fastperiod=50,
+                                               slowperiod=200, signalperiod=14)
         self.current_indicators[period_name]['vol_macd'] = macd[-1]
         self.current_indicators[period_name]['vol_macd_sig'] = macd_sig[-1]
         self.current_indicators[period_name]['vol_macd_hist'] = macd_hist[-1]
