@@ -12,6 +12,7 @@ import trade
 import pytz
 import requests
 import logging
+import time
 
 
 class Candlestick:
@@ -84,7 +85,12 @@ class Period:
 
     def get_historical_data(self):
         gdax_client = gdax.PublicClient()
-        hist_data = np.array(gdax_client.get_product_historic_rates(self.product, granularity=self.period_size), dtype='object')
+        ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size)
+        # Check if we got rate limited, which will return a JSON message
+        if type(ret) is not type(list()):
+            time.sleep(3)
+            ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size)
+        hist_data = np.array(ret, dtype='object')
         for row in hist_data:
             row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
         return np.flipud(hist_data)
