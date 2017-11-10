@@ -35,16 +35,8 @@ class IndicatorSubsystem:
             highs = np.append(cur_period.get_highs(), cur_period.cur_candlestick.high)
             lows = np.append(cur_period.get_lows(), cur_period.cur_candlestick.low)
 
-            # Need to calculate Bollinger Bands first, to use in OBV
             self.calculate_bbands(cur_period.name, closing_prices_close)
-            #self.calculate_sar(cur_period.name, highs, lows)
-            #self.calculate_mfi(cur_period.name, highs, lows, closing_prices_close, volumes)
-
             self.calculate_macd(cur_period.name, closing_prices_close)
-            #self.calculate_obv(cur_period.name, closing_prices_ask, volumes, 'ask')
-
-            #self.calculate_macd(cur_period.name, closing_prices_bid, 'bid')
-            #self.calculate_obv(cur_period.name, closing_prices_bid, volumes, 'bid')
 
             self.current_indicators[cur_period.name]['total_periods'] = total_periods
 
