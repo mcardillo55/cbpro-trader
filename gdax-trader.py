@@ -88,7 +88,7 @@ while(True):
             if time.time() - last_indicator_update >= 1.0:
                 for cur_period in period_list:
                     indicator_subsys.recalculate_indicators(cur_period, trade_engine.order_book)
-                trade_engine.determine_trades(indicator_subsys.current_indicators)
+                    trade_engine.determine_trades(cur_period.name, indicator_subsys.current_indicators)
                 interface.update_indicators(indicator_subsys.current_indicators)
                 interface.update_orders(trade_engine)
                 last_indicator_update = time.time()

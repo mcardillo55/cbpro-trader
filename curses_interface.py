@@ -30,10 +30,11 @@ class cursesDisplay:
         starty = 5
         for cur_period in period_list:
             cur_stick = cur_period.cur_candlestick
-            self.stdscr.addstr(starty, 0, "%s O: %f H: %f L: %f C: %f V: %f" %
-                               (cur_stick.time, cur_stick.open, cur_stick.high,
-                                cur_stick.low, cur_stick.close, cur_stick.volume),
-                               self.print_color(cur_stick.open, cur_stick.close))
+            if cur_stick:
+                self.stdscr.addstr(starty, 0, "%s O: %f H: %f L: %f C: %f V: %f" %
+                                   (cur_stick.time, cur_stick.open, cur_stick.high,
+                                    cur_stick.low, cur_stick.close, cur_stick.volume),
+                                   self.print_color(cur_stick.open, cur_stick.close))
             starty += 1
         self.stdscr.refresh()
 

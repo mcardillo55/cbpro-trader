@@ -21,7 +21,7 @@ class OrderBookCustom(gdax.OrderBook):
         try:
             super(OrderBookCustom, self).get_ask()
         except ValueError:
-            self.error_logger.exception(datetime.datetime.now())
+            #self.error_logger.exception(datetime.datetime.now())
             return False
         return True
 
@@ -198,37 +198,25 @@ class TradeEngine():
         except Exception:
             self.error_logger.exception(datetime.datetime.now())
 
-    def determine_trades(self, indicators):
+    def get_currency_size_and_product_id_from_period_name(self, period_name):
+        if period_name is 'BTC30':
+            return self.btc, 'BTC-USD'
+        elif period_name is 'ETH30':
+            return self.eth, 'ETH-USD'
+        elif period_name is 'LTC30':
+            return self.ltc, 'LTC-USD'
+
+
+    def determine_trades(self, period_name, indicators):
         if not self.is_live:
             return
+
         self.update_amounts()
-        if Decimal(indicators['1']['macd_hist_diff']) > Decimal('0.0') \
-           and Decimal(indicators['1']['mfi']) < Decimal('20.0'):
-            self.sell_flag = False
-            # buy btc
-            self.buy_flag = True
-            if self.order_thread.is_alive():
-                if self.order_thread.name == 'sell_thread':
-                    # Wait for thread to close
-                    while self.order_thread.is_alive():
-                        time.sleep(0.1)
-                else:
-                    pass
-            else:
-                self.order_thread = threading.Thread(target=self.buy, name='buy_thread')
-                self.order_thread.start()
-        elif Decimal(indicators['1']['macd_hist_diff']) < Decimal('0.0') \
-             and Decimal(indicators['1']['macd_hist']) < Decimal('0.0'):
-            self.buy_flag = False
-            # sell btc
-            self.sell_flag = True
-            if self.order_thread.is_alive():
-                if self.order_thread.name == 'buy_thread':
-                    # Wait for thread to close
-                    while self.order_thread.is_alive():
-                        time.sleep(0.1)
-                else:
-                    pass
-            else:
-                self.order_thread = threading.Thread(target=self.sell, name='sell_thread')
-                self.order_thread.start()
+        amount_of_coin, product_id = self.get_currency_size_and_product_id_from_period_name(period_name)
+
+        if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_2']):
+            if self.usd > Decimal('0.0'):
+                self.auth_client.buy(type='market', funds=str(self.usd), product_id=product_id)
+        elif Decimal(indicators[period_name]['close']) < Decimal(indicators[period_name]['bband_upper_1']):
+            if amount_of_coin > Decimal('0.0'):
+                self.auth_client.sell(type='market', size=str(amount_of_coin), product_id=product_id)

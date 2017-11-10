@@ -38,6 +38,7 @@ class IndicatorSubsystem:
             self.calculate_bbands(cur_period.name, closing_prices_close)
             self.calculate_macd(cur_period.name, closing_prices_close)
 
+            self.current_indicators[cur_period.name]['close'] = cur_period.cur_candlestick.close
             self.current_indicators[cur_period.name]['total_periods'] = total_periods
 
             self.logger.debug("[INDICATORS %s] Periods: %d MACD: %f MACD_SIG: %f MACD_HIST: %f" %
