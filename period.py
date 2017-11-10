@@ -18,6 +18,7 @@ import time
 class Candlestick:
     def __init__(self, isotime=None, existing_candlestick=None):
         self.logger = logging.getLogger('trader-logger')
+        self.new = True
         if isotime:
             self.time = isotime.replace(second=0, microsecond=0)
             self.open = None
@@ -26,9 +27,11 @@ class Candlestick:
             self.close = None
             self.volume = 0
         elif existing_candlestick is not None:
+            self.new = False
             self.time, self.low, self.high, self.open, self.close, self.volume = existing_candlestick
 
     def add_trade(self, new_trade):
+        self.new = False
         if not self.open:
             self.open = new_trade.price
 
@@ -50,6 +53,7 @@ class Candlestick:
     def close_candlestick(self, period_name, prev_stick=None):
         self.logger.debug("Candlestick Closed!")
         if self.close is None:
+            self.new = False
             self.open = prev_stick[4]  # Closing price
             self.high = prev_stick[4]
             self.low = prev_stick[4]

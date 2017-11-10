@@ -30,7 +30,7 @@ class cursesDisplay:
         starty = 5
         for cur_period in period_list:
             cur_stick = cur_period.cur_candlestick
-            if not cur_stick.new:
+            if cur_stick.new is False:
                 self.stdscr.addstr(starty, 0, "%s O: %f H: %f L: %f C: %f V: %f" %
                                    (cur_stick.time, cur_stick.open, cur_stick.high,
                                     cur_stick.low, cur_stick.close, cur_stick.volume),
