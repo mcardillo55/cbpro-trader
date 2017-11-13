@@ -95,8 +95,8 @@ while(True):
         elif msg.get('type') == "heartbeat":
             for cur_period in period_list:
                 cur_period.process_heartbeat(msg)
-                if len(indicator_subsys.current_indicators[cur_period.name]['bid']) > 0:
-                    trade_engine.determine_trades(indicator_subsys.current_indicators)
+                if len(indicator_subsys.current_indicators[cur_period.name]) > 0:
+                    trade_engine.determine_trades(cur_period.name, indicator_subsys.current_indicators)
             trade_engine.print_amounts()
             interface.update_heartbeat(msg)
             interface.update_balances(trade_engine)

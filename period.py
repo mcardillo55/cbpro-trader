@@ -16,16 +16,24 @@ import time
 
 
 class Candlestick:
-    def __init__(self, isotime=None, existing_candlestick=None):
+    def __init__(self, isotime=None, existing_candlestick=None, prev_close=None):
         self.logger = logging.getLogger('trader-logger')
         self.new = True
         if isotime:
             self.time = isotime.replace(second=0, microsecond=0)
-            self.open = None
-            self.high = None
-            self.low = None
-            self.close = None
             self.volume = 0
+            if prev_close:
+                self.open = prev_close
+                self.high = prev_close
+                self.low = prev_close
+                self.close = prev_close
+            else:
+                self.time = isotime.replace(second=0, microsecond=0)
+                self.open = None
+                self.high = None
+                self.low = None
+                self.close = None
+
         elif existing_candlestick is not None:
             self.new = False
             self.time, self.low, self.high, self.open, self.close, self.volume = existing_candlestick
@@ -106,7 +114,7 @@ class Period:
                 self.logger.debug("[HEARTBEAT] " + str(isotime) + " " + str(msg.get('last_trade_id')))
             if isotime - self.cur_candlestick_start > datetime.timedelta(seconds=self.period_size):
                 self.close_candlestick()
-                self.new_candlestick(isotime)
+                self.new_candlestick(self.cur_candlestick.time + datetime.timedelta(seconds=self.period_size))
 
     def process_trade(self, msg):
         if msg.get('product_id') == self.product:
@@ -120,7 +128,7 @@ class Period:
             else:
                 if isotime > self.cur_candlestick.time + datetime.timedelta(seconds=self.period_size):
                     self.close_candlestick()
-                    self.new_candlestick(isotime)
+                    self.new_candlestick(self.cur_candlestick.time + datetime.timedelta(seconds=self.period_size))
                 self.cur_candlestick.add_trade(cur_trade)
                 self.cur_candlestick.print_stick(self.name)
 
@@ -137,7 +145,8 @@ class Period:
         return np.array(self.candlesticks[:, 5], dtype='f8')
 
     def new_candlestick(self, isotime):
-        self.cur_candlestick = Candlestick(isotime=isotime)
+        prev_close = self.cur_candlestick.close
+        self.cur_candlestick = Candlestick(isotime=isotime, prev_close=prev_close)
         self.cur_candlestick_start = isotime.replace(second=0, microsecond=0)
 
     def add_stick(self, stick_to_add):

@@ -16,9 +16,6 @@ class IndicatorSubsystem:
         self.current_indicators = {}
         for period in period_list:
             self.current_indicators[period.name] = {}
-        for period in period_list:
-            self.current_indicators[period.name]['bid'] = {}
-            self.current_indicators[period.name]['ask'] = {}
 
     def recalculate_indicators(self, cur_period, order_book):
         total_periods = len(cur_period.candlesticks)
@@ -30,10 +27,6 @@ class IndicatorSubsystem:
             closing_prices_ask = np.append(closing_prices, cur_ask)
             closing_prices_close = np.append(closing_prices, cur_period.cur_candlestick.close)
 
-            volumes = np.append(cur_period.get_volumes(),
-                                cur_period.cur_candlestick.volume)
-            highs = np.append(cur_period.get_highs(), cur_period.cur_candlestick.high)
-            lows = np.append(cur_period.get_lows(), cur_period.cur_candlestick.low)
 
             self.calculate_bbands(cur_period.name, closing_prices_close)
             self.calculate_macd(cur_period.name, closing_prices_close)
