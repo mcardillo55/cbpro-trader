@@ -12,16 +12,15 @@ from decimal import *
 
 
 class OrderBookCustom(gdax.OrderBook):
-    def __init__(self):
+    def __init__(self, product_id='BTC-USD'):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
-        super(OrderBookCustom, self).__init__()
+        super(OrderBookCustom, self).__init__(product_id=product_id)
 
     def is_ready(self):
         try:
             super(OrderBookCustom, self).get_ask()
         except ValueError:
-            #self.error_logger.exception(datetime.datetime.now())
             return False
         return True
 
@@ -51,12 +50,18 @@ class TradeEngine():
     def __init__(self, auth_client, is_live=False):
         self.auth_client = auth_client
         self.is_live = is_live
-        self.order_book = OrderBookCustom()
+        self.order_book = {
+                            'BTC-USD': OrderBookCustom(product_id='BTC-USD'),
+                            'ETH-USD': OrderBookCustom(product_id='ETH-USD'),
+                            'LTC-USD': OrderBookCustom(product_id='LTC-USD')
+                          }
         self.last_balance_update = 0
         self.update_amounts()
         self.last_balance_update = time.time()
-        self.order_book.start()
+        for book in self.order_book:
+            self.order_book[book].start()
         self.order_thread = threading.Thread()
+        self.order_in_progress = False
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
 
@@ -72,10 +77,12 @@ class TradeEngine():
             self.auth_client.cancel_all(product_id='BTC-USD')
         except Exception:
             self.error_logger.exception(datetime.datetime.now())
-        self.order_book.close()
+        for book in self.order_book:
+            self.order_book[book].close()
 
     def start(self):
-        self.order_book.start()
+        for book in self.order_book:
+            self.order_book[book].start()
 
     def get_usd(self):
         try:
@@ -83,7 +90,16 @@ class TradeEngine():
                 if account.get('currency') == 'USD':
                     return self.round_usd(account.get('available'))
         except AttributeError:
-            return self.round_usd('0.0')
+            return round_usd('0.0')
+
+    def get_btc(self, product_id='BTC-USD'):
+        try:
+            for account in self.auth_client.get_accounts():
+                if account.get('currency') == product_id[:3]:
+                    return self.round_coin(account.get('available'))
+            return self.round_coin(auth_client.get_accounts()[0]['available'])
+        except AttributeError:
+            return self.round_coin('0.0')
 
     def round_usd(self, money):
         return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
@@ -110,93 +126,98 @@ class TradeEngine():
     def print_amounts(self):
         self.logger.debug("[BALANCES] USD: %.2f BTC: %.8f" % (self.usd, self.btc))
 
-    def place_buy(self, partial='1.0'):
+    def place_buy(self, product_id='BTC-USD', partial='1.0'):
         amount = self.get_usd() * Decimal(partial)
-        bid = self.order_book.get_ask() - Decimal('0.01')
+        bid = self.order_book[product_id].get_ask() - Decimal('0.01')
         amount = self.round_coin(Decimal(amount) / Decimal(bid))
 
         if amount < Decimal('0.01'):
             amount = self.get_usd()
-            bid = self.order_book.get_ask() - Decimal('0.01')
+            bid = self.order_book[product_id].get_ask() - Decimal('0.01')
             amount = self.round_coin(Decimal(amount) / Decimal(bid))
 
         if amount >= Decimal('0.01'):
-            self.logger.debug("BUYING BTC!")
+            self.logger.debug("Placing buy... Price: %.2f Size: %.8f" % (bid, amount))
             return self.auth_client.buy(type='limit', size=str(amount),
                                         price=str(bid), post_only=True,
-                                        product_id='BTC-USD')
+                                        product_id=product_id)
         else:
             ret = {'status': 'done'}
             return ret
 
-    def buy(self, amount=None):
+    def buy(self, product_id='BTC-USD', amount=None):
+        self.logger.debug("BLAAHHH*********" + product_id)
+        self.order_in_progress = True
         try:
-            ret = self.place_buy('0.5')
+            ret = self.place_buy(product_id=product_id, partial='0.5')
             bid = ret.get('price')
-            while ret.get('status') != 'done' and self.buy_flag:
-                if ret.get('status') == 'rejected' or ret.get('message') == 'NotFound':
-                    ret = self.place_buy('0.5')
+            usd = self.get_usd()
+            while usd > Decimal('0.0') or len(self.auth_client.get_orders()[0]) > 0:
+                if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
+                    ret = self.place_buy(product_id=product_id, partial='0.5')
                     bid = ret.get('price')
-                elif not bid or Decimal(bid) < self.order_book.get_ask() - Decimal('0.01'):
+                elif not bid or Decimal(bid) < self.order_book[product_id].get_ask() - Decimal('0.01'):
                     if len(self.auth_client.get_orders()[0]) > 0:
-                        ret = self.place_buy('1.0')
+                        ret = self.place_buy(product_id=product_id, partial='1.0')
                     else:
-                        ret = self.place_buy('0.5')
+                        ret = self.place_buy(product_id=product_id, partial='0.5')
                     for order in self.auth_client.get_orders()[0]:
                         if order.get('id') != ret.get('id'):
                             self.auth_client.cancel_order(order.get('id'))
                     bid = ret.get('price')
                 if ret.get('id'):
                     ret = self.auth_client.get_order(ret.get('id'))
-                self.usd = self.get_usd()
-            if not self.buy_flag and ret.get('id'):
-                self.auth_client.cancel_all(product_id='BTC-USD')
-            self.usd = self.get_usd()
-        except Exception:
-            self.error_logger.exception(datetime.datetime.now())
+                usd = self.get_usd()
+            if ret.get('id'):
+                self.auth_client.cancel_all(product_id=product_id)
+            usd = self.get_usd()
+        except Exception as e:
+            print(datetime.datetime.now(), e)
+        self.order_in_progress = False
 
-
-    def place_sell(self, partial='1.0'):
-        self.update_amounts()
-        amount = self.round_coin(self.btc * Decimal(partial))
+    def place_sell(self, product_id='BTC-USD', partial='1.0'):
+        amount = self.round_coin(self.get_btc() * Decimal(partial))
         if amount < Decimal('0.01'):
-            amount = self.btc
-        ask = self.order_book.get_bid() + Decimal('0.01')
+            amount = self.get_btc()
+        ask = self.order_book[product_id].get_bid() + Decimal('0.01')
 
         if amount >= Decimal('0.01'):
-            self.logger.debug("SELLING BTC!")
+            self.logger.debug("Placing sell... Price: %.2f Size: %.8f" % (ask, amount))
             return self.auth_client.sell(type='limit', size=str(amount),
-                                  price=str(ask), post_only=True,
-                                  product_id='BTC-USD')
+                                    price=str(ask), post_only=True,
+                                    product_id=product_id)
         else:
             ret = {'status': 'done'}
             return ret
 
-    def sell(self, amount=None):
+    def sell(self, product_id='BTC-USD', amount=None):
+        self.order_in_progress = True
         try:
-            ret = self.place_sell('0.5')
+            ret = self.place_sell(product_id=product_id, partial='0.5')
             ask = ret.get('price')
-            while ret.get('status') != 'done' and self.sell_flag:
-                if ret.get('status') == 'rejected' or ret.get('message') == 'NotFound':
-                    ret = self.place_sell('0.5')
+            btc = self.get_btc()
+            while btc >= Decimal('0.01') or len(self.auth_client.get_orders()[0]) > 0:
+                if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
+                    ret = self.place_sell(product_id=product_id, partial='0.5')
                     ask = ret.get('price')
-                elif not ask or Decimal(ask) > self.order_book.get_bid() + Decimal('0.01'):
+                elif not ask or Decimal(ask) > self.order_book[product_id].get_bid() + Decimal('0.01'):
                     if len(self.auth_client.get_orders()[0]) > 0:
-                        ret = self.place_sell('1.0')
+                        ret = self.place_sell(product_id=product_id, partial='1.0')
                     else:
-                        ret = self.place_sell('0.5')
+                        ret = self.place_sell(product_id=product_id, partial='0.5')
                     for order in self.auth_client.get_orders()[0]:
                         if order.get('id') != ret.get('id'):
                             self.auth_client.cancel_order(order.get('id'))
                     ask = ret.get('price')
                 if ret.get('id'):
                     ret = self.auth_client.get_order(ret.get('id'))
-                self.update_amounts()
-            if not self.sell_flag:
-                self.auth_client.cancel_all(product_id='BTC-USD')
-            self.update_amounts
-        except Exception:
-            self.error_logger.exception(datetime.datetime.now())
+                btc = self.get_btc()
+            if ret.get('id'):
+                self.auth_client.cancel_all(product_id=product_id)
+            btc = self.get_btc()
+        except Exception as e:
+            print(datetime.datetime.now(), e)
+        self.order_in_progress = False
 
     def get_currency_size_and_product_id_from_period_name(self, period_name):
         if period_name is 'BTC30':
@@ -205,7 +226,6 @@ class TradeEngine():
             return self.eth, 'ETH-USD'
         elif period_name is 'LTC30':
             return self.ltc, 'LTC-USD'
-
 
     def determine_trades(self, period_name, indicators):
         if not self.is_live:
@@ -216,7 +236,11 @@ class TradeEngine():
 
         if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_2']):
             if self.usd > Decimal('0.0'):
-                self.auth_client.buy(type='market', funds=str(self.usd), product_id=product_id)
+                if not self.order_in_progress:
+                    self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product_id': product_id})
+                    self.order_thread.start()
         elif Decimal(indicators[period_name]['close']) < Decimal(indicators[period_name]['bband_upper_1']):
             if amount_of_coin > Decimal('0.0'):
-                self.auth_client.sell(type='market', size=str(amount_of_coin), product_id=product_id)
+                if not self.order_in_progress:
+                    self.order_thread = threading.Thread(target=self.sell, name='sell_thread', kwargs={'product_id': product_id})
+                    self.order_thread.start()
