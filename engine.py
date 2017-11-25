@@ -176,9 +176,9 @@ class TradeEngine():
         self.order_in_progress = False
 
     def place_sell(self, product_id='BTC-USD', partial='1.0'):
-        amount = self.round_coin(self.get_btc() * Decimal(partial))
+        amount = self.round_coin(self.get_btc(product_id=product_id) * Decimal(partial))
         if amount < Decimal('0.01'):
-            amount = self.get_btc()
+            amount = self.get_btc(product_id=product_id)
         ask = self.order_book[product_id].get_bid() + Decimal('0.01')
 
         if amount >= Decimal('0.01'):
@@ -195,7 +195,7 @@ class TradeEngine():
         try:
             ret = self.place_sell(product_id=product_id, partial='0.5')
             ask = ret.get('price')
-            btc = self.get_btc()
+            btc = self.get_btc(product_id=product_id)
             while btc >= Decimal('0.01') or len(self.auth_client.get_orders()[0]) > 0:
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
                     ret = self.place_sell(product_id=product_id, partial='0.5')
@@ -211,10 +211,10 @@ class TradeEngine():
                     ask = ret.get('price')
                 if ret.get('id'):
                     ret = self.auth_client.get_order(ret.get('id'))
-                btc = self.get_btc()
+                btc = self.get_btc(product_id=product_id)
             if ret.get('id'):
                 self.auth_client.cancel_all(product_id=product_id)
-            btc = self.get_btc()
+            btc = self.get_btc(product_id=product_id)
         except Exception as e:
             print(datetime.datetime.now(), e)
         self.order_in_progress = False
