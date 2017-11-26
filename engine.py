@@ -65,13 +65,29 @@ class TradeEngine():
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
 
-        self.buy_flag = False
-        self.sell_flag = False
+        self.buy_flag = {
+                            'BTC-USD': False,
+                            'ETH-USD': False,
+                            'LTC-USD': False
+                        }
+        self.sell_flag = {
+                            'BTC-USD': False,
+                            'ETH-USD': False,
+                            'LTC-USD': False
+                        }
 
     def close(self):
         # Setting both flags will close any open order threads
-        self.buy_flag = False
-        self.sell_flag = False
+        self.buy_flag = {
+                            'BTC-USD': False,
+                            'ETH-USD': False,
+                            'LTC-USD': False
+                        }
+        self.sell_flag = {
+                            'BTC-USD': False,
+                            'ETH-USD': False,
+                            'LTC-USD': False
+                        }
         # Cancel any orders that may still be remaining
         try:
             self.auth_client.cancel_all()
@@ -146,13 +162,12 @@ class TradeEngine():
             return ret
 
     def buy(self, product_id='BTC-USD', amount=None):
-        self.logger.debug("BLAAHHH*********" + product_id)
         self.order_in_progress = True
         try:
             ret = self.place_buy(product_id=product_id, partial='0.5')
             bid = ret.get('price')
             usd = self.get_usd()
-            while usd > Decimal('0.0') or len(self.auth_client.get_orders()[0]) > 0:
+            while self.buy_flag[product_id] and usd > Decimal('0.0') or len(self.auth_client.get_orders()[0]) > 0:
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
                     ret = self.place_buy(product_id=product_id, partial='0.5')
                     bid = ret.get('price')
@@ -196,7 +211,7 @@ class TradeEngine():
             ret = self.place_sell(product_id=product_id, partial='0.5')
             ask = ret.get('price')
             btc = self.get_btc(product_id=product_id)
-            while btc >= Decimal('0.01') or len(self.auth_client.get_orders()[0]) > 0:
+            while self.sell_flag[product_id] and btc >= Decimal('0.01') or len(self.auth_client.get_orders()[0]) > 0:
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
                     ret = self.place_sell(product_id=product_id, partial='0.5')
                     ask = ret.get('price')
@@ -234,13 +249,20 @@ class TradeEngine():
         self.update_amounts()
         amount_of_coin, product_id = self.get_currency_size_and_product_id_from_period_name(period_name)
 
-        if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_2']):
+        if product_id is 'ETH-USD' or Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_2']):
             if self.usd > Decimal('0.0'):
                 if not self.order_in_progress:
+                    self.sell_flag[product_id] = False
+                    self.buy_flag[product_id] = True
                     self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product_id': product_id})
                     self.order_thread.start()
         elif Decimal(indicators[period_name]['close']) < Decimal(indicators[period_name]['bband_upper_1']):
             if amount_of_coin > Decimal('0.0'):
                 if not self.order_in_progress:
+                    self.buy_flag[product_id] = False
+                    self.sell_flag[product_id] = True
                     self.order_thread = threading.Thread(target=self.sell, name='sell_thread', kwargs={'product_id': product_id})
                     self.order_thread.start()
+        else:
+            self.buy_flag[product_id] = False
+            self.sell_flag[product_id] = False
