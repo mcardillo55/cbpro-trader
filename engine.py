@@ -249,7 +249,7 @@ class TradeEngine():
         self.update_amounts()
         amount_of_coin, product_id = self.get_currency_size_and_product_id_from_period_name(period_name)
 
-        if product_id is 'ETH-USD' or Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_2']):
+        if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_1']):
             if self.usd > Decimal('0.0'):
                 if not self.order_in_progress:
                     self.sell_flag[product_id] = False

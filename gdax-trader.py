@@ -63,9 +63,9 @@ error_logger.addHandler(logging.FileHandler("error.log"))
 gdax_websocket = TradeAndHeartbeatWebsocket()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
 trade_engine = engine.TradeEngine(auth_client, is_live=config.LIVE)
-btc_30 = period.Period(period_size=(60 * 30), product='BTC-USD', name='BTC30')
-eth_30 = period.Period(period_size=(60 * 30), product='ETH-USD', name='ETH30')
-ltc_30 = period.Period(period_size=(60 * 30), product='LTC-USD', name='LTC30')
+btc_30 = period.Period(period_size=(60 * 15), product='BTC-USD', name='BTC30')
+eth_30 = period.Period(period_size=(60 * 15), product='ETH-USD', name='ETH30')
+ltc_30 = period.Period(period_size=(60 * 15), product='LTC-USD', name='LTC30')
 period_list = [btc_30, eth_30, ltc_30]
 gdax_websocket.start()
 period_list[0].verbose_heartbeat = True
@@ -90,7 +90,7 @@ while(True):
                     indicator_subsys.recalculate_indicators(cur_period, trade_engine.order_book[cur_period.product])
                     trade_engine.determine_trades(cur_period.name, indicator_subsys.current_indicators)
                 interface.update_indicators(indicator_subsys.current_indicators)
-                interface.update_orders(trade_engine)
+                #interface.update_orders(trade_engine)
                 last_indicator_update = time.time()
         elif msg.get('type') == "heartbeat":
             for cur_period in period_list:
