@@ -20,11 +20,7 @@ class IndicatorSubsystem:
     def recalculate_indicators(self, cur_period, order_book):
         total_periods = len(cur_period.candlesticks)
         if total_periods > 0:
-            cur_bid = float(order_book.get_bid() + Decimal('0.01'))
-            cur_ask = float(order_book.get_ask() - Decimal('0.01'))
             closing_prices = cur_period.get_closing_prices()
-            closing_prices_bid = np.append(closing_prices, cur_bid)
-            closing_prices_ask = np.append(closing_prices, cur_ask)
             closing_prices_close = np.append(closing_prices, cur_period.cur_candlestick.close)
 
 
