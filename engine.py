@@ -74,7 +74,7 @@ class TradeEngine():
         self.sell_flag = False
         # Cancel any orders that may still be remaining
         try:
-            self.auth_client.cancel_all(product_id='BTC-USD')
+            self.auth_client.cancel_all()
         except Exception:
             self.error_logger.exception(datetime.datetime.now())
         for book in self.order_book:
@@ -90,7 +90,7 @@ class TradeEngine():
                 if account.get('currency') == 'USD':
                     return self.round_usd(account.get('available'))
         except AttributeError:
-            return round_usd('0.0')
+            return self.round_usd('0.0')
 
     def get_btc(self, product_id='BTC-USD'):
         try:
