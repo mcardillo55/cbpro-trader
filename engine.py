@@ -187,6 +187,7 @@ class TradeEngine():
                 self.auth_client.cancel_all(product_id=product_id)
             usd = self.get_usd()
         except Exception as e:
+            self.order_in_progress = False
             print(datetime.datetime.now(), e)
         self.order_in_progress = False
 
@@ -231,6 +232,7 @@ class TradeEngine():
                 self.auth_client.cancel_all(product_id=product_id)
             btc = self.get_btc(product_id=product_id)
         except Exception as e:
+            self.order_in_progress = False
             print(datetime.datetime.now(), e)
         self.order_in_progress = False
 
