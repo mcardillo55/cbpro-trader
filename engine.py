@@ -34,17 +34,6 @@ class OrderBookCustom(gdax.OrderBook):
             time.sleep(0.01)
         return super(OrderBookCustom, self).get_bid()
 
-    def on_open(self):
-        self.stop = False
-        self._sequence = -1
-        self.logger.debug("-- Order Book Opened ---")
-
-    def on_close(self):
-        self.logger.debug("-- Order Book Closed ---")
-
-    def on_error(self, e):
-        raise e
-
 
 class TradeEngine():
     def __init__(self, auth_client, is_live=False):
@@ -58,8 +47,6 @@ class TradeEngine():
         self.last_balance_update = 0
         self.update_amounts()
         self.last_balance_update = time.time()
-        for book in self.order_book:
-            self.order_book[book].start()
         self.order_thread = threading.Thread()
         self.order_in_progress = False
         self.logger = logging.getLogger('trader-logger')
@@ -93,12 +80,6 @@ class TradeEngine():
             self.auth_client.cancel_all()
         except Exception:
             self.error_logger.exception(datetime.datetime.now())
-        for book in self.order_book:
-            self.order_book[book].close()
-
-    def start(self):
-        for book in self.order_book:
-            self.order_book[book].start()
 
     def get_usd(self):
         try:

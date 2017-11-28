@@ -48,8 +48,7 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
                 pass
 
     def on_message(self, msg):
-        if msg.get('type') == "heartbeat" or msg.get('type') == "match":
-            self.websocket_queue.put(msg)
+        self.websocket_queue.put(msg)
 
 
 logger = logging.getLogger('trader-logger')
@@ -81,6 +80,8 @@ interface = curses_interface.cursesDisplay(enable=curses_enable)
 while(True):
     try:
         msg = gdax_websocket.websocket_queue.get(timeout=15)
+        for product_id, order_book in trade_engine.order_book.iteritems():
+            order_book.process_message(msg)
         if msg.get('type') == "match":
             for cur_period in period_list:
                 cur_period.process_trade(msg)
@@ -114,4 +115,3 @@ while(True):
             cur_period.initialize()
         time.sleep(10)
         gdax_websocket.start()
-        trade_engine.start()
