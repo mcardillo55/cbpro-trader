@@ -37,6 +37,8 @@ class OrderBookCustom(gdax.OrderBook):
 
 class TradeEngine():
     def __init__(self, auth_client, is_live=False):
+        self.logger = logging.getLogger('trader-logger')
+        self.error_logger = logging.getLogger('error-logger')
         self.auth_client = auth_client
         self.is_live = is_live
         self.order_book = {
@@ -53,8 +55,6 @@ class TradeEngine():
                                 'ETH-USD': False,
                                 'LTC-USD': False
                                 }
-        self.logger = logging.getLogger('trader-logger')
-        self.error_logger = logging.getLogger('error-logger')
 
         self.buy_flag = {
                             'BTC-USD': False,
