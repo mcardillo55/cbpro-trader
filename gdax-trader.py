@@ -11,7 +11,6 @@ import engine
 import config
 import Queue
 import time
-import traceback
 import curses_interface
 import logging
 import datetime
