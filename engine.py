@@ -48,6 +48,7 @@ class TradeEngine():
                           }
         self.last_balance_update = 0
         self.update_amounts()
+        self.usd_equivalent = 0
         self.last_balance_update = time.time()
         self.order_thread = threading.Thread()
         self.order_in_progress= {
@@ -113,7 +114,7 @@ class TradeEngine():
     def round_coin(self, money):
         return Decimal(money).quantize(Decimal('.00000001'), rounding=ROUND_DOWN)
 
-    def update_amounts(self):
+    def update_amounts(self, indicators=None):
         if time.time() - self.last_balance_update > 10.0:
             try:
                 for account in self.auth_client.get_accounts():
@@ -127,6 +128,10 @@ class TradeEngine():
                         self.usd = self.round_usd(account.get('available'))
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
+            if indicators and indicators['LTC30'].get('close'):
+                self.usd_equivalent = self.btc * Decimal(indicators['BTC30']['close']) + \
+                                      self.eth * Decimal(indicators['ETH30']['close']) + \
+                                      self.ltc * Decimal(indicators['LTC30']['close']) + self.usd
             self.last_balance_update = time.time()
 
     def print_amounts(self):
@@ -235,10 +240,10 @@ class TradeEngine():
             return self.ltc, 'LTC-USD'
 
     def determine_trades(self, period_name, indicators):
+        self.update_amounts(indicators)
         if not self.is_live:
             return
 
-        self.update_amounts()
         amount_of_coin, product_id = self.get_currency_size_and_product_id_from_period_name(period_name)
 
         if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_1']):

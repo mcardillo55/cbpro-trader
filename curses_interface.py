@@ -18,9 +18,9 @@ class cursesDisplay:
     def update_balances(self, trade_engine):
         if not self.enable:
             return
-        self.stdscr.addstr(0, 0, "USD: %.2f BTC: %.8f ETH: %.8f LTC: %.8f" %
+        self.stdscr.addstr(0, 0, "USD: %.2f BTC: %.8f ETH: %.8f LTC: %.8f USD_EQUIV: %.2f" %
                           (trade_engine.usd, trade_engine.btc,
-                           trade_engine.eth, trade_engine.ltc))
+                           trade_engine.eth, trade_engine.ltc, trade_engine.usd_equivalent))
         self.stdscr.refresh()
 
     def update_candlesticks(self, period_list):
@@ -41,7 +41,7 @@ class cursesDisplay:
     def update_heartbeat(self, msg):
         if not self.enable:
             return
-        self.stdscr.addstr(0, 65, msg.get('time'))
+        self.stdscr.addstr(0, 83, msg.get('time'))
         self.stdscr.refresh()
 
     def update_indicators(self, indicators):
