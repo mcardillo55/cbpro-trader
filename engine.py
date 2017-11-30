@@ -178,6 +178,7 @@ class TradeEngine():
         except Exception as e:
             self.order_in_progress[product_id] = False
             self.error_logger.exception(datetime.datetime.now())
+        self.auth_client.cancel_all(product_id=product_id)
         self.order_in_progress[product_id] = False
 
     def place_sell(self, product_id='BTC-USD', partial='1.0'):
@@ -222,6 +223,7 @@ class TradeEngine():
         except Exception as e:
             self.order_in_progress[product_id] = False
             self.error_logger.exception(datetime.datetime.now())
+        self.auth_client.cancel_all(product_id=product_id)
         self.order_in_progress[product_id] = False
 
     def get_currency_size_and_product_id_from_period_name(self, period_name):
