@@ -20,6 +20,7 @@ from websocket import WebSocketConnectionClosedException
 class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
     def __init__(self):
         self.logger = logging.getLogger('trader-logger')
+        self.error_logger = logging.getLogger('error-logger')
         super(TradeAndHeartbeatWebsocket, self).__init__()
 
     def on_open(self):
@@ -43,7 +44,8 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
             try:
                 if self.ws:
                     self.ws.close()
-            except WebSocketConnectionClosedException as e:
+            except WebSocketConnectionClosedException:
+                self.error_logger.exception(datetime.datetime.now())
                 pass
 
     def on_message(self, msg):
