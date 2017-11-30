@@ -63,13 +63,19 @@ error_logger.addHandler(logging.FileHandler("error.log"))
 gdax_websocket = TradeAndHeartbeatWebsocket()
 auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
 trade_engine = engine.TradeEngine(auth_client, is_live=config.LIVE)
-btc_30 = period.Period(period_size=(60 * 15), product='BTC-USD', name='BTC30')
-eth_30 = period.Period(period_size=(60 * 15), product='ETH-USD', name='ETH30')
-ltc_30 = period.Period(period_size=(60 * 15), product='LTC-USD', name='LTC30')
-period_list = [btc_30, eth_30, ltc_30]
+btc_15 = period.Period(period_size=(60 * 15), product='BTC-USD', name='BTC15')
+eth_15 = period.Period(period_size=(60 * 15), product='ETH-USD', name='ETH15')
+ltc_15 = period.Period(period_size=(60 * 15), product='LTC-USD', name='LTC15')
+btc_5 = period.Period(period_size=(60 * 5), product='BTC-USD', name='BTC5')
+eth_5 = period.Period(period_size=(60 * 5), product='ETH-USD', name='ETH5')
+ltc_5 = period.Period(period_size=(60 * 5), product='LTC-USD', name='LTC5')
+# Periods to update indicators for
+indicator_period_list = [btc_5, btc_15, eth_5, eth_15, ltc_5, ltc_15]
+# Periods to actively trade on (typically 1 per product)
+trade_period_list = [btc_15, eth_15, ltc_15]
 gdax_websocket.start()
-period_list[0].verbose_heartbeat = True
-indicator_subsys = indicators.IndicatorSubsystem(period_list)
+indicator_period_list[0].verbose_heartbeat = True
+indicator_subsys = indicators.IndicatorSubsystem(indicator_period_list)
 last_indicator_update = time.time()
 
 if config.FRONTEND == 'curses':
@@ -84,19 +90,21 @@ while(True):
         for product_id, order_book in trade_engine.order_book.iteritems():
             order_book.process_message(msg)
         if msg.get('type') == "match":
-            for cur_period in period_list:
+            for cur_period in indicator_period_list:
                 cur_period.process_trade(msg)
-            interface.update_candlesticks(period_list)
+            interface.update_candlesticks(indicator_period_list)
             if time.time() - last_indicator_update >= 1.0:
-                for cur_period in period_list:
+                for cur_period in indicator_period_list:
                     indicator_subsys.recalculate_indicators(cur_period, trade_engine.order_book[cur_period.product])
+                for cur_period in trade_period_list:
                     trade_engine.determine_trades(cur_period.name, indicator_subsys.current_indicators)
                 interface.update_indicators(indicator_subsys.current_indicators)
                 #interface.update_orders(trade_engine)
                 last_indicator_update = time.time()
         elif msg.get('type') == "heartbeat":
-            for cur_period in period_list:
+            for cur_period in indicator_period_list:
                 cur_period.process_heartbeat(msg)
+            for cur_period in trade_period_list:
                 if len(indicator_subsys.current_indicators[cur_period.name]) > 0:
                     trade_engine.determine_trades(cur_period.name, indicator_subsys.current_indicators)
             trade_engine.print_amounts()
@@ -112,7 +120,7 @@ while(True):
         trade_engine.close()
         gdax_websocket.close()
         # Period data cannot be trusted. Re-initialize
-        for cur_period in period_list:
+        for cur_period in indicator_period_list:
             cur_period.initialize()
         time.sleep(10)
         gdax_websocket.start()

@@ -27,13 +27,14 @@ class cursesDisplay:
         if not self.enable:
             return
 
-        starty = 5
+        starty = 8
         for cur_period in period_list:
             cur_stick = cur_period.cur_candlestick
             if cur_stick.new is False:
-                self.stdscr.addstr(starty, 0, "%s O: %f H: %f L: %f C: %f V: %f" %
-                                   (cur_stick.time, cur_stick.open, cur_stick.high,
-                                    cur_stick.low, cur_stick.close, cur_stick.volume),
+                self.stdscr.addstr(starty, 0, "%s - %s O: %f H: %f L: %f C: %f V: %f" %
+                                   (cur_period.name, cur_stick.time, cur_stick.open,
+                                    cur_stick.high, cur_stick.low, cur_stick.close,
+                                    cur_stick.volume),
                                    self.print_color(cur_stick.open, cur_stick.close))
             starty += 1
         self.stdscr.refresh()
@@ -47,12 +48,18 @@ class cursesDisplay:
     def update_indicators(self, indicators):
         if not self.enable:
             return
-        self.stdscr.addstr(1, 0, "BTC30 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                           (indicators['BTC30']['bband_upper_1'], indicators['BTC30']['bband_upper_2']))
-        self.stdscr.addstr(2, 0, "ETH30 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                           (indicators['ETH30']['bband_upper_1'], indicators['ETH30']['bband_upper_2']))
-        self.stdscr.addstr(3, 0, "LTC30 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                           (indicators['LTC30']['bband_upper_1'], indicators['LTC30']['bband_upper_2']))
+        self.stdscr.addstr(1, 0, "BTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                           (indicators['BTC5']['bband_upper_1'], indicators['BTC5']['bband_upper_2']))
+        self.stdscr.addstr(2, 0, "BTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                           (indicators['BTC15']['bband_upper_1'], indicators['BTC15']['bband_upper_2']))
+        self.stdscr.addstr(3, 0, "ETH5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                           (indicators['ETH5']['bband_upper_1'], indicators['ETH5']['bband_upper_2']))
+        self.stdscr.addstr(4, 0, "ETH15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                           (indicators['ETH15']['bband_upper_1'], indicators['ETH15']['bband_upper_2']))
+        self.stdscr.addstr(5, 0, "LTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                           (indicators['LTC5']['bband_upper_1'], indicators['LTC5']['bband_upper_2']))
+        self.stdscr.addstr(6, 0, "LTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                           (indicators['LTC15']['bband_upper_1'], indicators['LTC15']['bband_upper_2']))
         self.stdscr.refresh()
 
     def update_orders(self, trade_engine):

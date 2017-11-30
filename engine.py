@@ -128,10 +128,10 @@ class TradeEngine():
                         self.usd = self.round_usd(account.get('available'))
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
-            if indicators and indicators['LTC30'].get('close'):
-                self.usd_equivalent = self.btc * Decimal(indicators['BTC30']['close']) + \
-                                      self.eth * Decimal(indicators['ETH30']['close']) + \
-                                      self.ltc * Decimal(indicators['LTC30']['close']) + self.usd
+            if indicators and indicators['LTC15'].get('close'):
+                self.usd_equivalent = self.btc * Decimal(indicators['BTC15']['close']) + \
+                                      self.eth * Decimal(indicators['ETH15']['close']) + \
+                                      self.ltc * Decimal(indicators['LTC15']['close']) + self.usd
             self.last_balance_update = time.time()
 
     def print_amounts(self):
@@ -232,11 +232,11 @@ class TradeEngine():
         self.order_in_progress[product_id] = False
 
     def get_currency_size_and_product_id_from_period_name(self, period_name):
-        if period_name is 'BTC30':
+        if period_name is 'BTC15':
             return self.btc, 'BTC-USD'
-        elif period_name is 'ETH30':
+        elif period_name is 'ETH15':
             return self.eth, 'ETH-USD'
-        elif period_name is 'LTC30':
+        elif period_name is 'LTC15':
             return self.ltc, 'LTC-USD'
 
     def determine_trades(self, period_name, indicators):
@@ -245,15 +245,18 @@ class TradeEngine():
             return
 
         amount_of_coin, product_id = self.get_currency_size_and_product_id_from_period_name(period_name)
+        five_min_period_name = period_name[:3] + '5'
 
-        if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_1']):
+        if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_1']) and \
+           Decimal(indicators[period_name]['close']) > Decimal(indicators[five_min_period_name]['bband_upper_1']):
             self.sell_flag[product_id] = False
             self.buy_flag[product_id] = True
             if self.usd > Decimal('0.0'):
                 if not self.order_in_progress[product_id]:
                     self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product_id': product_id})
                     self.order_thread.start()
-        elif Decimal(indicators[period_name]['close']) < Decimal(indicators[period_name]['bband_upper_1']):
+        elif Decimal(indicators[period_name]['close']) < Decimal(indicators[period_name]['bband_upper_1']) or \
+             Decimal(indicators[period_name]['close']) < Decimal(indicators[five_min_period_name]['bband_upper_1']):
             self.buy_flag[product_id] = False
             self.sell_flag[product_id] = True
             if amount_of_coin > Decimal('0.0'):
