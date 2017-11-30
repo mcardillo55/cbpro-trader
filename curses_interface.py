@@ -19,8 +19,8 @@ class cursesDisplay:
         if not self.enable:
             return
         self.stdscr.addstr(0, 0, "USD: %.2f BTC: %.8f ETH: %.8f LTC: %.8f USD_EQUIV: %.2f" %
-                          (trade_engine.usd, trade_engine.btc,
-                           trade_engine.eth, trade_engine.ltc, trade_engine.usd_equivalent))
+                           (trade_engine.usd, trade_engine.btc,
+                            trade_engine.eth, trade_engine.ltc, trade_engine.usd_equivalent))
         self.stdscr.refresh()
 
     def update_candlesticks(self, period_list):
