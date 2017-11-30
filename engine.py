@@ -240,17 +240,17 @@ class TradeEngine():
         amount_of_coin, product_id = self.get_currency_size_and_product_id_from_period_name(period_name)
 
         if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_1']):
+            self.sell_flag[product_id] = False
+            self.buy_flag[product_id] = True
             if self.usd > Decimal('0.0'):
                 if not self.order_in_progress[product_id]:
-                    self.sell_flag[product_id] = False
-                    self.buy_flag[product_id] = True
                     self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product_id': product_id})
                     self.order_thread.start()
         elif Decimal(indicators[period_name]['close']) < Decimal(indicators[period_name]['bband_upper_1']):
+            self.buy_flag[product_id] = False
+            self.sell_flag[product_id] = True
             if amount_of_coin > Decimal('0.0'):
                 if not self.order_in_progress[product_id]:
-                    self.buy_flag[product_id] = False
-                    self.sell_flag[product_id] = True
                     self.order_thread = threading.Thread(target=self.sell, name='sell_thread', kwargs={'product_id': product_id})
                     self.order_thread.start()
         else:
