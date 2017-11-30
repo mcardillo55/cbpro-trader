@@ -157,7 +157,7 @@ class TradeEngine():
             ret = self.place_buy(product_id=product_id, partial='0.5')
             bid = ret.get('price')
             usd = self.get_usd()
-            while self.buy_flag[product_id] and usd > Decimal('0.0') or len(self.auth_client.get_orders()[0]) > 0:
+            while self.buy_flag[product_id] and (usd > Decimal('0.0') or len(self.auth_client.get_orders()[0]) > 0):
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
                     ret = self.place_buy(product_id=product_id, partial='0.5')
                     bid = ret.get('price')
@@ -202,7 +202,7 @@ class TradeEngine():
             ret = self.place_sell(product_id=product_id, partial='0.5')
             ask = ret.get('price')
             btc = self.get_btc(product_id=product_id)
-            while self.sell_flag[product_id] and btc >= Decimal('0.01') or len(self.auth_client.get_orders()[0]) > 0:
+            while self.sell_flag[product_id] and (btc >= Decimal('0.01') or len(self.auth_client.get_orders()[0]) > 0):
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
                     ret = self.place_sell(product_id=product_id, partial='0.5')
                     ask = ret.get('price')
