@@ -7,7 +7,7 @@ class cursesDisplay:
         if not self.enable:
             return
         self.stdscr = curses.initscr()
-        self.pad = curses.newpad(20, 120)
+        self.pad = curses.newpad(30, 120)
         self.timestamp = ""
         curses.start_color()
         curses.noecho()
@@ -19,19 +19,19 @@ class cursesDisplay:
 
     def update_balances(self, trade_engine):
         self.pad.addstr(0, 0, "USD: %.2f BTC: %.8f ETH: %.8f LTC: %.8f USD_EQUIV: %.2f" %
-                           (trade_engine.usd, trade_engine.btc,
-                            trade_engine.eth, trade_engine.ltc, trade_engine.usd_equivalent))
+                        (trade_engine.usd, trade_engine.btc,
+                         trade_engine.eth, trade_engine.ltc, trade_engine.usd_equivalent))
 
     def update_candlesticks(self, period_list):
-        starty = 8
+        starty = 12
         for cur_period in period_list:
             cur_stick = cur_period.cur_candlestick
             if cur_stick.new is False:
                 self.pad.addstr(starty, 0, "%s - %s O: %f H: %f L: %f C: %f V: %f" %
-                                   (cur_period.name, cur_stick.time, cur_stick.open,
-                                    cur_stick.high, cur_stick.low, cur_stick.close,
-                                    cur_stick.volume),
-                                   self.print_color(cur_stick.open, cur_stick.close))
+                                (cur_period.name, cur_stick.time, cur_stick.open,
+                                 cur_stick.high, cur_stick.low, cur_stick.close,
+                                 cur_stick.volume),
+                                self.print_color(cur_stick.open, cur_stick.close))
             starty += 1
 
     def update_heartbeat(self):
@@ -39,23 +39,35 @@ class cursesDisplay:
 
     def update_indicators(self, indicators):
         self.pad.addstr(1, 0, "BTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                           (indicators['BTC5']['bband_upper_1'], indicators['BTC5']['bband_upper_2']),
-                           self.print_color(indicators['BTC5']['bband_upper_1'], indicators['BTC5']['close']))
+                        (indicators['BTC5']['bband_upper_1'], indicators['BTC5']['bband_upper_2']),
+                        self.print_color(indicators['BTC5']['bband_upper_1'], indicators['BTC5']['close']))
         self.pad.addstr(2, 0, "BTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                           (indicators['BTC15']['bband_upper_1'], indicators['BTC15']['bband_upper_2']),
-                           self.print_color(indicators['BTC15']['bband_upper_1'], indicators['BTC15']['close']))
+                        (indicators['BTC15']['bband_upper_1'], indicators['BTC15']['bband_upper_2']),
+                        self.print_color(indicators['BTC15']['bband_upper_1'], indicators['BTC15']['close']))
         self.pad.addstr(3, 0, "ETH5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                           (indicators['ETH5']['bband_upper_1'], indicators['ETH5']['bband_upper_2']),
-                           self.print_color(indicators['ETH5']['bband_upper_1'], indicators['ETH5']['close']))
+                        (indicators['ETH5']['bband_upper_1'], indicators['ETH5']['bband_upper_2']),
+                        self.print_color(indicators['ETH5']['bband_upper_1'], indicators['ETH5']['close']))
         self.pad.addstr(4, 0, "ETH15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                           (indicators['ETH15']['bband_upper_1'], indicators['ETH15']['bband_upper_2']),
-                           self.print_color(indicators['ETH15']['bband_upper_1'], indicators['ETH15']['close']))
+                        (indicators['ETH15']['bband_upper_1'], indicators['ETH15']['bband_upper_2']),
+                        self.print_color(indicators['ETH15']['bband_upper_1'], indicators['ETH15']['close']))
         self.pad.addstr(5, 0, "LTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                           (indicators['LTC5']['bband_upper_1'], indicators['LTC5']['bband_upper_2']),
-                           self.print_color(indicators['LTC15']['bband_upper_1'], indicators['LTC15']['close']))
+                        (indicators['LTC5']['bband_upper_1'], indicators['LTC5']['bband_upper_2']),
+                        self.print_color(indicators['LTC15']['bband_upper_1'], indicators['LTC15']['close']))
         self.pad.addstr(6, 0, "LTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                           (indicators['LTC15']['bband_upper_1'], indicators['LTC15']['bband_upper_2']),
-                           self.print_color(indicators['LTC15']['bband_upper_1'], indicators['LTC15']['close']))
+                        (indicators['LTC15']['bband_upper_1'], indicators['LTC15']['bband_upper_2']),
+                        self.print_color(indicators['LTC15']['bband_upper_1'], indicators['LTC15']['close']))
+        self.pad.addstr(7, 0, "ETHBTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                        (indicators['ETHBTC5']['bband_upper_1'], indicators['ETHBTC5']['bband_upper_2']),
+                        self.print_color(indicators['ETHBTC5']['bband_upper_1'], indicators['ETHBTC5']['close']))
+        self.pad.addstr(8, 0, "ETHBTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                        (indicators['ETHBTC15']['bband_upper_1'], indicators['ETHBTC15']['bband_upper_2']),
+                        self.print_color(indicators['ETHBTC15']['bband_upper_1'], indicators['ETHBTC15']['close']))
+        self.pad.addstr(9, 0, "LTCBTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                        (indicators['LTCBTC5']['bband_upper_1'], indicators['LTCBTC5']['bband_upper_2']),
+                        self.print_color(indicators['LTCBTC15']['bband_upper_1'], indicators['LTCBTC15']['close']))
+        self.pad.addstr(10, 0, "LTCBTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
+                        (indicators['LTCBTC15']['bband_upper_1'], indicators['LTCBTC15']['bband_upper_2']),
+                        self.print_color(indicators['LTCBTC15']['bband_upper_1'], indicators['LTCBTC15']['close']))
 
     def update_orders(self, trade_engine):
         self.pad.addstr(9, 0, "Recent Fills")

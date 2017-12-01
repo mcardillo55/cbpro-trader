@@ -17,7 +17,7 @@ class IndicatorSubsystem:
         for period in period_list:
             self.current_indicators[period.name] = {}
 
-    def recalculate_indicators(self, cur_period, order_book):
+    def recalculate_indicators(self, cur_period):
         total_periods = len(cur_period.candlesticks)
         if total_periods > 0:
             closing_prices = cur_period.get_closing_prices()

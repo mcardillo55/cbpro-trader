@@ -24,7 +24,7 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         super(TradeAndHeartbeatWebsocket, self).__init__()
 
     def on_open(self):
-        self.products = ["BTC-USD", 'ETH-USD', 'LTC-USD']
+        self.products = ["BTC-USD", 'ETH-USD', 'LTC-USD', 'ETH-BTC', 'LTC-BTC']
         self.type = "heartbeat"
         self.websocket_queue = Queue.Queue()
         self.stop = False
@@ -69,8 +69,12 @@ ltc_15 = period.Period(period_size=(60 * 15), product='LTC-USD', name='LTC15')
 btc_5 = period.Period(period_size=(60 * 5), product='BTC-USD', name='BTC5')
 eth_5 = period.Period(period_size=(60 * 5), product='ETH-USD', name='ETH5')
 ltc_5 = period.Period(period_size=(60 * 5), product='LTC-USD', name='LTC5')
+eth_btc5 = period.Period(period_size=(60 * 5), product='ETH-BTC', name='ETHBTC5')
+eth_btc15 = period.Period(period_size=(60 * 5), product='ETH-BTC', name='ETHBTC15')
+ltc_btc5 = period.Period(period_size=(60 * 5), product='ETH-BTC', name='LTCBTC5')
+ltc_btc15 = period.Period(period_size=(60 * 5), product='ETH-BTC', name='LTCBTC15')
 # Periods to update indicators for
-indicator_period_list = [btc_5, btc_15, eth_5, eth_15, ltc_5, ltc_15]
+indicator_period_list = [btc_5, btc_15, eth_5, eth_15, ltc_5, ltc_15, eth_btc5, eth_btc15, ltc_btc5, ltc_btc15]
 # Periods to actively trade on (typically 1 per product)
 trade_period_list = [btc_15, eth_15, ltc_15]
 gdax_websocket.start()
@@ -94,7 +98,7 @@ while(True):
                 cur_period.process_trade(msg)
             if time.time() - last_indicator_update >= 1.0:
                 for cur_period in indicator_period_list:
-                    indicator_subsys.recalculate_indicators(cur_period, trade_engine.order_book[cur_period.product])
+                    indicator_subsys.recalculate_indicators(cur_period)
                 for cur_period in trade_period_list:
                     trade_engine.determine_trades(cur_period.name, indicator_subsys.current_indicators)
                 last_indicator_update = time.time()
