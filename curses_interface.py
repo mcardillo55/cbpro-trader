@@ -37,37 +37,14 @@ class cursesDisplay:
     def update_heartbeat(self):
         self.pad.addstr(0, 83, self.timestamp)
 
-    def update_indicators(self, indicators):
-        self.pad.addstr(1, 0, "BTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                        (indicators['BTC5']['bband_upper_1'], indicators['BTC5']['bband_upper_2']),
-                        self.print_color(indicators['BTC5']['bband_upper_1'], indicators['BTC5']['close']))
-        self.pad.addstr(2, 0, "BTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                        (indicators['BTC15']['bband_upper_1'], indicators['BTC15']['bband_upper_2']),
-                        self.print_color(indicators['BTC15']['bband_upper_1'], indicators['BTC15']['close']))
-        self.pad.addstr(3, 0, "ETH5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                        (indicators['ETH5']['bband_upper_1'], indicators['ETH5']['bband_upper_2']),
-                        self.print_color(indicators['ETH5']['bband_upper_1'], indicators['ETH5']['close']))
-        self.pad.addstr(4, 0, "ETH15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                        (indicators['ETH15']['bband_upper_1'], indicators['ETH15']['bband_upper_2']),
-                        self.print_color(indicators['ETH15']['bband_upper_1'], indicators['ETH15']['close']))
-        self.pad.addstr(5, 0, "LTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                        (indicators['LTC5']['bband_upper_1'], indicators['LTC5']['bband_upper_2']),
-                        self.print_color(indicators['LTC15']['bband_upper_1'], indicators['LTC15']['close']))
-        self.pad.addstr(6, 0, "LTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                        (indicators['LTC15']['bband_upper_1'], indicators['LTC15']['bband_upper_2']),
-                        self.print_color(indicators['LTC15']['bband_upper_1'], indicators['LTC15']['close']))
-        self.pad.addstr(7, 0, "ETHBTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                        (indicators['ETHBTC5']['bband_upper_1'], indicators['ETHBTC5']['bband_upper_2']),
-                        self.print_color(indicators['ETHBTC5']['bband_upper_1'], indicators['ETHBTC5']['close']))
-        self.pad.addstr(8, 0, "ETHBTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                        (indicators['ETHBTC15']['bband_upper_1'], indicators['ETHBTC15']['bband_upper_2']),
-                        self.print_color(indicators['ETHBTC15']['bband_upper_1'], indicators['ETHBTC15']['close']))
-        self.pad.addstr(9, 0, "LTCBTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                        (indicators['LTCBTC5']['bband_upper_1'], indicators['LTCBTC5']['bband_upper_2']),
-                        self.print_color(indicators['LTCBTC15']['bband_upper_1'], indicators['LTCBTC15']['close']))
-        self.pad.addstr(10, 0, "LTCBTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
-                        (indicators['LTCBTC15']['bband_upper_1'], indicators['LTCBTC15']['bband_upper_2']),
-                        self.print_color(indicators['LTCBTC15']['bband_upper_1'], indicators['LTCBTC15']['close']))
+    def update_indicators(self, period_list, indicators):
+        starty = 1
+        for cur_period in period_list:
+            self.pad.addstr(starty, 0, "%s - BBAND_TOP_1: %f" %
+                            (cur_period.name, indicators[cur_period.name]['bband_upper_1']),
+                            self.print_color(indicators[cur_period.name]['bband_upper_1'],
+                                             indicators[cur_period.name]['close']))
+            starty += 1
 
     def update_orders(self, trade_engine):
         self.pad.addstr(9, 0, "Recent Fills")
@@ -121,7 +98,7 @@ class cursesDisplay:
         self.update_balances(trade_engine)
         # Make sure indicator dict is populated
         if len(indicators[period_list[0].name]) > 0:
-            self.update_indicators(indicators)
+            self.update_indicators(period_list, indicators)
         self.update_heartbeat()
         height, width = self.stdscr.getmaxyx()
         self.pad.refresh(0, 0, 0, 0, (height - 1), (width - 1))
