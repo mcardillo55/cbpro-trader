@@ -45,12 +45,14 @@ class TradeEngine():
         self.order_in_progress = {}
         self.buy_flag = {}
         self.sell_flag = {}
+        self.last_signal_switch = {}
         self.product_list = ['BTC-USD', 'ETH-USD', 'LTC-USD']
         for product_id in self.product_list:
             self.order_book[product_id] = OrderBookCustom(product_id=product_id)
             self.order_in_progress[product_id] = False
             self.buy_flag[product_id] = False
             self.sell_flag[product_id] = False
+            self.last_signal_switch = time.time()
         self.last_balance_update = 0
         self.update_amounts()
         self.usd_equivalent = 0
@@ -219,7 +221,8 @@ class TradeEngine():
 
     def determine_trades(self, period_name, indicators):
         self.update_amounts(indicators)
-        if not self.is_live:
+        # Throttle to prevent flip flopping over trade signal
+        if (time.time() - self.last_signal_switch) <= 30.0 or not self.is_live:
             return
 
         amount_of_coin, product_id = self.get_currency_size_and_product_id_from_period_name(period_name)
@@ -227,6 +230,8 @@ class TradeEngine():
 
         if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_1']) and \
            Decimal(indicators[period_name]['close']) > Decimal(indicators[five_min_period_name]['bband_upper_1']):
+            if self.sell_flag[product_id]:
+                self.last_signal_switch = time.time()
             self.sell_flag[product_id] = False
             self.buy_flag[product_id] = True
             if self.usd > Decimal('0.0'):
@@ -235,6 +240,8 @@ class TradeEngine():
                     self.order_thread.start()
         elif Decimal(indicators[period_name]['close']) < Decimal(indicators[period_name]['bband_upper_1']) or \
              Decimal(indicators[period_name]['close']) < Decimal(indicators[five_min_period_name]['bband_upper_1']):
+            if self.buy_flag[product_id]:
+                self.last_signal_switch = time.time()
             self.buy_flag[product_id] = False
             self.sell_flag[product_id] = True
             if amount_of_coin > Decimal('0.0'):
