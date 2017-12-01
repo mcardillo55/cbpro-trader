@@ -123,7 +123,6 @@ class cursesDisplay:
     def close(self):
         if not self.enable:
             return
-        self.stop = True
         curses.nocbreak()
         self.stdscr.keypad(0)
         curses.echo()
