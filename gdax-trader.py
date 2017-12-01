@@ -92,15 +92,11 @@ while(True):
         if msg.get('type') == "match":
             for cur_period in indicator_period_list:
                 cur_period.process_trade(msg)
-            interface.update_candlesticks(indicator_period_list)
             if time.time() - last_indicator_update >= 1.0:
                 for cur_period in indicator_period_list:
                     indicator_subsys.recalculate_indicators(cur_period, trade_engine.order_book[cur_period.product])
                 for cur_period in trade_period_list:
                     trade_engine.determine_trades(cur_period.name, indicator_subsys.current_indicators)
-                interface.update_signals(trade_engine)
-                interface.update_indicators(indicator_subsys.current_indicators)
-                #interface.update_orders(trade_engine)
                 last_indicator_update = time.time()
         elif msg.get('type') == "heartbeat":
             for cur_period in indicator_period_list:
@@ -108,10 +104,9 @@ while(True):
             for cur_period in trade_period_list:
                 if len(indicator_subsys.current_indicators[cur_period.name]) > 0:
                     trade_engine.determine_trades(cur_period.name, indicator_subsys.current_indicators)
-            interface.update_signals(trade_engine)
             trade_engine.print_amounts()
-            interface.update_heartbeat(msg)
-            interface.update_balances(trade_engine)
+        interface.update(trade_engine, indicator_subsys.current_indicators,
+                         indicator_period_list, msg)
     except KeyboardInterrupt:
         trade_engine.close()
         gdax_websocket.close()

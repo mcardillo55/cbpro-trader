@@ -7,6 +7,7 @@ class cursesDisplay:
         if not self.enable:
             return
         self.stdscr = curses.initscr()
+        self.timestamp = ""
         curses.start_color()
         curses.noecho()
         curses.cbreak()
@@ -16,17 +17,11 @@ class cursesDisplay:
         self.stdscr.addstr(1, 0, "Waiting for a trade...")
 
     def update_balances(self, trade_engine):
-        if not self.enable:
-            return
         self.stdscr.addstr(0, 0, "USD: %.2f BTC: %.8f ETH: %.8f LTC: %.8f USD_EQUIV: %.2f" %
                            (trade_engine.usd, trade_engine.btc,
                             trade_engine.eth, trade_engine.ltc, trade_engine.usd_equivalent))
-        self.stdscr.refresh()
 
     def update_candlesticks(self, period_list):
-        if not self.enable:
-            return
-
         starty = 8
         for cur_period in period_list:
             cur_stick = cur_period.cur_candlestick
@@ -37,17 +32,11 @@ class cursesDisplay:
                                     cur_stick.volume),
                                    self.print_color(cur_stick.open, cur_stick.close))
             starty += 1
-        self.stdscr.refresh()
 
-    def update_heartbeat(self, msg):
-        if not self.enable:
-            return
-        self.stdscr.addstr(0, 83, msg.get('time'))
-        self.stdscr.refresh()
+    def update_heartbeat(self):
+        self.stdscr.addstr(0, 83, self.timestamp)
 
     def update_indicators(self, indicators):
-        if not self.enable:
-            return
         self.stdscr.addstr(1, 0, "BTC5 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
                            (indicators['BTC5']['bband_upper_1'], indicators['BTC5']['bband_upper_2']))
         self.stdscr.addstr(2, 0, "BTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
@@ -60,12 +49,8 @@ class cursesDisplay:
                            (indicators['LTC5']['bband_upper_1'], indicators['LTC5']['bband_upper_2']))
         self.stdscr.addstr(6, 0, "LTC15 - BBAND_TOP_1: %f BBAND_TOP_2: %f" %
                            (indicators['LTC15']['bband_upper_1'], indicators['LTC15']['bband_upper_2']))
-        self.stdscr.refresh()
 
     def update_orders(self, trade_engine):
-        if not self.enable:
-            return
-
         self.stdscr.addstr(9, 0, "Recent Fills")
         starty = 10
         for fill in trade_engine.auth_client.get_fills(limit=5)[0]:
@@ -89,7 +74,6 @@ class cursesDisplay:
                 starty += 1
         else:
             self.stdscr.addstr(17, 0, "None")
-        self.stdscr.refresh()
 
     def update_signals(self, trade_engine):
         signals = {}
@@ -103,6 +87,22 @@ class cursesDisplay:
         self.stdscr.addstr(1, 83, "BTC: %s" % (signals['BTC-USD']))
         self.stdscr.addstr(2, 83, "ETH: %s" % (signals['ETH-USD']))
         self.stdscr.addstr(3, 83, "LTC: %s" % (signals['LTC-USD']))
+
+    def update(self, trade_engine, indicators, period_list, msg):
+        if not self.enable:
+            return
+
+        if msg.get('type') == "heartbeat":
+            self.timestamp = msg.get('time')
+        self.stdscr.erase()
+        self.update_candlesticks(period_list)
+        self.update_signals(trade_engine)
+        self.update_balances(trade_engine)
+        # Make sure indicator dict is populated
+        if len(indicators[period_list[0].name]) > 0:
+            self.update_indicators(indicators)
+        self.update_heartbeat()
+        self.stdscr.refresh()
 
     def print_color(self, a, b):
         if a < b:
