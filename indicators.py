@@ -33,10 +33,7 @@ class IndicatorSubsystem:
                               (cur_period.name, self.current_indicators[cur_period.name]['total_periods'], self.current_indicators[cur_period.name]['bband_upper_1']))
 
     def calculate_bbands(self, period_name, close):
-        if period_name[3:] is '5':
-            timeperiod = 50
-        else:
-            timeperiod = 20
+        timeperiod = 20
         upperband_1, middleband_1, lowerband_1 = talib.BBANDS(close, timeperiod=timeperiod, nbdevup=1, nbdevdn=1, matype=0)
 
         self.current_indicators[period_name]['bband_upper_1'] = upperband_1[-1]
