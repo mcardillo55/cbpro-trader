@@ -226,7 +226,7 @@ class TradeEngine():
         five_min_period_name = period_name[:3] + '5'
 
         # Throttle to prevent flip flopping over trade signal
-        if (time.time() - self.last_signal_switch[product_id]) <= 30.0 or not self.is_live:
+        if (time.time() - self.last_signal_switch[product_id]) <= 60.0 or not self.is_live:
             return
 
         if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_1']) and \
@@ -235,7 +235,7 @@ class TradeEngine():
                 self.last_signal_switch[product_id] = time.time()
             self.sell_flag[product_id] = False
             self.buy_flag[product_id] = True
-            if self.usd > Decimal('0.0'):
+            if self.usd > Decimal('0.0') and (time.time() - self.last_signal_switch[product_id]) > 60.0:
                 if not self.order_in_progress[product_id]:
                     self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product_id': product_id})
                     self.order_thread.start()
@@ -245,7 +245,7 @@ class TradeEngine():
                 self.last_signal_switch[product_id] = time.time()
             self.buy_flag[product_id] = False
             self.sell_flag[product_id] = True
-            if amount_of_coin > Decimal('0.0'):
+            if amount_of_coin > Decimal('0.0') and (time.time() - self.last_signal_switch[product_id]) > 60.0:
                 if not self.order_in_progress[product_id]:
                     self.order_thread = threading.Thread(target=self.sell, name='sell_thread', kwargs={'product_id': product_id})
                     self.order_thread.start()
