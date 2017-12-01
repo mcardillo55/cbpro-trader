@@ -41,51 +41,29 @@ class TradeEngine():
         self.error_logger = logging.getLogger('error-logger')
         self.auth_client = auth_client
         self.is_live = is_live
-        self.order_book = {
-                            'BTC-USD': OrderBookCustom(product_id='BTC-USD'),
-                            'ETH-USD': OrderBookCustom(product_id='ETH-USD'),
-                            'LTC-USD': OrderBookCustom(product_id='LTC-USD')
-                          }
+        self.order_book = {}
+        self.order_in_progress = {}
+        self.buy_flag = {}
+        self.sell_flag = {}
+        self.product_list = ['BTC-USD', 'ETH-USD', 'LTC-USD']
+        for product_id in self.product_list:
+            self.order_book[product_id] = OrderBookCustom(product_id=product_id)
+            self.order_in_progress[product_id] = False
+            self.buy_flag[product_id] = False
+            self.sell_flag[product_id] = False
         self.last_balance_update = 0
         self.update_amounts()
         self.usd_equivalent = 0
         self.last_balance_update = time.time()
         self.order_thread = threading.Thread()
-        self.order_in_progress= {
-                                'BTC-USD': False,
-                                'ETH-USD': False,
-                                'LTC-USD': False
-                                }
-
-        self.buy_flag = {
-                            'BTC-USD': False,
-                            'ETH-USD': False,
-                            'LTC-USD': False
-                        }
-        self.sell_flag = {
-                            'BTC-USD': False,
-                            'ETH-USD': False,
-                            'LTC-USD': False
-                        }
 
     def close(self):
-        # Setting both flags will close any open order threads
-        self.buy_flag = {
-                            'BTC-USD': False,
-                            'ETH-USD': False,
-                            'LTC-USD': False
-                        }
-        self.sell_flag = {
-                            'BTC-USD': False,
-                            'ETH-USD': False,
-                            'LTC-USD': False
-                        }
-        # Cancel any orders that may still be remaining
-        self.order_in_progress= {
-                                'BTC-USD': False,
-                                'ETH-USD': False,
-                                'LTC-USD': False
-                                }
+        for product_id in self.product_list:
+            # Setting both flags will close any open order threads
+            self.buy_flag[product_id] = False
+            self.sell_flag[product_id] = False
+            # Cancel any orders that may still be remaining
+            self.order_in_progress[product_id] = False
         try:
             self.auth_client.cancel_all()
         except Exception:
