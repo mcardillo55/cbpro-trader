@@ -34,7 +34,7 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         self.logger.debug("-- GDAX Websocket Closed ---")
 
     def on_error(self, e):
-        raise e
+        self.error_logger.exception(datetime.datetime.now())
 
     def close(self):
         if not self.stop:
