@@ -91,6 +91,19 @@ class cursesDisplay:
             self.stdscr.addstr(17, 0, "None")
         self.stdscr.refresh()
 
+    def update_signals(self, trade_engine):
+        signals = {}
+        for product_id in trade_engine.product_list:
+            if trade_engine.buy_flag[product_id]:
+                signals[product_id] = 'BUY'
+            elif trade_engine.sell_flag[product_id]:
+                signals[product_id] = 'SELL'
+            else:
+                signals[product_id] = 'NONE'
+        self.stdscr.addstr(1, 83, "BTC: %s" % (signals['BTC-USD']))
+        self.stdscr.addstr(2, 83, "ETH: %s" % (signals['ETH-USD']))
+        self.stdscr.addstr(3, 83, "LTC: %s" % (signals['LTC-USD']))
+
     def print_color(self, a, b):
         if a < b:
             return curses.color_pair(1)
