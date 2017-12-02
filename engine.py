@@ -229,8 +229,8 @@ class TradeEngine():
         if (time.time() - self.last_signal_switch[product_id]) <= 60.0 or not self.is_live:
             return
 
-        if Decimal(indicators[period_name]['close']) > Decimal(indicators[period_name]['bband_upper_1']) and \
-           Decimal(indicators[period_name]['close']) > Decimal(indicators[five_min_period_name]['bband_upper_1']):
+        if Decimal(indicators[period_name]['macd_hist_diff']) > Decimal('0.0') and \
+           Decimal(indicators[five_min_period_name]['macd_hist_diff']) > Decimal('0.0'):
             if self.sell_flag[product_id]:
                 self.last_signal_switch[product_id] = time.time()
             self.sell_flag[product_id] = False
@@ -239,8 +239,8 @@ class TradeEngine():
                 if not self.order_in_progress[product_id]:
                     self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product_id': product_id})
                     self.order_thread.start()
-        elif Decimal(indicators[period_name]['close']) < Decimal(indicators[period_name]['bband_upper_1']) or \
-             Decimal(indicators[period_name]['close']) < Decimal(indicators[five_min_period_name]['bband_upper_1']):
+        elif Decimal(indicators[period_name]['macd_hist_diff']) < Decimal('0.0') or \
+             Decimal(indicators[five_min_period_name]['macd_hist_diff']) < Decimal('0.0'):
             if self.buy_flag[product_id]:
                 self.last_signal_switch[product_id] = time.time()
             self.buy_flag[product_id] = False
