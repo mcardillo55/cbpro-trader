@@ -1,4 +1,5 @@
 import curses
+import time
 from decimal import Decimal
 
 
@@ -10,6 +11,7 @@ class cursesDisplay:
         self.stdscr = curses.initscr()
         self.pad = curses.newpad(30, 120)
         self.timestamp = ""
+        self.last_order_update = 0
         curses.start_color()
         curses.noecho()
         curses.cbreak()
@@ -47,30 +49,40 @@ class cursesDisplay:
                                              indicators[cur_period.name]['close']))
             starty += 1
 
-    def update_orders(self, trade_engine):
+    def update_fills(self, trade_engine):
         self.pad.addstr(9, 0, "Recent Fills")
         starty = 10
         for fill in trade_engine.auth_client.get_fills(limit=5)[0]:
             self.pad.addstr(starty, 0, "%s Price: %s Size: %s Time: %s" %
-                               (fill.get('side').upper(), fill.get('price'),
-                                fill.get('size'), fill.get('created_at')))
+                            (fill.get('side').upper(), fill.get('price'),
+                             fill.get('size'), fill.get('created_at')))
             starty += 1
 
-        self.pad.addstr(16, 0, "Open Orders")
+    def update_orders(self, trade_engine):
+        starty = 23
+        self.pad.addstr(starty, 0, "Open Orders")
 
-        # Clear the next 5 rows
-        for idx in xrange(17, 22):
-            self.pad.addstr(idx, 0, " " * 70)
+        if time.time() - self.last_order_update > 5.0:
+            # First check if trade engine has any open orders
+            order_in_progress = False
+            for product in trade_engine.product_list:
+                if trade_engine.order_in_progress[product]:
+                    order_in_progress = True
+            # Clear the next 5 rows
+            for idx in xrange(starty + 1, starty + 6):
+                self.pad.addstr(idx, 0, " " * 70)
 
-        starty = 17
-        if trade_engine.order_thread.is_alive():
-            for order in trade_engine.auth_client.get_orders()[0]:
-                self.pad.addstr(starty, 0, "%s Price: %s Size: %s Status: %s" %
-                                   (order.get('side').upper(), order.get('price'),
-                                    order.get('size'), order.get('status')))
-                starty += 1
-        else:
-            self.pad.addstr(17, 0, "None")
+            order_in_progress = True
+            starty += 1
+            if order_in_progress:
+                for order in trade_engine.auth_client.get_orders()[0]:
+                    self.pad.addstr(starty, 0, "%s Price: %s Size: %s Status: %s" %
+                                    (order.get('side').upper(), order.get('price'),
+                                     order.get('size'), order.get('status')))
+                    starty += 1
+            else:
+                self.pad.addstr(starty, 0, 'None')
+            self.last_order_update = time.time()
 
     def update_signals(self, trade_engine):
         starty = 1
@@ -97,6 +109,7 @@ class cursesDisplay:
         self.update_candlesticks(period_list)
         self.update_signals(trade_engine)
         self.update_balances(trade_engine)
+        self.update_orders(trade_engine)
         # Make sure indicator dict is populated
         if len(indicators[period_list[0].name]) > 0:
             self.update_indicators(period_list, indicators)
