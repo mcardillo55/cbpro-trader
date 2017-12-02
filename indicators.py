@@ -45,7 +45,7 @@ class IndicatorSubsystem:
         self.current_indicators[period_name]['bband_lower_2'] = lowerband_2[-1]
 
     def calculate_macd(self, period_name, closing_prices):
-        macd, macd_sig, macd_hist = talib.MACD(closing_prices, fastperiod=10,
+        macd, macd_sig, macd_hist = talib.MACD(closing_prices, fastperiod=12,
                                                slowperiod=26, signalperiod=9)
         self.current_indicators[period_name]['macd'] = macd[-1]
         self.current_indicators[period_name]['macd_sig'] = macd_sig[-1]
