@@ -108,10 +108,10 @@ class TradeEngine():
                         self.usd = self.round_usd(account.get('available'))
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
-            if indicators and indicators['LTC15'].get('close'):
-                self.usd_equivalent = self.btc * Decimal(indicators['BTC15']['close']) + \
-                                      self.eth * Decimal(indicators['ETH15']['close']) + \
-                                      self.ltc * Decimal(indicators['LTC15']['close']) + self.usd
+            if indicators and indicators['LTC30'].get('close'):
+                self.usd_equivalent = self.btc * Decimal(indicators['BTC30']['close']) + \
+                                      self.eth * Decimal(indicators['ETH30']['close']) + \
+                                      self.ltc * Decimal(indicators['LTC30']['close']) + self.usd
             self.last_balance_update = time.time()
 
     def print_amounts(self):
@@ -223,7 +223,7 @@ class TradeEngine():
         self.update_amounts(indicators)
 
         amount_of_coin, product_id = self.get_currency_size_and_product_id_from_period_name(period_name)
-        fifteen_min_period_name = period_name[:3] + '15'
+        fifteen_min_period_name = period_name[:3] + '60'
 
         if Decimal(indicators[period_name]['macd_hist_diff']) > Decimal('0.0') and \
            Decimal(indicators[fifteen_min_period_name]['macd_hist_diff']) > Decimal('0.0'):
