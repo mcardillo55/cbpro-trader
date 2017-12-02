@@ -76,7 +76,7 @@ ltc_btc15 = period.Period(period_size=(60 * 15), product='LTC-BTC', name='LTCBTC
 # Periods to update indicators for
 indicator_period_list = [btc_5, btc_15, eth_5, eth_15, ltc_5, ltc_15, eth_btc5, eth_btc15, ltc_btc5, ltc_btc15]
 # Periods to actively trade on (typically 1 per product)
-trade_period_list = [btc_15, eth_15, ltc_15]
+trade_period_list = [btc_5, eth_5, ltc_5]
 gdax_websocket.start()
 indicator_period_list[0].verbose_heartbeat = True
 indicator_subsys = indicators.IndicatorSubsystem(indicator_period_list)
