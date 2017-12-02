@@ -9,7 +9,8 @@ class cursesDisplay:
         if not self.enable:
             return
         self.stdscr = curses.initscr()
-        self.pad = curses.newpad(30, 120)
+        self.pad = curses.newpad(23, 120)
+        self.order_pad = curses.newpad(10, 120)
         self.timestamp = ""
         self.last_order_update = 0
         curses.start_color()
@@ -59,30 +60,30 @@ class cursesDisplay:
             starty += 1
 
     def update_orders(self, trade_engine):
-        starty = 23
-        self.pad.addstr(starty, 0, "Open Orders")
+        starty = 0
+        self.order_pad.addstr(starty, 0, "Open Orders")
 
-        if time.time() - self.last_order_update > 1.0:
-            # First check if trade engine has any open orders
+        if time.time() - self.last_order_update > 3.0:
+            self.order_pad.erase()
+            self.order_pad.addstr(starty, 0, "Open Orders")
             order_in_progress = False
+            # First check if trade engine has any open orders
             for product in trade_engine.product_list:
                 if trade_engine.order_in_progress[product]:
                     order_in_progress = True
-            # Clear the next 5 rows
-            for idx in xrange(starty + 1, starty + 6):
-                self.pad.addstr(idx, 0, " " * 70)
-
-            order_in_progress = True
             starty += 1
             if order_in_progress:
                 for order in trade_engine.auth_client.get_orders()[0]:
-                    self.pad.addstr(starty, 0, "%s Price: %s Size: %s Status: %s" %
-                                    (order.get('side').upper(), order.get('price'),
-                                     order.get('size'), order.get('status')))
+                    self.order_pad.addstr(starty, 0, "%s %s Price: %s Size: %s Status: %s" %
+                                          (order.get('side').upper(), order.get('product_id'),
+                                           order.get('price'), order.get('size'),
+                                           order.get('status')))
                     starty += 1
             else:
-                self.pad.addstr(starty, 0, 'None')
+                self.order_pad.addstr(starty, 0, 'None')
             self.last_order_update = time.time()
+            height, width = self.stdscr.getmaxyx()
+            self.order_pad.refresh(0, 0, 23, 0, (height - 1), (width - 1))
 
     def update_signals(self, trade_engine):
         starty = 1
