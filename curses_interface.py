@@ -1,4 +1,5 @@
 import curses
+from decimal import Decimal
 
 
 class cursesDisplay:
@@ -104,7 +105,7 @@ class cursesDisplay:
         self.pad.refresh(0, 0, 0, 0, (height - 1), (width - 1))
 
     def print_color(self, a, b):
-        if a < b:
+        if Decimal(a) < Decimal(b):
             return curses.color_pair(1)
         else:
             return curses.color_pair(2)
