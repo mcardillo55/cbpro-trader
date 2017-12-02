@@ -225,28 +225,29 @@ class TradeEngine():
         amount_of_coin, product_id = self.get_currency_size_and_product_id_from_period_name(period_name)
         fifteen_min_period_name = period_name[:3] + '60'
 
-        if Decimal(indicators[period_name]['macd_hist_diff']) > Decimal('0.0') and \
-           Decimal(indicators[fifteen_min_period_name]['macd_hist_diff']) > Decimal('0.0'):
-            if self.sell_flag[product_id]:
-                self.last_signal_switch[product_id] = time.time()
-            self.sell_flag[product_id] = False
-            self.buy_flag[product_id] = True
-            # Throttle to prevent flip flopping over trade signal
-            if self.usd > Decimal('0.0') and (time.time() - self.last_signal_switch[product_id]) > 60.0:
-                if not self.order_in_progress[product_id]:
-                    self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product_id': product_id})
-                    self.order_thread.start()
-        elif Decimal(indicators[period_name]['macd_hist_diff']) < Decimal('0.0') or \
-             Decimal(indicators[fifteen_min_period_name]['macd_hist_diff']) < Decimal('0.0'):
-            if self.buy_flag[product_id]:
-                self.last_signal_switch[product_id] = time.time()
-            self.buy_flag[product_id] = False
-            self.sell_flag[product_id] = True
-            # Throttle to prevent flip flopping over trade signal
-            if amount_of_coin > Decimal('0.0') and (time.time() - self.last_signal_switch[product_id]) > 60.0:
-                if not self.order_in_progress[product_id]:
-                    self.order_thread = threading.Thread(target=self.sell, name='sell_thread', kwargs={'product_id': product_id})
-                    self.order_thread.start()
-        else:
-            self.buy_flag[product_id] = False
-            self.sell_flag[product_id] = False
+        if self.is_live:
+            if Decimal(indicators[period_name]['macd_hist_diff']) > Decimal('0.0') and \
+               Decimal(indicators[fifteen_min_period_name]['macd_hist_diff']) > Decimal('0.0'):
+                if self.sell_flag[product_id]:
+                    self.last_signal_switch[product_id] = time.time()
+                self.sell_flag[product_id] = False
+                self.buy_flag[product_id] = True
+                # Throttle to prevent flip flopping over trade signal
+                if self.usd > Decimal('0.0') and (time.time() - self.last_signal_switch[product_id]) > 60.0:
+                    if not self.order_in_progress[product_id]:
+                        self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product_id': product_id})
+                        self.order_thread.start()
+            elif Decimal(indicators[period_name]['macd_hist_diff']) < Decimal('0.0') or \
+                 Decimal(indicators[fifteen_min_period_name]['macd_hist_diff']) < Decimal('0.0'):
+                if self.buy_flag[product_id]:
+                    self.last_signal_switch[product_id] = time.time()
+                self.buy_flag[product_id] = False
+                self.sell_flag[product_id] = True
+                # Throttle to prevent flip flopping over trade signal
+                if amount_of_coin > Decimal('0.0') and (time.time() - self.last_signal_switch[product_id]) > 60.0:
+                    if not self.order_in_progress[product_id]:
+                        self.order_thread = threading.Thread(target=self.sell, name='sell_thread', kwargs={'product_id': product_id})
+                        self.order_thread.start()
+            else:
+                self.buy_flag[product_id] = False
+                self.sell_flag[product_id] = False
