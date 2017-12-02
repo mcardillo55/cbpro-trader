@@ -71,8 +71,8 @@ eth_5 = period.Period(period_size=(60 * 5), product='ETH-USD', name='ETH5')
 ltc_5 = period.Period(period_size=(60 * 5), product='LTC-USD', name='LTC5')
 eth_btc5 = period.Period(period_size=(60 * 5), product='ETH-BTC', name='ETHBTC5')
 eth_btc15 = period.Period(period_size=(60 * 5), product='ETH-BTC', name='ETHBTC15')
-ltc_btc5 = period.Period(period_size=(60 * 5), product='ETH-BTC', name='LTCBTC5')
-ltc_btc15 = period.Period(period_size=(60 * 5), product='ETH-BTC', name='LTCBTC15')
+ltc_btc5 = period.Period(period_size=(60 * 5), product='LTC-BTC', name='LTCBTC5')
+ltc_btc15 = period.Period(period_size=(60 * 5), product='LTC-BTC', name='LTCBTC15')
 # Periods to update indicators for
 indicator_period_list = [btc_5, btc_15, eth_5, eth_15, ltc_5, ltc_15, eth_btc5, eth_btc15, ltc_btc5, ltc_btc15]
 # Periods to actively trade on (typically 1 per product)
