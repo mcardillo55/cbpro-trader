@@ -43,10 +43,10 @@ class cursesDisplay:
     def update_indicators(self, period_list, indicators):
         starty = 1
         for cur_period in period_list:
-            self.pad.addstr(starty, 0, "%s - BBAND_TOP_1: %f" %
-                            (cur_period.name, indicators[cur_period.name]['bband_upper_1']),
-                            self.print_color(indicators[cur_period.name]['bband_upper_1'],
-                                             indicators[cur_period.name]['close']))
+            self.pad.addstr(starty, 0, "%s - MACD_DIFF: %f" %
+                            (cur_period.name, indicators[cur_period.name]['macd_hist_diff']),
+                            self.print_color('0.0',
+                                             indicators[cur_period.name]['macd_hist_diff']))
             starty += 1
 
     def update_fills(self, trade_engine):
@@ -62,7 +62,7 @@ class cursesDisplay:
         starty = 23
         self.pad.addstr(starty, 0, "Open Orders")
 
-        if time.time() - self.last_order_update > 5.0:
+        if time.time() - self.last_order_update > 1.0:
             # First check if trade engine has any open orders
             order_in_progress = False
             for product in trade_engine.product_list:
