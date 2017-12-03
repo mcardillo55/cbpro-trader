@@ -262,7 +262,7 @@ class TradeEngine():
                 new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['macd_hist_diff']) < Decimal('0.0')
 
             if product_id == 'LTC-BTC' or product_id == 'ETH-BTC':
-                new_buy_flag = new_buy_flag and self.buy_flag[product_id[4:] + '-USD']
+                new_buy_flag = new_buy_flag and self.buy_flag[product_id[:3] + '-USD']
                 new_sell_flag = new_sell_flag and self.buy_flag['BTC-USD']
 
             if new_buy_flag:
