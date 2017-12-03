@@ -10,7 +10,6 @@ import datetime
 import dateutil.parser
 import trade
 import pytz
-import requests
 import logging
 import time
 
