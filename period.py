@@ -97,11 +97,17 @@ class Period:
 
     def get_historical_data(self):
         gdax_client = gdax.PublicClient()
-        ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size)
+
+        end = datetime.datetime.now()
+        end_iso = end.isoformat()
+        start = end - datetime.timedelta(seconds=(self.period_size * 200))
+        start_iso = start.isoformat()
+
+        ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size, start=start_iso, end=end_iso)
         # Check if we got rate limited, which will return a JSON message
         if type(ret) is not type(list()):
             time.sleep(3)
-            ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size)
+            ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size, start=start_iso, end=end_iso)
         hist_data = np.array(ret, dtype='object')
         for row in hist_data:
             row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
