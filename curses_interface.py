@@ -119,8 +119,9 @@ class cursesDisplay:
         # Make sure indicator dict is populated
         if len(indicators[period_list[0].name]) > 0:
             self.update_indicators(period_list, indicators)
-        self.update_orders(trade_engine)
         self.update_candlesticks(period_list)
+
+        #self.update_orders(trade_engine)
 
         height, width = self.stdscr.getmaxyx()
         self.pad.refresh(0, 0, 0, 0, (height - 1), (width - 1))
