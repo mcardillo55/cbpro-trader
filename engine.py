@@ -97,6 +97,7 @@ class TradeEngine():
     def update_amounts(self, indicators=None):
         if time.time() - self.last_balance_update > 10.0:
             try:
+                self.last_balance_update = time.time()
                 for account in self.auth_client.get_accounts():
                     if account.get('currency') == 'BTC':
                         self.btc = self.round_coin(account.get('available'))
@@ -108,6 +109,11 @@ class TradeEngine():
                         self.usd = self.round_usd(account.get('available'))
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
+                self.btc = Decimal('0.0')
+                self.eth = Decimal('0.0')
+                self.ltc = Decimal('0.0')
+                self.usd = Decimal('0.0')
+                return
 
             self.usd_equivalent = Decimal('0.0')
             for product in self.product_list:
@@ -118,8 +124,6 @@ class TradeEngine():
                 except Exception:
                     self.error_logger.exception(datetime.datetime.now())
             self.usd_equivalent += self.usd
-
-            self.last_balance_update = time.time()
 
     def print_amounts(self):
         self.logger.debug("[BALANCES] USD: %.2f BTC: %.8f" % (self.usd, self.btc))
