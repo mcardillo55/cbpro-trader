@@ -104,7 +104,7 @@ class Period:
 
         ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size, start=start_iso, end=end_iso)
         # Check if we got rate limited, which will return a JSON message
-        if type(ret) is not type(list()):
+        if isinstance(ret, list):
             time.sleep(3)
             ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size, start=start_iso, end=end_iso)
         hist_data = np.array(ret, dtype='object')
