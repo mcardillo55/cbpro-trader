@@ -8,7 +8,7 @@ import gdax
 import period
 import indicators
 import engine
-import config
+import yaml
 import Queue
 import time
 import curses_interface
@@ -52,17 +52,19 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         self.websocket_queue.put(msg)
 
 
+with open("config.yml", 'r') as ymlfile:
+    config = yaml.load(ymlfile)
 logger = logging.getLogger('trader-logger')
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.FileHandler("debug.log"))
-if config.FRONTEND == 'debug':
+if config['frontend'] == 'debug':
     logger.addHandler(logging.StreamHandler())
 error_logger = logging.getLogger('error-logger')
 error_logger.addHandler(logging.FileHandler("error.log"))
 
 gdax_websocket = TradeAndHeartbeatWebsocket()
-auth_client = gdax.AuthenticatedClient(config.KEY, config.SECRET, config.PASSPHRASE)
-trade_engine = engine.TradeEngine(auth_client, is_live=config.LIVE)
+auth_client = gdax.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
+trade_engine = engine.TradeEngine(auth_client, is_live=config['live'])
 btc_15 = period.Period(period_size=(60 * 60), product='BTC-USD', name='BTC60')
 eth_15 = period.Period(period_size=(60 * 60), product='ETH-USD', name='ETH60')
 ltc_15 = period.Period(period_size=(60 * 60), product='LTC-USD', name='LTC60')
@@ -82,7 +84,7 @@ indicator_period_list[0].verbose_heartbeat = True
 indicator_subsys = indicators.IndicatorSubsystem(indicator_period_list)
 last_indicator_update = time.time()
 
-if config.FRONTEND == 'curses':
+if config['frontend'] == 'curses':
     curses_enable = True
 else:
     curses_enable = False

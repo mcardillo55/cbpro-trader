@@ -1,0 +1,5 @@
+key: mykey
+secret: mysecret
+passphrase: mypassphrase
+live: no
+frontend: curses
