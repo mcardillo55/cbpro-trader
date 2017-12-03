@@ -1,5 +1,5 @@
 bintrees==2.0.7
-gdax==1.0.6
+-e git+https://github.com/mcardillo55/gdax-python.git@6201a55be371a936c951352374f3868c49994d3c#egg=gdax
 numpy==1.13.1
 pymongo==3.5.1
 python-dateutil==2.6.0
