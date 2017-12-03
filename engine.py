@@ -113,7 +113,8 @@ class TradeEngine():
             for product in self.product_list:
                 try:
                     quote = self.auth_client.get_product_ticker(product_id=product)['price']
-                    self.usd_equivalent += self.get_currency_amount_from_product_id(product) * Decimal(quote)
+                    if quote is not None:
+                        self.usd_equivalent += self.get_currency_amount_from_product_id(product) * Decimal(quote)
                 except Exception:
                     self.error_logger.exception(datetime.datetime.now())
             self.usd_equivalent += self.usd
