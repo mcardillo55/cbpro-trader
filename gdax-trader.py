@@ -62,23 +62,23 @@ if config['frontend'] == 'debug':
 error_logger = logging.getLogger('error-logger')
 error_logger.addHandler(logging.FileHandler("error.log"))
 
-gdax_websocket = TradeAndHeartbeatWebsocket()
-auth_client = gdax.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
-trade_engine = engine.TradeEngine(auth_client, is_live=config['live'])
-btc_15 = period.Period(period_size=(60 * 60), product='BTC-USD', name='BTC60')
-eth_15 = period.Period(period_size=(60 * 60), product='ETH-USD', name='ETH60')
-ltc_15 = period.Period(period_size=(60 * 60), product='LTC-USD', name='LTC60')
-btc_5 = period.Period(period_size=(60 * 120), product='BTC-USD', name='BTC120')
-eth_5 = period.Period(period_size=(60 * 120), product='ETH-USD', name='ETH120')
-ltc_5 = period.Period(period_size=(60 * 120), product='LTC-USD', name='LTC120')
-eth_btc5 = period.Period(period_size=(60 * 120), product='ETH-BTC', name='ETHBTC120')
-eth_btc15 = period.Period(period_size=(60 * 60), product='ETH-BTC', name='ETHBTC60')
-ltc_btc5 = period.Period(period_size=(60 * 120), product='LTC-BTC', name='LTCBTC120')
-ltc_btc15 = period.Period(period_size=(60 * 60), product='LTC-BTC', name='LTCBTC60')
 # Periods to update indicators for
-indicator_period_list = [btc_5, btc_15, eth_5, eth_15, ltc_5, ltc_15, eth_btc5, eth_btc15, ltc_btc5, ltc_btc15]
+indicator_period_list = []
 # Periods to actively trade on (typically 1 per product)
-trade_period_list = [btc_5, eth_5, ltc_5]
+trade_period_list = []
+# List of products that we are actually monitoring
+product_list = set()
+for cur_period in config['periods']:
+    new_period = period.Period(period_size=(60 * cur_period['length']),
+                               product=cur_period['product'], name=cur_period['name'])
+    indicator_period_list.append(new_period)
+    product_list.add(cur_period['product'])
+    if cur_period['trade']:
+        trade_period_list.append(new_period)
+
+auth_client = gdax.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
+trade_engine = engine.TradeEngine(auth_client, product_list=product_list, is_live=config['live'])
+gdax_websocket = TradeAndHeartbeatWebsocket()
 gdax_websocket.start()
 indicator_period_list[0].verbose_heartbeat = True
 indicator_subsys = indicators.IndicatorSubsystem(indicator_period_list)
@@ -102,14 +102,14 @@ while(True):
                 for cur_period in indicator_period_list:
                     indicator_subsys.recalculate_indicators(cur_period)
                 for cur_period in trade_period_list:
-                    trade_engine.determine_trades(cur_period.name, indicator_subsys.current_indicators)
+                    trade_engine.determine_trades(cur_period, indicator_subsys.current_indicators)
                 last_indicator_update = time.time()
         elif msg.get('type') == "heartbeat":
             for cur_period in indicator_period_list:
                 cur_period.process_heartbeat(msg)
             for cur_period in trade_period_list:
                 if len(indicator_subsys.current_indicators[cur_period.name]) > 0:
-                    trade_engine.determine_trades(cur_period.name, indicator_subsys.current_indicators)
+                    trade_engine.determine_trades(cur_period, indicator_subsys.current_indicators)
             trade_engine.print_amounts()
         interface.update(trade_engine, indicator_subsys.current_indicators,
                          indicator_period_list, msg)

@@ -36,17 +36,17 @@ class OrderBookCustom(gdax.OrderBook):
 
 
 class TradeEngine():
-    def __init__(self, auth_client, is_live=False):
+    def __init__(self, auth_client, product_list=['BTC-USD', 'ETH-USD', 'LTC-USD'], is_live=False):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
         self.auth_client = auth_client
+        self.product_list = product_list
         self.is_live = is_live
         self.order_book = {}
         self.order_in_progress = {}
         self.buy_flag = {}
         self.sell_flag = {}
         self.last_signal_switch = {}
-        self.product_list = ['BTC-USD', 'ETH-USD', 'LTC-USD']
         for product_id in self.product_list:
             self.order_book[product_id] = OrderBookCustom(product_id=product_id)
             self.order_in_progress[product_id] = False
@@ -108,10 +108,16 @@ class TradeEngine():
                         self.usd = self.round_usd(account.get('available'))
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
-            if indicators and indicators['LTC120'].get('close'):
-                self.usd_equivalent = self.btc * Decimal(indicators['BTC120']['close']) + \
-                                      self.eth * Decimal(indicators['ETH120']['close']) + \
-                                      self.ltc * Decimal(indicators['LTC120']['close']) + self.usd
+
+            self.usd_equivalent = Decimal('0.0')
+            for product in self.product_list:
+                try:
+                    quote = self.auth_client.get_product_ticker(product_id=product)['price']
+                    self.usd_equivalent += self.get_currency_amount_from_product_id(product) * Decimal(quote)
+                except Exception:
+                    self.error_logger.exception(datetime.datetime.now())
+            self.usd_equivalent += self.usd
+
             self.last_balance_update = time.time()
 
     def print_amounts(self):
@@ -211,21 +217,21 @@ class TradeEngine():
         self.auth_client.cancel_all(product_id=product_id)
         self.order_in_progress[product_id] = False
 
-    def get_currency_size_and_product_id_from_period_name(self, period_name):
-        if period_name is 'BTC120':
-            return self.btc, 'BTC-USD'
-        elif period_name is 'ETH120':
-            return self.eth, 'ETH-USD'
-        elif period_name is 'LTC120':
-            return self.ltc, 'LTC-USD'
+    def get_currency_amount_from_product_id(self, product_id):
+        if product_id == 'BTC-USD':
+            return self.btc
+        elif product_id == 'ETH-USD':
+            return self.eth
+        elif product_id == 'LTC-USD':
+            return self.ltc
 
-    def determine_trades(self, period_name, indicators):
+    def determine_trades(self, cur_period, indicators):
         self.update_amounts(indicators)
 
-        amount_of_coin, product_id = self.get_currency_size_and_product_id_from_period_name(period_name)
-        fifteen_min_period_name = period_name[:3] + '60'
-
         if self.is_live:
+            fifteen_min_period_name = period_name[:3] + '60'
+            amount_of_coin = self.get_currency_amount_from_product_id(period.product)
+
             if Decimal(indicators[period_name]['macd_hist_diff']) > Decimal('0.0') and \
                Decimal(indicators[fifteen_min_period_name]['macd_hist_diff']) > Decimal('0.0'):
                 if self.sell_flag[product_id]:
