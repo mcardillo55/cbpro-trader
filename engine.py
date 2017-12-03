@@ -108,10 +108,10 @@ class TradeEngine():
                         self.usd = self.round_usd(account.get('available'))
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
-            if indicators and indicators['LTC30'].get('close'):
-                self.usd_equivalent = self.btc * Decimal(indicators['BTC30']['close']) + \
-                                      self.eth * Decimal(indicators['ETH30']['close']) + \
-                                      self.ltc * Decimal(indicators['LTC30']['close']) + self.usd
+            if indicators and indicators['LTC120'].get('close'):
+                self.usd_equivalent = self.btc * Decimal(indicators['BTC120']['close']) + \
+                                      self.eth * Decimal(indicators['ETH120']['close']) + \
+                                      self.ltc * Decimal(indicators['LTC120']['close']) + self.usd
             self.last_balance_update = time.time()
 
     def print_amounts(self):
@@ -212,11 +212,11 @@ class TradeEngine():
         self.order_in_progress[product_id] = False
 
     def get_currency_size_and_product_id_from_period_name(self, period_name):
-        if period_name is 'BTC30':
+        if period_name is 'BTC120':
             return self.btc, 'BTC-USD'
-        elif period_name is 'ETH30':
+        elif period_name is 'ETH120':
             return self.eth, 'ETH-USD'
-        elif period_name is 'LTC30':
+        elif period_name is 'LTC120':
             return self.ltc, 'LTC-USD'
 
     def determine_trades(self, period_name, indicators):
