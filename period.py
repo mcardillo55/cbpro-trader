@@ -97,7 +97,7 @@ class Period:
     def get_historical_data(self):
         gdax_client = gdax.PublicClient()
 
-        end = datetime.datetime.now()
+        end = datetime.datetime.utcnow()
         end_iso = end.isoformat()
         start = end - datetime.timedelta(seconds=(self.period_size * 200))
         start_iso = start.isoformat()
