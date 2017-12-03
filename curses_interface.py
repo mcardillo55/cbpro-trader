@@ -27,7 +27,9 @@ class cursesDisplay:
                          trade_engine.eth, trade_engine.ltc, trade_engine.usd_equivalent))
 
     def update_candlesticks(self, period_list):
-        starty = 12
+        starty = self.starty + 1
+        if starty < self.signal_end_y + 1:
+            starty = self.signal_end_y + 1
         for cur_period in period_list:
             cur_stick = cur_period.cur_candlestick
             if cur_stick.new is False:
@@ -37,18 +39,20 @@ class cursesDisplay:
                                  cur_stick.volume),
                                 self.print_color(cur_stick.open, cur_stick.close))
             starty += 1
+        self.starty = starty
 
     def update_heartbeat(self):
         self.pad.addstr(0, 83, self.timestamp)
 
     def update_indicators(self, period_list, indicators):
-        starty = 1
+        starty = self.starty
         for cur_period in period_list:
             self.pad.addstr(starty, 0, "%s - MACD_DIFF: %f" %
                             (cur_period.name, indicators[cur_period.name]['macd_hist_diff']),
                             self.print_color('0.0',
                                              indicators[cur_period.name]['macd_hist_diff']))
             starty += 1
+        self.starty = starty
 
     def update_fills(self, trade_engine):
         self.pad.addstr(9, 0, "Recent Fills")
@@ -83,7 +87,7 @@ class cursesDisplay:
                 self.order_pad.addstr(starty, 0, 'None')
             self.last_order_update = time.time()
             height, width = self.stdscr.getmaxyx()
-            self.order_pad.refresh(0, 0, 23, 0, (height - 1), (width - 1))
+            self.order_pad.refresh(0, 0, (self.starty + 1), 0, (height - 1), (width - 1))
 
     def update_signals(self, trade_engine):
         starty = 1
@@ -99,22 +103,25 @@ class cursesDisplay:
                 color = curses.color_pair(0)
             self.pad.addstr(starty, 83, "%s: %s" % (product_id, text), color)
             starty += 1
+        self.signal_end_y = starty
 
     def update(self, trade_engine, indicators, period_list, msg):
         if not self.enable:
             return
 
+        self.starty = 1
         if msg.get('type') == "heartbeat":
             self.timestamp = msg.get('time')
         self.pad.erase()
-        self.update_candlesticks(period_list)
-        self.update_signals(trade_engine)
         self.update_balances(trade_engine)
-        self.update_orders(trade_engine)
+        self.update_heartbeat()
+        self.update_signals(trade_engine)
         # Make sure indicator dict is populated
         if len(indicators[period_list[0].name]) > 0:
             self.update_indicators(period_list, indicators)
-        self.update_heartbeat()
+        self.update_orders(trade_engine)
+        self.update_candlesticks(period_list)
+
         height, width = self.stdscr.getmaxyx()
         self.pad.refresh(0, 0, 0, 0, (height - 1), (width - 1))
 
