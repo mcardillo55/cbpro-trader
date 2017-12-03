@@ -65,16 +65,19 @@ error_logger.addHandler(logging.FileHandler("error.log"))
 # Periods to update indicators for
 indicator_period_list = []
 # Periods to actively trade on (typically 1 per product)
-trade_period_list = []
+trade_period_list = {}
 # List of products that we are actually monitoring
 product_list = set()
+
 for cur_period in config['periods']:
     new_period = period.Period(period_size=(60 * cur_period['length']),
                                product=cur_period['product'], name=cur_period['name'])
     indicator_period_list.append(new_period)
     product_list.add(cur_period['product'])
     if cur_period['trade']:
-        trade_period_list.append(new_period)
+        if trade_period_list.get(cur_period['product']) is None:
+            trade_period_list[cur_period['product']] = []
+        trade_period_list[cur_period['product']].append(new_period)
 
 auth_client = gdax.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
 trade_engine = engine.TradeEngine(auth_client, product_list=product_list, is_live=config['live'])
@@ -89,7 +92,6 @@ if config['frontend'] == 'curses':
 else:
     curses_enable = False
 interface = curses_interface.cursesDisplay(enable=curses_enable)
-
 while(True):
     try:
         msg = gdax_websocket.websocket_queue.get(timeout=15)
@@ -101,15 +103,15 @@ while(True):
             if time.time() - last_indicator_update >= 1.0:
                 for cur_period in indicator_period_list:
                     indicator_subsys.recalculate_indicators(cur_period)
-                for cur_period in trade_period_list:
-                    trade_engine.determine_trades(cur_period, indicator_subsys.current_indicators)
+                for product_id, period_list in trade_period_list.iteritems():
+                    trade_engine.determine_trades(product_id, period_list, indicator_subsys.current_indicators)
                 last_indicator_update = time.time()
         elif msg.get('type') == "heartbeat":
             for cur_period in indicator_period_list:
                 cur_period.process_heartbeat(msg)
-            for cur_period in trade_period_list:
+            for product_id, period_list in trade_period_list.iteritems():
                 if len(indicator_subsys.current_indicators[cur_period.name]) > 0:
-                    trade_engine.determine_trades(cur_period, indicator_subsys.current_indicators)
+                    trade_engine.determine_trades(product_id, period_list, indicator_subsys.current_indicators)
             trade_engine.print_amounts()
         interface.update(trade_engine, indicator_subsys.current_indicators,
                          indicator_period_list, msg)

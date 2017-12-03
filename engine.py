@@ -225,15 +225,19 @@ class TradeEngine():
         elif product_id == 'LTC-USD':
             return self.ltc
 
-    def determine_trades(self, cur_period, indicators):
+    def determine_trades(self, product_id, period_list, indicators):
         self.update_amounts(indicators)
 
         if self.is_live:
-            fifteen_min_period_name = period_name[:3] + '60'
-            amount_of_coin = self.get_currency_amount_from_product_id(period.product)
+            amount_of_coin = self.get_currency_amount_from_product_id(product_id)
 
-            if Decimal(indicators[period_name]['macd_hist_diff']) > Decimal('0.0') and \
-               Decimal(indicators[fifteen_min_period_name]['macd_hist_diff']) > Decimal('0.0'):
+            new_buy_flag = True
+            new_sell_flag = False
+            for cur_period in period_list:
+                new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['macd_hist_diff']) > Decimal('0.0')
+                new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['macd_hist_diff']) < Decimal('0.0')
+
+            if new_buy_flag:
                 if self.sell_flag[product_id]:
                     self.last_signal_switch[product_id] = time.time()
                 self.sell_flag[product_id] = False
@@ -243,8 +247,7 @@ class TradeEngine():
                     if not self.order_in_progress[product_id]:
                         self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product_id': product_id})
                         self.order_thread.start()
-            elif Decimal(indicators[period_name]['macd_hist_diff']) < Decimal('0.0') or \
-                 Decimal(indicators[fifteen_min_period_name]['macd_hist_diff']) < Decimal('0.0'):
+            elif new_sell_flag:
                 if self.buy_flag[product_id]:
                     self.last_signal_switch[product_id] = time.time()
                 self.buy_flag[product_id] = False
