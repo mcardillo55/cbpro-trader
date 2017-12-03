@@ -3,3 +3,16 @@ secret: mysecret
 passphrase: mypassphrase
 live: no
 frontend: curses
+periods:
+  - name: BTC
+    product: BTC-USD
+    length: 5
+    trade: yes
+  - name: ETH
+    product: ETH-USD
+    length: 15
+    trade: yes
+  - name: LTC
+    product: LTC-USD
+    length: 30
+    trade: yes
