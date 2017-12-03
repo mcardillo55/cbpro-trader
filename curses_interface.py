@@ -47,10 +47,10 @@ class cursesDisplay:
     def update_indicators(self, period_list, indicators):
         starty = self.starty
         for cur_period in period_list:
-            self.pad.addstr(starty, 0, "%s - MACD_DIFF: %f" %
-                            (cur_period.name, indicators[cur_period.name]['macd_hist_diff']),
-                            self.print_color('0.0',
-                                             indicators[cur_period.name]['macd_hist_diff']))
+            self.pad.addstr(starty, 0, "%s - BBAND_UPPER_1: %f" %
+                            (cur_period.name, indicators[cur_period.name]['bband_upper_1']),
+                            self.print_color(indicators[cur_period.name]['bband_upper_1'],
+                                             indicators[cur_period.name]['close']))
             starty += 1
         self.starty = starty
 
