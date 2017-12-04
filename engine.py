@@ -156,7 +156,6 @@ class TradeEngine():
 
     def buy(self, product=None, amount=None):
         product.order_in_progress = True
-        self.logger.debug("******HELLO FROM BUY!!!!")
         try:
             ret = self.place_buy(product=product, partial='0.5')
             bid = ret.get('price')
