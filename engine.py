@@ -56,13 +56,6 @@ class TradeEngine():
         self.auth_client = auth_client
         self.product_list = product_list
         self.is_live = is_live
-        self.quote_increment = {}
-        self.min_size = {}
-        self.order_book = {}
-        self.order_in_progress = {}
-        self.buy_flag = {}
-        self.sell_flag = {}
-        self.last_signal_switch = {}
         self.products = []
         for product in self.product_list:
             self.products.append(Product(auth_client, product_id=product))
@@ -163,6 +156,7 @@ class TradeEngine():
 
     def buy(self, product=None, amount=None):
         product.order_in_progress = True
+        self.logger.debug("******HELLO FROM BUY!!!!")
         try:
             ret = self.place_buy(product=product, partial='0.5')
             bid = ret.get('price')
@@ -250,15 +244,15 @@ class TradeEngine():
 
     def get_quoted_currency_from_product_id(self, product_id):
         if product_id == 'BTC-USD':
-            return self.btc
+            return self.usd
         elif product_id == 'ETH-USD':
-            return self.eth
+            return self.usd
         elif product_id == 'LTC-USD':
-            return self.ltc
+            return self.usd
         elif product_id == 'ETH-BTC':
-            return self.eth
+            return self.btc
         elif product_id == 'LTC-BTC':
-            return self.ltc
+            return self.btc
 
     def determine_trades(self, product_id, period_list, indicators):
         self.update_amounts(indicators)
@@ -274,8 +268,10 @@ class TradeEngine():
                 new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['close']) < Decimal(indicators[cur_period.name]['bband_upper_1'])
 
             if product_id == 'LTC-BTC' or product_id == 'ETH-BTC':
-                new_buy_flag = new_buy_flag and self.buy_flag[product_id[:3] + '-USD']
-                new_sell_flag = new_sell_flag and self.buy_flag['BTC-USD']
+                ltc_or_eth_usd_product = self.get_product_by_product_id(product_id[:3] + '-USD')
+                btc_usd_product = self.get_product_by_product_id('BTC-USD')
+                new_buy_flag = new_buy_flag and ltc_or_eth_usd_product.buy_flag
+                new_sell_flag = new_sell_flag and btc_usd_product.buy_flag
 
             if new_buy_flag:
                 if product.sell_flag:
@@ -289,7 +285,7 @@ class TradeEngine():
                         self.order_thread.start()
             elif new_sell_flag:
                 if product.buy_flag:
-                    pproduct.last_signal_switch = time.time()
+                    product.last_signal_switch = time.time()
                 product.buy_flag = False
                 product.sell_flag = True
                 # Throttle to prevent flip flopping over trade signal
