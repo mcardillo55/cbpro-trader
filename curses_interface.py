@@ -89,7 +89,8 @@ class cursesDisplay:
                 self.order_pad.addstr(starty, 0, 'None')
             self.last_order_update = time.time()
             height, width = self.stdscr.getmaxyx()
-            self.order_pad.refresh(0, 0, (self.padsize + 1), 0, (height - 1), (width - 1))
+            if height > (self.padsize + 1):
+                self.order_pad.refresh(0, 0, (self.padsize + 1), 0, (height - 1), (width - 1))
 
     def update_signals(self, trade_engine):
         starty = 1
