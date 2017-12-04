@@ -1,5 +1,6 @@
 import curses
 import time
+import logging
 from decimal import Decimal
 
 
@@ -8,6 +9,7 @@ class cursesDisplay:
         self.enable = enable
         if not self.enable:
             return
+        self.logger = logging.getLogger('trader-logger')
         self.stdscr = curses.initscr()
         self.pad = curses.newpad(23, 120)
         self.order_pad = curses.newpad(10, 120)
