@@ -95,8 +95,8 @@ interface = curses_interface.cursesDisplay(enable=curses_enable)
 while(True):
     try:
         msg = gdax_websocket.websocket_queue.get(timeout=15)
-        for product_id, order_book in trade_engine.order_book.iteritems():
-            order_book.process_message(msg)
+        for product in trade_engine.products:
+            product.order_book.process_message(msg)
         if msg.get('type') == "match":
             for cur_period in indicator_period_list:
                 cur_period.process_trade(msg)

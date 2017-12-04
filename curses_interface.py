@@ -74,8 +74,8 @@ class cursesDisplay:
             self.order_pad.addstr(starty, 0, "Open Orders")
             order_in_progress = False
             # First check if trade engine has any open orders
-            for product in trade_engine.product_list:
-                if trade_engine.order_in_progress[product]:
+            for product in trade_engine.products:
+                if product.order_in_progress:
                     order_in_progress = True
             starty += 1
             if order_in_progress:
@@ -94,17 +94,17 @@ class cursesDisplay:
 
     def update_signals(self, trade_engine):
         starty = 1
-        for product_id in trade_engine.product_list:
-            if trade_engine.buy_flag[product_id]:
+        for product in trade_engine.products:
+            if product.buy_flag:
                 text = 'BUY'
                 color = curses.color_pair(1)
-            elif trade_engine.sell_flag[product_id]:
+            elif product.sell_flag:
                 text = 'SELL'
                 color = curses.color_pair(2)
             else:
                 text = 'NONE'
                 color = curses.color_pair(0)
-            self.pad.addstr(starty, 83, "%s: %s" % (product_id, text), color)
+            self.pad.addstr(starty, 83, "%s: %s" % (product.product_id, text), color)
             starty += 1
         self.signal_end_y = starty
 

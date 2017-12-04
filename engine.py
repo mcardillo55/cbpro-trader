@@ -35,6 +35,20 @@ class OrderBookCustom(gdax.OrderBook):
         return super(OrderBookCustom, self).get_bid()
 
 
+class Product(object):
+    def __init__(self, auth_client, product_id='BTC-USD'):
+        self.product_id = product_id
+        self.order_book = OrderBookCustom(product_id=product_id)
+        self.order_in_progress = False
+        self.buy_flag = False
+        self.sell_flag = False
+        self.last_signal_switch = time.time()
+        for gdax_product in auth_client.get_products():
+                if product_id == gdax_product.get('id'):
+                    self.quote_increment = gdax_product.get('quote_increment')
+                    self.min_size = gdax_product.get('base_min_size')
+
+
 class TradeEngine():
     def __init__(self, auth_client, product_list=['BTC-USD', 'ETH-USD', 'LTC-USD'], is_live=False):
         self.logger = logging.getLogger('trader-logger')
@@ -49,18 +63,9 @@ class TradeEngine():
         self.buy_flag = {}
         self.sell_flag = {}
         self.last_signal_switch = {}
-        gdax_product_info = self.auth_client.get_products()
-        # Should probably make Product class
-        for product_id in self.product_list:
-            for gdax_product in gdax_product_info:
-                if product_id == gdax_product.get('id'):
-                    self.quote_increment[product_id] = gdax_product.get('quote_increment')
-                    self.min_size[product_id] = gdax_product.get('base_min_size')
-            self.order_book[product_id] = OrderBookCustom(product_id=product_id)
-            self.order_in_progress[product_id] = False
-            self.buy_flag[product_id] = False
-            self.sell_flag[product_id] = False
-            self.last_signal_switch[product_id] = time.time()
+        self.products = []
+        for product in self.product_list:
+            self.products.append(Product(auth_client, product_id=product))
         self.last_balance_update = 0
         self.update_amounts()
         self.usd_equivalent = 0
@@ -68,12 +73,12 @@ class TradeEngine():
         self.order_thread = threading.Thread()
 
     def close(self):
-        for product_id in self.product_list:
+        for product in self.products:
             # Setting both flags will close any open order threads
-            self.buy_flag[product_id] = False
-            self.sell_flag[product_id] = False
+            product.buy_flag = False
+            product.sell_flag = False
             # Cancel any orders that may still be remaining
-            self.order_in_progress[product_id] = False
+            product.order_in_progress = False
         try:
             self.auth_client.cancel_all()
         except Exception:
@@ -90,6 +95,12 @@ class TradeEngine():
         except AttributeError:
             self.error_logger.exception(datetime.datetime.now())
             return self.round_coin('0.0')
+
+    def get_product_by_product_id(self, product_id='BTC-USD'):
+        for product in self.products:
+            if product.product_id == product_id:
+                return product
+        return None
 
     def round_usd(self, money):
         return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
@@ -119,11 +130,11 @@ class TradeEngine():
                 return
 
             self.usd_equivalent = Decimal('0.0')
-            for product in self.product_list:
+            for product in self.products:
                 try:
-                    quote = self.auth_client.get_product_ticker(product_id=product)['price']
+                    quote = self.auth_client.get_product_ticker(product_id=product.product_id)['price']
                     if quote is not None:
-                        self.usd_equivalent += self.get_base_currency_from_product_id(product) * Decimal(quote)
+                        self.usd_equivalent += self.get_base_currency_from_product_id(product.product_id) * Decimal(quote)
                 except Exception:
                     self.error_logger.exception(datetime.datetime.now())
             self.usd_equivalent += self.usd
@@ -131,99 +142,99 @@ class TradeEngine():
     def print_amounts(self):
         self.logger.debug("[BALANCES] USD: %.2f BTC: %.8f" % (self.usd, self.btc))
 
-    def place_buy(self, product_id='BTC-USD', partial='1.0'):
-        amount = self.get_currency(product_id[4:]) * Decimal(partial)
-        bid = self.order_book[product_id].get_ask() - Decimal(self.quote_increment[product_id])
+    def place_buy(self, product=None, partial='1.0'):
+        amount = self.get_currency(product.product_id[4:]) * Decimal(partial)
+        bid = product.order_book.get_ask() - Decimal(product.quote_increment)
         amount = self.round_coin(Decimal(amount) / Decimal(bid))
 
-        if amount < Decimal(self.min_size[product_id]):
-            amount = self.get_currency(product_id[4:])
-            bid = self.order_book[product_id].get_ask() - Decimal(self.quote_increment[product_id])
+        if amount < Decimal(product.min_size):
+            amount = self.get_currency(product.product_id[4:])
+            bid = product.order_book.get_ask() - Decimal(product.quote_increment)
             amount = self.round_coin(Decimal(amount) / Decimal(bid))
 
-        if amount >= Decimal(self.quote_increment[product_id]):
+        if amount >= Decimal(product.quote_increment):
             self.logger.debug("Placing buy... Price: %.8f Size: %.8f" % (bid, amount))
             return self.auth_client.buy(type='limit', size=str(amount),
                                         price=str(bid), post_only=True,
-                                        product_id=product_id)
+                                        product_id=product.product_id)
         else:
             ret = {'status': 'done'}
             return ret
 
-    def buy(self, product_id='BTC-USD', amount=None):
-        self.order_in_progress[product_id] = True
+    def buy(self, product=None, amount=None):
+        product.order_in_progress = True
         try:
-            ret = self.place_buy(product_id=product_id, partial='0.5')
+            ret = self.place_buy(product=product, partial='0.5')
             bid = ret.get('price')
-            amount = self.get_currency(product_id[4:])
-            while self.buy_flag[product_id] and (amount > Decimal('0.0') or len(self.auth_client.get_orders()[0]) > 0):
+            amount = self.get_currency(product.product_id[4:])
+            while product.buy_flag and (amount > Decimal('0.0') or len(self.auth_client.get_orders()[0]) > 0):
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
-                    ret = self.place_buy(product_id=product_id, partial='0.5')
+                    ret = self.place_buy(product=product, partial='0.5')
                     bid = ret.get('price')
-                elif not bid or Decimal(bid) < self.order_book[product_id].get_ask() - Decimal(self.quote_increment[product_id]):
+                elif not bid or Decimal(bid) < product.order_book.get_ask() - Decimal(product.quote_increment):
                     if len(self.auth_client.get_orders()[0]) > 0:
-                        ret = self.place_buy(product_id=product_id, partial='1.0')
+                        ret = self.place_buy(product=product, partial='1.0')
                     else:
-                        ret = self.place_buy(product_id=product_id, partial='0.5')
+                        ret = self.place_buy(product=product, partial='0.5')
                     for order in self.auth_client.get_orders()[0]:
                         if order.get('id') != ret.get('id'):
                             self.auth_client.cancel_order(order.get('id'))
                     bid = ret.get('price')
                 if ret.get('id'):
                     ret = self.auth_client.get_order(ret.get('id'))
-                amount = self.get_currency(product_id[4:])
-            self.auth_client.cancel_all(product_id=product_id)
-            amount = self.get_currency(product_id[4:])
+                amount = self.get_currency(product.product_id[4:])
+            self.auth_client.cancel_all(product_id=product.product_id)
+            amount = self.get_currency(product.product_id[4:])
         except Exception:
-            self.order_in_progress[product_id] = False
+            product.order_in_progress = False
             self.error_logger.exception(datetime.datetime.now())
-        self.auth_client.cancel_all(product_id=product_id)
-        self.order_in_progress[product_id] = False
+        self.auth_client.cancel_all(product_id=product.product_id)
+        product.order_in_progress = False
 
-    def place_sell(self, product_id='BTC-USD', partial='1.0'):
-        amount = self.round_coin(self.get_currency(product_id[:3]) * Decimal(partial))
-        if amount < Decimal(self.min_size[product_id]):
-            amount = self.get_currency(product_id[:3])
-        ask = self.order_book[product_id].get_bid() + Decimal(self.quote_increment[product_id])
+    def place_sell(self, product=None, partial='1.0'):
+        amount = self.round_coin(self.get_currency(product.product_id[:3]) * Decimal(partial))
+        if amount < Decimal(product.min_size):
+            amount = self.get_currency(product.product_id[:3])
+        ask = product.order_book.get_bid() + Decimal(product.quote_increment)
 
-        if amount >= Decimal(self.min_size[product_id]):
+        if amount >= Decimal(product.min_size):
             self.logger.debug("Placing sell... Price: %.2f Size: %.8f" % (ask, amount))
             return self.auth_client.sell(type='limit', size=str(amount),
-                                    price=str(ask), post_only=True,
-                                    product_id=product_id)
+                                         price=str(ask), post_only=True,
+                                         product_id=product.product_id)
         else:
             ret = {'status': 'done'}
             return ret
 
-    def sell(self, product_id='BTC-USD', amount=None):
-        self.order_in_progress[product_id] = True
+    def sell(self, product=None, amount=None):
+        product.order_in_progress = True
         try:
-            ret = self.place_sell(product_id=product_id, partial='0.5')
+            ret = self.place_sell(product=product, partial='0.5')
             ask = ret.get('price')
-            amount = self.get_currency(product_id[:3])
-            while self.sell_flag[product_id] and (amount >= Decimal(self.min_size[product_id]) or len(self.auth_client.get_orders()[0]) > 0):
+            amount = self.get_currency(product.product_id[:3])
+            while product.sell_flag and (amount >= Decimal(product.min_size) or len(self.auth_client.get_orders()[0]) > 0):
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
-                    ret = self.place_sell(product_id=product_id, partial='0.5')
+                    ret = self.place_sell(product=product, partial='0.5')
                     ask = ret.get('price')
-                elif not ask or Decimal(ask) > self.order_book[product_id].get_bid() + Decimal(self.quote_increment[product_id]):
+                elif not ask or Decimal(ask) > product.order_book.get_bid() + Decimal(product.quote_increment):
                     if len(self.auth_client.get_orders()[0]) > 0:
-                        ret = self.place_sell(product_id=product_id, partial='1.0')
+                        ret = self.place_sell(product=product, partial='1.0')
                     else:
-                        ret = self.place_sell(product_id=product_id, partial='0.5')
+                        ret = self.place_sell(product=product, partial='0.5')
                     for order in self.auth_client.get_orders()[0]:
                         if order.get('id') != ret.get('id'):
                             self.auth_client.cancel_order(order.get('id'))
                     ask = ret.get('price')
                 if ret.get('id'):
                     ret = self.auth_client.get_order(ret.get('id'))
-                amount = self.get_currency(product_id[:3])
-            self.auth_client.cancel_all(product_id=product_id)
-            amount = self.get_currency(product_id[:3])
+                amount = self.get_currency(product.product_id[:3])
+            self.auth_client.cancel_all(product_id=product.product_id)
+            amount = self.get_currency(product.product_id[:3])
         except Exception:
-            self.order_in_progress[product_id] = False
+            product.order_in_progress = False
             self.error_logger.exception(datetime.datetime.now())
-        self.auth_client.cancel_all(product_id=product_id)
-        self.order_in_progress[product_id] = False
+        self.auth_client.cancel_all(product_id=product.product_id)
+        product.order_in_progress = False
 
     def get_base_currency_from_product_id(self, product_id):
         if product_id == 'BTC-USD':
@@ -254,6 +265,7 @@ class TradeEngine():
 
         if self.is_live:
             amount_of_coin = self.get_base_currency_from_product_id(product_id)
+            product = self.get_product_by_product_id(product_id)
 
             new_buy_flag = True
             new_sell_flag = False
@@ -266,25 +278,25 @@ class TradeEngine():
                 new_sell_flag = new_sell_flag and self.buy_flag['BTC-USD']
 
             if new_buy_flag:
-                if self.sell_flag[product_id]:
-                    self.last_signal_switch[product_id] = time.time()
-                self.sell_flag[product_id] = False
-                self.buy_flag[product_id] = True
+                if product.sell_flag:
+                    product.last_signal_switch = time.time()
+                product.sell_flag = False
+                product.buy_flag = True
                 # Throttle to prevent flip flopping over trade signal
-                if self.get_quoted_currency_from_product_id(product_id) > Decimal('0.0') and (time.time() - self.last_signal_switch[product_id]) > 60.0:
-                    if not self.order_in_progress[product_id]:
-                        self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product_id': product_id})
+                if self.get_quoted_currency_from_product_id(product_id) > Decimal('0.0') and (time.time() - product.last_signal_switch) > 60.0:
+                    if not product.order_in_progress:
+                        self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product': product})
                         self.order_thread.start()
             elif new_sell_flag:
-                if self.buy_flag[product_id]:
-                    self.last_signal_switch[product_id] = time.time()
-                self.buy_flag[product_id] = False
-                self.sell_flag[product_id] = True
+                if product.buy_flag:
+                    pproduct.last_signal_switch = time.time()
+                product.buy_flag = False
+                product.sell_flag = True
                 # Throttle to prevent flip flopping over trade signal
-                if amount_of_coin > Decimal('0.0') and (time.time() - self.last_signal_switch[product_id]) > 60.0:
-                    if not self.order_in_progress[product_id]:
-                        self.order_thread = threading.Thread(target=self.sell, name='sell_thread', kwargs={'product_id': product_id})
+                if amount_of_coin > Decimal('0.0') and (time.time() - product.last_signal_switch) > 60.0:
+                    if not product.order_in_progress:
+                        self.order_thread = threading.Thread(target=self.sell, name='sell_thread', kwargs={'product': product})
                         self.order_thread.start()
             else:
-                self.buy_flag[product_id] = False
-                self.sell_flag[product_id] = False
+                product.buy_flag = False
+                product.sell_flag = False
