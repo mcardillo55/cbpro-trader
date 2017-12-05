@@ -2,7 +2,11 @@
 
 gdax-trader is a bot to automate trading on the GDAX cryptocurrency exchange. It is based around the ta-lib and gdax-python libraries, allowing easy trading based on technical analysis indicators.
 
-Most of the code is currently written to trade Bitcoin (BTC), but can be tweaked to trade any cryptocurrency currently supported by GDAX. It is the eventual goal to be able to track all GDAX cryptocurrencies and trade whichever has the best opportunity at the moment.
+The bot can monitor and trade any ticker supported by GDAX, and will even trade between cryptocurrencies if the opportunity is better.
+
+## Disclaimer
+
+This bot is still in early stages and may have bugs. The strategies also need major reworking. **Do not use with any money you are not 100% willing to lose.**
 
 ## Requirements
 
@@ -10,27 +14,23 @@ You can install most requirements with
 
 `pip install -r ./requirements.txt`
 
-Currently, we're using the upstream version of the gdax-python library, so you will need to do
-
-`pip uninstall gdax` then
-
-`pip install git+git://github.com/danpaquin/gdax-python.git`. 
+Note that it is currently pointing to a custom version of the gdax-python library until I can push my OrderBook changes upstream.
 
 Also note that the TA-Lib python library is actually a wrapper for the ta-lib C library, so you will need to install that before. See the "Dependencies" section on https://github.com/mrjbq7/ta-lib for more information on that.
 
 ## Configuration
 
-Copy config.py.sample to config.py and include your KEY, SECRET, and PASSPHRASE values from your GDAX API key.
+Copy config.yml.sample to config.yml and include your `key`, `secret`, and `passphrase` values from your GDAX API key.
 
-Set LIVE to True **only if** you want the bot to execute **actual trades.** The bot will still collect data and calculate indicators when LIVE is set to FALSE.
+Set `live` to `yes` **only if** you want the bot to execute **actual trades.** The bot will still collect data and calculate indicators when LIVE is set to FALSE.
 
-INTERFACE can be set to `curses` which is an ncurses display of balances, indicator values, recent candlesticks and trades and current open orders or `debug` which will print the same infromation to the console, line-by-line, as it is available.
+`frontend` can be set to `curses` which is an ncurses display of balances, indicator values, recent candlesticks and trades and current open orders or `debug` which will print the same infromation to the console, line-by-line, as it is available. `debug` tends to fall behind in development, as it's mostly used for debugging (obviously).
 
 I'm throwing around an idea of making a local web frontend, maybe in React or something similar, to better visualize the current data recorded by the bot.
 
 ## Tweaking indicators and trade logic
 
-If you're handy with Python, any indicators from TA-Lib can be added, as desired. Trade logic can also obviously be modified as well.
+I'm currently working on making indicators and trade strategies more configurable, but if you're handy with Python, any indicators from TA-Lib can be added, as desired. Trade logic can also obviously be modified as well.
 
 ### Design
 
@@ -58,4 +58,4 @@ Trade logic can obviously be modified as desired. Just make your decisions in `T
 
 `TradeEngine.determine_trades()` has access to the `IndicatorSubsystem.current_indicators` as `indicators`, as was discussed earlier.
 
-When issuing a buy order, be sure to set `self.buy_flag = True` and `self.sell_flag = False` before starting the buy order thread. This is to be sure that if there is a sell order pending, it will be cancelled and the sell thread will be closed. The same obviously holds true when issueing a sell order.
+When issuing a buy order, be sure to set `product.buy_flag = True` and `product.sell_flag = False` before starting the buy order thread. This is to be sure that if there is a sell order pending, it will be cancelled and the sell thread will be closed. The same obviously holds true when issueing a sell order.
