@@ -145,7 +145,7 @@ class TradeEngine():
             bid = product.order_book.get_ask() - Decimal(product.quote_increment)
             amount = self.round_coin(Decimal(amount) / Decimal(bid))
 
-        if amount >= Decimal(product.quote_increment):
+        if amount >= Decimal(product.min_size):
             self.logger.debug("Placing buy... Price: %.8f Size: %.8f" % (bid, amount))
             return self.auth_client.buy(type='limit', size=str(amount),
                                         price=str(bid), post_only=True,
