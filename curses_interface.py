@@ -55,9 +55,10 @@ class cursesDisplay:
                                 self.print_color(indicators[cur_period.name]['macd_hist_diff'],
                                                  Decimal('0.0')))
             elif cur_period.period_size == (60 * 5):
-                self.pad.addstr(starty, 0, "%s - MACD_HIST: %f" %
-                                (cur_period.name, indicators[cur_period.name]['macd_hist']),
-                                self.print_color(indicators[cur_period.name]['macd_hist'],
+                self.pad.addstr(starty, 0, "%s - MACD_HIST: %f MACD_HIST_DIFF: %f" %
+                                (cur_period.name, indicators[cur_period.name]['macd_hist'],
+                                 indicators[cur_period.name]['macd_hist_diff']),
+                                self.print_color(indicators[cur_period.name]['macd_hist_diff'],
                                                  '0.0'))
             starty += 1
         self.starty = starty + 1
