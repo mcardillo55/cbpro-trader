@@ -58,7 +58,9 @@ class cursesDisplay:
                 self.pad.addstr(starty, 0, "%s - MACD_HIST: %f MACD_HIST_DIFF: %f" %
                                 (cur_period.name, indicators[cur_period.name]['macd_hist'],
                                  indicators[cur_period.name]['macd_hist_diff']),
-                                self.print_color(indicators[cur_period.name]['macd_hist_diff'],
+                                self.print_color(indicators[cur_period.name]['macd_hist'],
+                                                 '0.0',
+                                                 indicators[cur_period.name]['macd_hist_diff'],
                                                  '0.0'))
             starty += 1
         self.starty = starty + 1
@@ -137,12 +139,18 @@ class cursesDisplay:
         height, width = self.stdscr.getmaxyx()
         self.pad.refresh(0, 0, 0, 0, (height - 1), (width - 1))
 
-    def print_color(self, a, b):
+    def print_color(self, a, b, c=None, d=None):
         # If a > b, print green, otherwise red
-        if Decimal(a) > Decimal(b):
-            return curses.color_pair(1)
+        if c and d:
+            if Decimal(a) > Decimal(b) and Decimal(c) > Decimal(d):
+                return curses.color_pair(1)
+            else:
+                return curses.color_pair(2)
         else:
-            return curses.color_pair(2)
+            if Decimal(a) > Decimal(b):
+                return curses.color_pair(1)
+            else:
+                return curses.color_pair(2)
 
     def close(self):
         if not self.enable:
