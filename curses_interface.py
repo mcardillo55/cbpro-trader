@@ -39,7 +39,7 @@ class cursesDisplay:
                                 (cur_period.name, cur_stick.time, cur_stick.open,
                                  cur_stick.high, cur_stick.low, cur_stick.close,
                                  cur_stick.volume),
-                                self.print_color(cur_stick.open, cur_stick.close))
+                                self.print_color(cur_stick.close, cur_stick.open))
             starty += 1
         self.starty = starty
 
