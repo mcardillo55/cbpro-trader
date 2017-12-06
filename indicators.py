@@ -22,15 +22,18 @@ class IndicatorSubsystem:
         if total_periods > 0:
             closing_prices = cur_period.get_closing_prices()
             closing_prices_close = np.append(closing_prices, cur_period.cur_candlestick.close)
+            volumes = np.append(cur_period.get_volumes(), cur_period.cur_candlestick.volume)
 
-            self.calculate_bbands(cur_period.name, closing_prices_close)
+
+            #self.calculate_bbands(cur_period.name, closing_prices_close)
             self.calculate_macd(cur_period.name, closing_prices_close)
+            self.calculate_obv(cur_period.name, closing_prices_close, volumes)
 
             self.current_indicators[cur_period.name]['close'] = cur_period.cur_candlestick.close
             self.current_indicators[cur_period.name]['total_periods'] = total_periods
 
-            self.logger.debug("[INDICATORS %s] Periods: %d : BBAND_UPPER_1: %f" %
-                              (cur_period.name, self.current_indicators[cur_period.name]['total_periods'], self.current_indicators[cur_period.name]['bband_upper_1']))
+            self.logger.debug("[INDICATORS %s] Periods: %d : MACD_HIST: %f" %
+                              (cur_period.name, self.current_indicators[cur_period.name]['total_periods'], self.current_indicators[cur_period.name]['macd_hist']))
 
     def calculate_bbands(self, period_name, close):
         timeperiod = 20
@@ -64,14 +67,12 @@ class IndicatorSubsystem:
 
         self.current_indicators[period_name]['avg_volume'] = avg_vol[-1]
 
-    def calculate_obv(self, period_name, closing_prices, volumes, bid_or_ask):
-        # cryptowat.ch does not include the first value in their OBV
-        # calculation, we we won't either to provide parity
-        obv = talib.OBV(closing_prices[1:], volumes[1:])
-        obv_ema = talib.EMA(obv, timeperiod=21)
+    def calculate_obv(self, period_name, closing_prices, volumes):
+        obv = talib.OBV(closing_prices, volumes)
+        obv_ema = talib.EMA(obv, timeperiod=26)
 
-        self.current_indicators[period_name][bid_or_ask]['obv_ema'] = obv_ema[-1]
-        self.current_indicators[period_name][bid_or_ask]['obv'] = obv[-1]
+        self.current_indicators[period_name]['obv_ema'] = obv_ema[-1]
+        self.current_indicators[period_name]['obv'] = obv[-1]
 
     def calculate_sar(self, period_name, highs, lows):
         sar = talib.SAR(highs, lows)

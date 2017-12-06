@@ -49,11 +49,13 @@ class cursesDisplay:
     def update_indicators(self, period_list, indicators):
         starty = self.starty
         for cur_period in period_list:
-            if cur_period.period_size == (60 * 60):
-                self.pad.addstr(starty, 0, "%s - MACD_HIST_DIFF: %f" %
-                                (cur_period.name, indicators[cur_period.name]['macd_hist_diff']),
-                                self.print_color(indicators[cur_period.name]['macd_hist_diff'],
-                                                 Decimal('0.0')))
+            if cur_period.period_size == (60 * 30):
+                self.pad.addstr(starty, 0, "%s - MACD_HIST: %f OBV: %f OBV_EMA: %f" %
+                                (cur_period.name, indicators[cur_period.name]['macd_hist'],
+                                 indicators[cur_period.name]['obv'], indicators[cur_period.name]['obv_ema']),
+                                self.print_color(indicators[cur_period.name]['macd_hist'],
+                                                 Decimal('0.0'), indicators[cur_period.name]['obv'],
+                                                 indicators[cur_period.name]['obv_ema']))
             elif cur_period.period_size == (60 * 5):
                 self.pad.addstr(starty, 0, "%s - MACD_HIST: %f MACD_HIST_DIFF: %f" %
                                 (cur_period.name, indicators[cur_period.name]['macd_hist'],
