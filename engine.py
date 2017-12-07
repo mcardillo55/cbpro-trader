@@ -124,12 +124,8 @@ class TradeEngine():
 
             self.usd_equivalent = Decimal('0.0')
             for product in self.products:
-                try:
-                    quote = self.auth_client.get_product_ticker(product_id=product.product_id)['price']
-                    if quote is not None:
-                        self.usd_equivalent += self.get_base_currency_from_product_id(product.product_id) * Decimal(quote)
-                except Exception:
-                    self.error_logger.exception(datetime.datetime.now())
+                if product.order_book.get_current_ticker() and product.order_book.get_current_ticker().get('price'):
+                    self.usd_equivalent += self.get_base_currency_from_product_id(product.product_id) * Decimal(product.order_book.get_current_ticker().get('price'))
             self.usd_equivalent += self.usd
 
     def print_amounts(self):
