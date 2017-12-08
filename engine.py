@@ -249,11 +249,17 @@ class TradeEngine():
             new_buy_flag = True
             new_sell_flag = False
             for cur_period in period_list:
-                new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['macd_hist']) > Decimal('0.0') and \
-                                                Decimal(indicators[cur_period.name]['macd_hist_diff']) > Decimal('0.0') and \
-                                                Decimal(indicators[cur_period.name]['obv']) > Decimal(indicators[cur_period.name]['obv_ema'])
-                new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['macd_hist']) < Decimal('0.0') or \
-                                                 Decimal(indicators[cur_period.name]['obv']) < Decimal(indicators[cur_period.name]['obv_ema'])
+                if Decimal(indicators[cur_period.name]['adx']) > Decimal(25.0):
+                    # Trending strategy
+                    new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['macd_hist']) > Decimal('0.0') and \
+                                                    Decimal(indicators[cur_period.name]['macd_hist_diff']) > Decimal('0.0') and \
+                                                    Decimal(indicators[cur_period.name]['obv']) > Decimal(indicators[cur_period.name]['obv_ema'])
+                    new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['macd_hist']) < Decimal('0.0') or \
+                                                     Decimal(indicators[cur_period.name]['obv']) < Decimal(indicators[cur_period.name]['obv_ema'])
+                else:
+                    # Ranging strategy
+                    new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['stochrsi_fastk']) > Decimal(indicators[cur_period.name]['stochrsi_fastd'])
+                    new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['stochrsi_fastk']) < Decimal(indicators[cur_period.name]['stochrsi_fastd'])
 
             if product_id == 'LTC-BTC' or product_id == 'ETH-BTC':
                 ltc_or_eth_usd_product = self.get_product_by_product_id(product_id[:3] + '-USD')
