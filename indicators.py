@@ -22,18 +22,27 @@ class IndicatorSubsystem:
         if total_periods > 0:
             closing_prices = cur_period.get_closing_prices()
             closing_prices_close = np.append(closing_prices, cur_period.cur_candlestick.close)
+            self.highs = np.append(cur_period.get_highs(), cur_period.cur_candlestick.high)
+            self.lows = np.append(cur_period.get_lows(), cur_period.cur_candlestick.low)
             volumes = np.append(cur_period.get_volumes(), cur_period.cur_candlestick.volume)
 
 
             #self.calculate_bbands(cur_period.name, closing_prices_close)
             self.calculate_macd(cur_period.name, closing_prices_close)
             self.calculate_obv(cur_period.name, closing_prices_close, volumes)
+            self.calculate_adx(cur_period.name, closing_prices_close)
+            self.calculate_stochrsi(cur_period.name, closing_prices_close)
 
             self.current_indicators[cur_period.name]['close'] = cur_period.cur_candlestick.close
             self.current_indicators[cur_period.name]['total_periods'] = total_periods
 
             self.logger.debug("[INDICATORS %s] Periods: %d : MACD_HIST: %f" %
                               (cur_period.name, self.current_indicators[cur_period.name]['total_periods'], self.current_indicators[cur_period.name]['macd_hist']))
+
+    def calculate_adx(self, period_name, close):
+        adx = talib.ADX(self.highs, self.lows, close, timeperiod=14)
+
+        self.current_indicators[period_name]['adx'] = adx[-1]
 
     def calculate_bbands(self, period_name, close):
         timeperiod = 20
@@ -78,6 +87,12 @@ class IndicatorSubsystem:
         sar = talib.SAR(highs, lows)
 
         self.current_indicators[period_name]['sar'] = sar[-1]
+
+    def calculate_stochrsi(self, period_name, closing_prices):
+        fastk, fastd = talib.STOCHRSI(closing_prices, timeperiod=14, fastk_period=3, fastd_period=3, fastd_matype=0)
+
+        self.current_indicators[period_name]['stochrsi_fastk'] = fastk[-1]
+        self.current_indicators[period_name]['stochrsi_fastd'] = fastd[-1]
 
     def calculate_mfi(self, period_name, highs, lows, closing_prices, volumes):
         mfi = talib.MFI(highs, lows, closing_prices, volumes)

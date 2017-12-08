@@ -49,9 +49,11 @@ class cursesDisplay:
     def update_indicators(self, period_list, indicators):
         starty = self.starty
         for cur_period in period_list:
-            self.pad.addstr(starty, 0, "%s - MACD_HIST: %f OBV: %f OBV_EMA: %f" %
+            obv_diff = Decimal(indicators[cur_period.name]['obv']) - Decimal(indicators[cur_period.name]['obv_ema'])
+            stoch_diff = Decimal(indicators[cur_period.name]['stochrsi_fastk']) - Decimal(indicators[cur_period.name]['stochrsi_fastd'])
+            self.pad.addstr(starty, 0, "%s - MACD_HIST: %f OBV_DIFF: %f STOCH_DIFF: %f ADX: %f" %
                             (cur_period.name, indicators[cur_period.name]['macd_hist'],
-                             indicators[cur_period.name]['obv'], indicators[cur_period.name]['obv_ema']),
+                             obv_diff, stoch_diff, indicators[cur_period.name]['adx']),
                             self.print_color(indicators[cur_period.name]['macd_hist'],
                                              Decimal('0.0'), indicators[cur_period.name]['obv'],
                                              indicators[cur_period.name]['obv_ema']))
@@ -106,7 +108,7 @@ class cursesDisplay:
             else:
                 text = 'NONE'
                 color = curses.color_pair(0)
-            self.pad.addstr(starty, 83, "%s: %s" % (product.product_id, text), color)
+            self.pad.addstr(starty, 93, "%s: %s" % (product.product_id, text), color)
             starty += 1
         self.signal_end_y = starty
 
