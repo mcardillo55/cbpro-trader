@@ -82,6 +82,10 @@ class Period:
         self.product = product
         self.first_trade = True
         self.verbose_heartbeat = False
+        # GDAX historical data is not up-to-date
+        # We need to update data 10 minutes after closing the first period
+        self.updated_hist_data = False
+        self.time_of_first_candlestick_close = None
         self.logger = logging.getLogger('trader-logger')
         if initialize:
             self.initialize()
@@ -94,12 +98,12 @@ class Period:
         self.candlesticks = self.candlesticks[:-1]
         self.cur_candlestick_start = self.cur_candlestick.time
 
-    def get_historical_data(self):
+    def get_historical_data(self, num_periods=200):
         gdax_client = gdax.PublicClient()
 
         end = datetime.datetime.utcnow()
         end_iso = end.isoformat()
-        start = end - datetime.timedelta(seconds=(self.period_size * 200))
+        start = end - datetime.timedelta(seconds=(self.period_size * num_periods))
         start_iso = start.isoformat()
 
         ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size, start=start_iso, end=end_iso)
@@ -112,7 +116,19 @@ class Period:
             row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
         return np.flipud(hist_data)
 
+    def update_historical_data(self):
+        updated_sticks = self.get_historical_data(num_periods=5)
+        for new_stick in updated_sticks:
+            for idx, old_stick in enumerate(self.candlesticks[-10:]):
+                if new_stick[0] == old_stick[0]:
+                    self.candlesticks[-10 + idx] = new_stick
+        self.updated_hist_data = True
+
     def process_heartbeat(self, msg):
+        if not self.updated_hist_data and self.time_of_first_candlestick_close \
+           and datetime.datetime.now() - self.time_of_first_candlestick_close >= datetime.timedelta(minutes=10):
+            self.update_historical_data()
+
         isotime = dateutil.parser.parse(msg.get('time'))
         if isotime:
             if self.verbose_heartbeat:
@@ -158,6 +174,8 @@ class Period:
         self.candlesticks = np.row_stack((self.candlesticks, stick_to_add.close_candlestick(self.name)))
 
     def close_candlestick(self):
+        if not self.updated_hist_data:
+            self.time_of_first_candlestick_close = datetime.datetime.now()
         if len(self.candlesticks) > 0:
             self.candlesticks = np.row_stack((self.candlesticks,
                                               self.cur_candlestick.close_candlestick(period_name=self.name,
