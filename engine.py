@@ -258,8 +258,8 @@ class TradeEngine():
                                                      Decimal(indicators[cur_period.name]['obv']) < Decimal(indicators[cur_period.name]['obv_ema'])
                 else:
                     # Ranging strategy
-                    new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['stochrsi_fastk']) > Decimal(indicators[cur_period.name]['stochrsi_fastd'])
-                    new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['stochrsi_fastk']) < Decimal(indicators[cur_period.name]['stochrsi_fastd'])
+                    new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['stoch_slowk']) > Decimal(indicators[cur_period.name]['stoch_slowd'])
+                    new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['stoch_slowk']) < Decimal(indicators[cur_period.name]['stoch_slowd'])
 
             if product_id == 'LTC-BTC' or product_id == 'ETH-BTC':
                 ltc_or_eth_usd_product = self.get_product_by_product_id(product_id[:3] + '-USD')

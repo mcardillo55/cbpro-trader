@@ -31,7 +31,7 @@ class IndicatorSubsystem:
             self.calculate_macd(cur_period.name, closing_prices_close)
             self.calculate_obv(cur_period.name, closing_prices_close, volumes)
             self.calculate_adx(cur_period.name, closing_prices_close)
-            self.calculate_stochrsi(cur_period.name, closing_prices_close)
+            self.calculate_stoch(cur_period.name, closing_prices_close)
 
             self.current_indicators[cur_period.name]['close'] = cur_period.cur_candlestick.close
             self.current_indicators[cur_period.name]['total_periods'] = total_periods
@@ -89,9 +89,14 @@ class IndicatorSubsystem:
         self.current_indicators[period_name]['sar'] = sar[-1]
 
     def calculate_stochrsi(self, period_name, closing_prices):
-        fastk, fastd = talib.STOCHRSI(closing_prices, timeperiod=14, fastk_period=5, fastd_period=3, fastd_matype=0)
+        fastk, fastd = talib.STOCHRSI(closing_prices, timeperiod=14, fastk_period=3, fastd_period=3, fastd_matype=0)
         self.current_indicators[period_name]['stochrsi_fastk'] = fastk[-1]
         self.current_indicators[period_name]['stochrsi_fastd'] = fastd[-1]
+
+    def calculate_stoch(self, period_name, closing_prices):
+        slowk, slowd = talib.STOCH(self.highs, self.lows, closing_prices, fastk_period=14, slowk_period=1, slowk_matype=0, slowd_period=3, slowd_matype=0)
+        self.current_indicators[period_name]['stoch_slowk'] = slowk[-1]
+        self.current_indicators[period_name]['stoch_slowd'] = slowd[-1]
 
     def calculate_mfi(self, period_name, highs, lows, closing_prices, volumes):
         mfi = talib.MFI(highs, lows, closing_prices, volumes)
