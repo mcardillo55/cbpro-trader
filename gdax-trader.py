@@ -103,13 +103,13 @@ while(True):
             if time.time() - last_indicator_update >= 1.0:
                 for cur_period in indicator_period_list:
                     indicator_subsys.recalculate_indicators(cur_period)
-                for product_id, period_list in trade_period_list.iteritems():
+                for product_id, period_list in trade_period_list.items():
                     trade_engine.determine_trades(product_id, period_list, indicator_subsys.current_indicators)
                 last_indicator_update = time.time()
         elif msg.get('type') == "heartbeat":
             for cur_period in indicator_period_list:
                 cur_period.process_heartbeat(msg)
-            for product_id, period_list in trade_period_list.iteritems():
+            for product_id, period_list in trade_period_list.items():
                 if len(indicator_subsys.current_indicators[cur_period.name]) > 0:
                     trade_engine.determine_trades(product_id, period_list, indicator_subsys.current_indicators)
             trade_engine.print_amounts()
