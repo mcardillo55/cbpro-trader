@@ -9,7 +9,7 @@ import period
 import indicators
 import engine
 import yaml
-import Queue
+import queue
 import time
 import curses_interface
 import logging
@@ -26,7 +26,7 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
     def on_open(self):
         self.products = ["BTC-USD", 'ETH-USD', 'LTC-USD', 'ETH-BTC', 'LTC-BTC']
         self.type = "heartbeat"
-        self.websocket_queue = Queue.Queue()
+        self.websocket_queue = queue.Queue()
         self.stop = False
         self.logger.debug("-- GDAX Websocket Opened ---")
 
