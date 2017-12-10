@@ -49,14 +49,13 @@ class cursesDisplay:
     def update_indicators(self, period_list, indicators):
         starty = self.starty
         for cur_period in period_list:
-            obv_diff = Decimal(indicators[cur_period.name]['obv']) - Decimal(indicators[cur_period.name]['obv_ema'])
             stoch_diff = Decimal(indicators[cur_period.name]['stoch_slowk']) - Decimal(indicators[cur_period.name]['stoch_slowd'])
-            self.pad.addstr(starty, 0, "%s - MACD_HIST: %f OBV_DIFF: %f STOCH_DIFF: %f ADX: %f" %
-                            (cur_period.name, indicators[cur_period.name]['macd_hist'],
-                             obv_diff, stoch_diff, indicators[cur_period.name]['adx']),
+            self.pad.addstr(starty, 0, "%s - MACD_HIST_DIFF: %f STOCH_DIFF: %f" %
+                            (cur_period.name, indicators[cur_period.name]['macd_hist_diff'],
+                             stoch_diff),
                             self.print_color(indicators[cur_period.name]['macd_hist'],
-                                             Decimal('0.0'), indicators[cur_period.name]['obv'],
-                                             indicators[cur_period.name]['obv_ema']))
+                                             Decimal('0.0'), Decimal(stoch_diff),
+                                             Decimal('0.0')))
             starty += 1
         self.starty = starty + 1
 

@@ -26,11 +26,10 @@ class IndicatorSubsystem:
             self.lows = np.append(cur_period.get_lows(), cur_period.cur_candlestick.low)
             volumes = np.append(cur_period.get_volumes(), cur_period.cur_candlestick.volume)
 
-
-            #self.calculate_bbands(cur_period.name, closing_prices_close)
+            # self.calculate_bbands(cur_period.name, closing_prices_close)
             self.calculate_macd(cur_period.name, closing_prices_close)
-            self.calculate_obv(cur_period.name, closing_prices_close, volumes)
-            self.calculate_adx(cur_period.name, closing_prices_close)
+            # self.calculate_obv(cur_period.name, closing_prices_close, volumes)
+            # self.calculate_adx(cur_period.name, closing_prices_close)
             self.calculate_stoch(cur_period.name, closing_prices_close)
 
             self.current_indicators[cur_period.name]['close'] = cur_period.cur_candlestick.close
