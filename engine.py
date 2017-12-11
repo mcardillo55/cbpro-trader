@@ -154,9 +154,12 @@ class TradeEngine():
 
         if amount >= Decimal(product.min_size):
             self.logger.debug("Placing buy... Price: %.8f Size: %.8f" % (bid, amount))
-            return self.auth_client.buy(type='limit', size=str(amount),
-                                        price=str(bid), post_only=True,
-                                        product_id=product.product_id)
+            ret = self.auth_client.buy(type='limit', size=str(amount),
+                                       price=str(bid), post_only=True,
+                                       product_id=product.product_id)
+            if ret.get('status') == 'pending' or ret.get('status') == 'open':
+                product.open_orders.append(ret)
+            return ret
         else:
             ret = {'status': 'done'}
             return ret
@@ -203,9 +206,12 @@ class TradeEngine():
 
         if amount >= Decimal(product.min_size):
             self.logger.debug("Placing sell... Price: %.2f Size: %.8f" % (ask, amount))
-            return self.auth_client.sell(type='limit', size=str(amount),
-                                         price=str(ask), post_only=True,
-                                         product_id=product.product_id)
+            ret = self.auth_client.sell(type='limit', size=str(amount),
+                                        price=str(ask), post_only=True,
+                                        product_id=product.product_id)
+            if ret.get('status') == 'pending' or ret.get('status') == 'open':
+                product.open_orders.append(ret)
+            return ret
         else:
             ret = {'status': 'done'}
             return ret
