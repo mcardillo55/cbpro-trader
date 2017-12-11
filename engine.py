@@ -174,7 +174,7 @@ class TradeEngine():
                     ret = self.place_buy(product=product, partial='0.5')
                     bid = ret.get('price')
                 elif not bid or Decimal(bid) < product.order_book.get_ask() - Decimal(product.quote_increment):
-                    if len(product.open_orders > 0):
+                    if len(product.open_orders) > 0:
                         ret = self.place_buy(product=product, partial='1.0')
                     else:
                         ret = self.place_buy(product=product, partial='0.5')
