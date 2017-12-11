@@ -93,7 +93,7 @@ class IndicatorSubsystem:
         self.current_indicators[period_name]['stochrsi_fastd'] = fastd[-1]
 
     def calculate_stoch(self, period_name, closing_prices):
-        slowk, slowd = talib.STOCH(self.highs, self.lows, closing_prices, fastk_period=14, slowk_period=1, slowk_matype=0, slowd_period=3, slowd_matype=0)
+        slowk, slowd = talib.STOCH(self.highs, self.lows, closing_prices, fastk_period=14, slowk_period=2, slowk_matype=0, slowd_period=3, slowd_matype=0)
         self.current_indicators[period_name]['stoch_slowk'] = slowk[-1]
         self.current_indicators[period_name]['stoch_slowd'] = slowd[-1]
 
