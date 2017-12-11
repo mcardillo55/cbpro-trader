@@ -291,6 +291,7 @@ class TradeEngine():
                 if Decimal(indicators[cur_period.name]['adx']) > Decimal(25.0):
                     # Trending strategy
                     new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['obv']) > Decimal(indicators[cur_period.name]['obv_ema'])
+                    new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['obv']) < Decimal(indicators[cur_period.name]['obv_ema'])
                 else:
                     # Ranging strategy
                     new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['stoch_slowk']) > Decimal(indicators[cur_period.name]['stoch_slowd'])
