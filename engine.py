@@ -173,7 +173,7 @@ class TradeEngine():
             ret = self.place_buy(product=product, partial='0.5')
             bid = ret.get('price')
             amount = self.get_quoted_currency_from_product_id(product.product_id)
-            while product.buy_flag and (amount > Decimal('0.0') or len(product.open_orders) > 0):
+            while product.buy_flag and (amount >= Decimal(product.min_size) or len(product.open_orders) > 0):
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
                     ret = self.place_buy(product=product, partial='0.5')
                     bid = ret.get('price')
@@ -304,8 +304,11 @@ class TradeEngine():
                     product.last_signal_switch = time.time()
                 product.sell_flag = False
                 product.buy_flag = True
+                amount = self.get_quoted_currency_from_product_id(product_id)
+                bid = product.order_book.get_ask() - Decimal(product.quote_increment)
+                amount = self.round_coin(Decimal(amount) / Decimal(bid))
                 # Throttle to prevent flip flopping over trade signal
-                if self.get_quoted_currency_from_product_id(product_id) > Decimal('0.0') and (time.time() - product.last_signal_switch) > 60.0:
+                if amount >= Decimal(product.min_size) and (time.time() - product.last_signal_switch) > 60.0:
                     if not product.order_in_progress:
                         self.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product': product})
                         self.order_thread.start()
@@ -315,7 +318,7 @@ class TradeEngine():
                 product.buy_flag = False
                 product.sell_flag = True
                 # Throttle to prevent flip flopping over trade signal
-                if amount_of_coin > Decimal('0.0') and (time.time() - product.last_signal_switch) > 60.0:
+                if amount_of_coin >= Decimal(product.min_size) and (time.time() - product.last_signal_switch) > 60.0:
                     if not product.order_in_progress:
                         self.order_thread = threading.Thread(target=self.sell, name='sell_thread', kwargs={'product': product})
                         self.order_thread.start()
