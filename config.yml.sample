@@ -3,6 +3,7 @@ secret: mysecret
 passphrase: mypassphrase
 live: no
 frontend: curses
+logging: no
 periods:
   - name: BTC
     product: BTC-USD

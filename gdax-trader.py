@@ -56,7 +56,8 @@ with open("config.yml", 'r') as ymlfile:
     config = yaml.load(ymlfile)
 logger = logging.getLogger('trader-logger')
 logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.FileHandler("debug.log"))
+if config['logging']:
+    logger.addHandler(logging.FileHandler("debug.log"))
 if config['frontend'] == 'debug':
     logger.addHandler(logging.StreamHandler())
 error_logger = logging.getLogger('error-logger')
