@@ -77,7 +77,7 @@ class IndicatorSubsystem:
 
     def calculate_obv(self, period_name, closing_prices, volumes):
         obv = talib.OBV(closing_prices, volumes)
-        obv_ema = talib.EMA(obv, timeperiod=50)
+        obv_ema = talib.EMA(obv, timeperiod=5)
 
         self.current_indicators[period_name]['obv_ema'] = obv_ema[-1]
         self.current_indicators[period_name]['obv'] = obv[-1]
