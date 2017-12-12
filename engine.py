@@ -89,7 +89,7 @@ class TradeEngine():
 
     def update_orders(self):
         while not self.stop_update_order_thread:
-            if self.last_order_update - time.time() >= 1.0:
+            if self.last_order_update - time.time() >= 0.5:
                 try:
                     ret = self.auth_client.get_orders()
                     while not isinstance(ret, list):
@@ -113,7 +113,7 @@ class TradeEngine():
         return Decimal(money).quantize(Decimal('.00000001'), rounding=ROUND_DOWN)
 
     def update_amounts(self):
-        if time.time() - self.last_balance_update > 10.0:
+        if time.time() - self.last_balance_update > 2.0:
             self.usd_equivalent = Decimal('0.0')
             try:
                 self.last_balance_update = time.time()
