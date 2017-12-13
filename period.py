@@ -12,6 +12,7 @@ import trade
 import pytz
 import logging
 import time
+from decimal import Decimal
 
 
 class Candlestick:
@@ -182,3 +183,57 @@ class Period:
                                                                                      prev_stick=self.candlesticks[-1])))
         else:
             self.candlesticks = np.array([self.cur_candlestick.close_candlestick(self.name)])
+
+class MetaPeriod(Period):
+    def __init__(self, period_size=60, name='Period', product='BTC-USD', initialize=True):
+        self.base = product[:3] + '-USD'
+        self.quoted = product[4:] + '-USD'
+        super(MetaPeriod, self).__init__(period_size=period_size, name=name, product=product, initialize=True)
+
+    def process_trade(self, msg):
+        if msg.get('product_id') == self.base:
+            msg['product_id'] = self.product
+            quoted_last = Decimal(msg.get('price')) / Decimal(self.cur_candlestick.close)
+            total_price = quoted_last + Decimal(msg.get('price'))
+            msg['size'] = Decimal(msg.get('size')) * (Decimal(msg.get('price')) / total_price)
+            msg['price'] = Decimal(msg.get('price')) / quoted_last
+        elif msg.get('product_id') == self.quoted:
+            msg['product_id'] = self.product
+            base_last = Decimal(self.cur_candlestick.close) * Decimal(msg.get('price'))
+            total_price = base_last + Decimal(msg.get('price'))
+            msg['size'] = Decimal(msg.get('size')) * (Decimal(msg.get('price')) / total_price)
+            msg['price'] = base_last / Decimal(msg.get('price'))
+        super(MetaPeriod, self).process_trade(msg=msg)
+
+    def get_historical_data(self, num_periods=200):
+        gdax_client = gdax.PublicClient()
+
+        end = datetime.datetime.utcnow()
+        end_iso = end.isoformat()
+        start = end - datetime.timedelta(seconds=(self.period_size * num_periods))
+        start_iso = start.isoformat()
+
+        ret_base = gdax_client.get_product_historic_rates(self.base, granularity=self.period_size, start=start_iso, end=end_iso)
+        ret_quoted = gdax_client.get_product_historic_rates(self.quoted, granularity=self.period_size, start=start_iso, end=end_iso)
+        # Check if we got rate limited, which will return a JSON message
+        while not isinstance(ret_base, list):
+            time.sleep(3)
+            ret_base = gdax_client.get_product_historic_rates(self.base, granularity=self.period_size, start=start_iso, end=end_iso)
+        while not isinstance(ret_quoted, list):
+            time.sleep(3)
+            ret_quoted = gdax_client.get_product_historic_rates(self.quoted, granularity=self.period_size, start=start_iso, end=end_iso)
+        hist_data_base = np.array(ret_base, dtype='object')
+        hist_data_quoted = np.array(ret_quoted, dtype='object')
+
+        for row in hist_data_base:
+            row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
+        for row in hist_data_quoted:
+            row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
+
+        hist_data = np.ndarray((len(hist_data_base), 6), dtype='object')
+        hist_data[:, 0] = hist_data_base[:, 0]
+        hist_data[:, [1,2,3,4]] = hist_data_base[:, [1,2,3,4]]/hist_data_quoted[:, [1,2,3,4]]
+        total_price = (hist_data_base[:, 4] + hist_data_quoted[:, 4])
+        hist_data[:, 5] = ((hist_data_base[:, 4] / total_price) * hist_data_base[:, 5]) + ((hist_data_base[:, 4] / total_price)  * hist_data_quoted[:, 5])
+        hist_data[:, 5] = hist_data[:, 5] * hist_data[:, 4]
+        return np.flipud(hist_data)

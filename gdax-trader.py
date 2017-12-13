@@ -74,8 +74,12 @@ trade_period_list = {}
 product_list = set()
 
 for cur_period in config['periods']:
-    new_period = period.Period(period_size=(60 * cur_period['length']),
-                               product=cur_period['product'], name=cur_period['name'])
+    if cur_period.get('meta'):
+        new_period = period.MetaPeriod(period_size=(60 * cur_period['length']),
+                                       product=cur_period['product'], name=cur_period['name'])
+    else:
+        new_period = period.Period(period_size=(60 * cur_period['length']),
+                                   product=cur_period['product'], name=cur_period['name'])
     indicator_period_list.append(new_period)
     product_list.add(cur_period['product'])
     if cur_period['trade']:
