@@ -286,7 +286,7 @@ class TradeEngine():
             new_buy_flag = True
             new_sell_flag = False
             for cur_period in period_list:
-                if cur_period.period_size == (60 * 60):
+                if cur_period.period_size == (60 * 30):
                     new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['macd_hist']) > Decimal('0.0')
                     new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['macd_hist']) < Decimal('0.0')
                 else:
