@@ -20,7 +20,7 @@ class OrderBookCustom(gdax.OrderBook):
     def is_ready(self):
         try:
             super(OrderBookCustom, self).get_ask()
-        except ValueError:
+        except (ValueError, AttributeError):
             return False
         return True
 
