@@ -35,6 +35,8 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
 
     def on_error(self, e):
         self.error_logger.exception(datetime.datetime.now())
+        self.stop = True
+        raise e
 
     def close(self):
         if not self.stop:
