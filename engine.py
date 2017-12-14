@@ -72,7 +72,7 @@ class TradeEngine():
         self.update_order_thread.start()
 
     def close(self):
-        self.stop_update_order_thread = False
+        self.stop_update_order_thread = True
         for product in self.products:
             # Setting both flags will close any open order threads
             product.buy_flag = False
