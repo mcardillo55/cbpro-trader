@@ -24,9 +24,9 @@ class cursesDisplay:
         self.pad.addstr(1, 0, "Waiting for a trade...")
 
     def update_balances(self, trade_engine):
-        self.pad.addstr(0, 0, "USD: %.2f BTC: %.8f ETH: %.8f LTC: %.8f USD_EQUIV: %.2f" %
-                        (trade_engine.usd, trade_engine.btc,
-                         trade_engine.eth, trade_engine.ltc, trade_engine.usd_equivalent))
+        self.pad.addstr(0, 0, "%s: %.2f BTC: %.8f ETH: %.8f LTC: %.8f %s_EQUIV: %.2f" %
+                        (trade_engine.fiat_currency, trade_engine.fiat, trade_engine.btc,
+                         trade_engine.eth, trade_engine.ltc, trade_engine.fiat_currency, trade_engine.fiat_equivalent))
 
     def update_candlesticks(self, period_list):
         starty = self.starty

@@ -4,6 +4,7 @@ passphrase: mypassphrase
 live: no
 frontend: curses
 logging: no
+fiat: USD
 periods:
   - name: BTC
     product: BTC-USD
