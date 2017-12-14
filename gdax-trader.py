@@ -18,13 +18,14 @@ from websocket import WebSocketConnectionClosedException
 
 
 class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
-    def __init__(self):
+    def __init__(self, fiat='USD'):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
+        self.fiat_currency = fiat
         super(TradeAndHeartbeatWebsocket, self).__init__()
 
     def on_open(self):
-        self.products = ["BTC-USD", 'ETH-USD', 'LTC-USD', 'ETH-BTC', 'LTC-BTC']
+        self.products = ["BTC-" + self.fiat_currency, 'ETH-' + self.fiat_currency, 'LTC-' + self.fiat_currency, 'ETH-BTC', 'LTC-BTC']
         self.type = "heartbeat"
         self.websocket_queue = queue.Queue()
         self.stop = False
@@ -82,9 +83,10 @@ for cur_period in config['periods']:
             trade_period_list[cur_period['product']] = []
         trade_period_list[cur_period['product']].append(new_period)
 
+fiat_currency = config['fiat']
 auth_client = gdax.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
-trade_engine = engine.TradeEngine(auth_client, product_list=product_list, is_live=config['live'])
-gdax_websocket = TradeAndHeartbeatWebsocket()
+trade_engine = engine.TradeEngine(auth_client, product_list=product_list, fiat=fiat_currency, is_live=config['live'])
+gdax_websocket = TradeAndHeartbeatWebsocket(fiat=fiat_currency)
 gdax_websocket.start()
 indicator_period_list[0].verbose_heartbeat = True
 indicator_subsys = indicators.IndicatorSubsystem(indicator_period_list)

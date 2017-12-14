@@ -52,11 +52,12 @@ class Product(object):
 
 
 class TradeEngine():
-    def __init__(self, auth_client, product_list=['BTC-USD', 'ETH-USD', 'LTC-USD'], is_live=False):
+    def __init__(self, auth_client, product_list=['BTC-USD', 'ETH-USD', 'LTC-USD'], fiat='USD', is_live=False):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
         self.auth_client = auth_client
         self.product_list = product_list
+        self.fiat_currency = fiat
         self.is_live = is_live
         self.products = []
         self.stop_update_order_thread = False
@@ -65,7 +66,7 @@ class TradeEngine():
             self.products.append(Product(auth_client, product_id=product))
         self.last_balance_update = 0
         self.update_amounts()
-        self.usd_equivalent = 0
+        self.fiat_equivalent = 0
         self.last_balance_update = time.time()
         self.update_order_thread = threading.Thread(target=self.update_orders, name='update_orders')
         self.update_order_thread.start()
@@ -113,7 +114,7 @@ class TradeEngine():
                     self.error_logger.exception(datetime.datetime.now())
             time.sleep(0.01)
 
-    def round_usd(self, money):
+    def round_fiat(self, money):
         return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
 
     def round_coin(self, money):
@@ -121,7 +122,7 @@ class TradeEngine():
 
     def update_amounts(self):
         if time.time() - self.last_balance_update > 2.0:
-            self.usd_equivalent = Decimal('0.0')
+            self.fiat_equivalent = Decimal('0.0')
             try:
                 self.last_balance_update = time.time()
                 for account in self.auth_client.get_accounts():
@@ -131,23 +132,23 @@ class TradeEngine():
                         self.eth = self.round_coin(account.get('available'))
                     elif account.get('currency') == 'LTC':
                         self.ltc = self.round_coin(account.get('available'))
-                    elif account.get('currency') == 'USD':
-                        self.usd = self.round_usd(account.get('available'))
+                    elif account.get('currency') == self.fiat_currency:
+                        self.fiat = self.round_fiat(account.get('available'))
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
                 self.btc = Decimal('0.0')
                 self.eth = Decimal('0.0')
                 self.ltc = Decimal('0.0')
-                self.usd = Decimal('0.0')
+                self.fiat = Decimal('0.0')
                 return
 
             for product in self.products:
                 if product.order_book.get_current_ticker() and product.order_book.get_current_ticker().get('price'):
-                    self.usd_equivalent += self.get_base_currency_from_product_id(product.product_id) * Decimal(product.order_book.get_current_ticker().get('price'))
-            self.usd_equivalent += self.usd
+                    self.fiat_equivalent += self.get_base_currency_from_product_id(product.product_id) * Decimal(product.order_book.get_current_ticker().get('price'))
+            self.fiat_equivalent += self.fiat
 
     def print_amounts(self):
-        self.logger.debug("[BALANCES] USD: %.2f BTC: %.8f" % (self.usd, self.btc))
+        self.logger.debug("[BALANCES] %s: %.2f BTC: %.8f" % (self.fiat_currency, self.fiat, self.btc))
 
     def place_buy(self, product=None, partial='1.0'):
         amount = self.get_quoted_currency_from_product_id(product.product_id) * Decimal(partial)
@@ -260,9 +261,15 @@ class TradeEngine():
         self.update_amounts()
         if product_id == 'BTC-USD':
             return self.btc
+        elif product_id == 'BTC-EUR':
+            return self.btc
         elif product_id == 'ETH-USD':
             return self.eth
+        elif product_id == 'ETH-EUR':
+            return self.eth
         elif product_id == 'LTC-USD':
+            return self.ltc
+        elif product_id == 'LTC-EUR':
             return self.ltc
         elif product_id == 'ETH-BTC':
             return self.eth
@@ -272,11 +279,17 @@ class TradeEngine():
     def get_quoted_currency_from_product_id(self, product_id):
         self.update_amounts()
         if product_id == 'BTC-USD':
-            return self.usd
+            return self.fiat
+        elif product_id == 'BTC-EUR':
+            return self.fiat
         elif product_id == 'ETH-USD':
-            return self.usd
+            return self.fiat
+        elif product_id == 'ETH-EUR':
+            return self.fiat
         elif product_id == 'LTC-USD':
-            return self.usd
+            return self.fiat
+        elif product_id == 'LTC-EUR':
+            return self.fiat
         elif product_id == 'ETH-BTC':
             return self.btc
         elif product_id == 'LTC-BTC':
@@ -296,7 +309,7 @@ class TradeEngine():
                     new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['macd_hist']) > Decimal('0.0')
                     new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['macd_hist']) < Decimal('0.0')
                 else:
-                    if Decimal(indicators[cur_period.name[:-2] + '60']['adx']) > Decimal(25.0):
+                    if Decimal(indicators[cur_period.name]['adx']) > Decimal(25.0):
                         # Trending strategy
                         new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['obv']) > Decimal(indicators[cur_period.name]['obv_ema'])
                         new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['obv']) < Decimal(indicators[cur_period.name]['obv_ema'])
@@ -307,10 +320,10 @@ class TradeEngine():
                         new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['stoch_slowk']) < Decimal(indicators[cur_period.name]['stoch_slowd'])
 
             if product_id == 'LTC-BTC' or product_id == 'ETH-BTC':
-                ltc_or_eth_usd_product = self.get_product_by_product_id(product_id[:3] + '-USD')
-                btc_usd_product = self.get_product_by_product_id('BTC-USD')
-                new_buy_flag = new_buy_flag and ltc_or_eth_usd_product.buy_flag
-                new_sell_flag = new_sell_flag and btc_usd_product.buy_flag
+                ltc_or_eth_fiat_product = self.get_product_by_product_id(product_id[:3] + '-' + self.fiat_currency)
+                btc_fiat_product = self.get_product_by_product_id('BTC-' + self.fiat_currency)
+                new_buy_flag = new_buy_flag and ltc_or_eth_fiat_product.buy_flag
+                new_sell_flag = new_sell_flag and btc_fiat_product.buy_flag
 
             if new_buy_flag:
                 if product.sell_flag:
