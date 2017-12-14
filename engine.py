@@ -43,7 +43,7 @@ class Product(object):
         self.buy_flag = False
         self.sell_flag = False
         self.open_orders = []
-        self.order_thread = threading.Thread()
+        self.order_thread = None
         self.last_signal_switch = time.time()
         for gdax_product in auth_client.get_products():
                 if product_id == gdax_product.get('id'):
@@ -61,7 +61,7 @@ class TradeEngine():
         self.products = []
         self.stop_update_order_thread = True
         self.last_order_update = time.time()
-        self.update_order_thread = threading.Thread()
+        self.update_order_thread = None
         for product in self.product_list:
             self.products.append(Product(auth_client, product_id=product))
         self.last_balance_update = 0
@@ -169,6 +169,7 @@ class TradeEngine():
         self.stop_update_order_thread = False
         self.update_order_thread = threading.Thread(target=self.update_orders, name='update_orders')
         self.update_order_thread.start()
+        last_order_update = 0
         try:
             ret = self.place_buy(product=product, partial='0.5')
             bid = ret.get('price')
@@ -186,8 +187,9 @@ class TradeEngine():
                         if order.get('id') != ret.get('id'):
                             self.auth_client.cancel_order(order.get('id'))
                     bid = ret.get('price')
-                if ret.get('id'):
+                if ret.get('id') and time.time() - last_order_update >= 1.0:
                     ret = self.auth_client.get_order(ret.get('id'))
+                    last_order_update = time.time()
                 amount = self.get_quoted_currency_from_product_id(product.product_id)
             self.auth_client.cancel_all(product_id=product.product_id)
             amount = self.get_quoted_currency_from_product_id(product.product_id)
@@ -221,6 +223,7 @@ class TradeEngine():
         self.stop_update_order_thread = False
         self.update_order_thread = threading.Thread(target=self.update_orders, name='update_orders')
         self.update_order_thread.start()
+        last_order_update = 0
         try:
             ret = self.place_sell(product=product, partial='0.5')
             ask = ret.get('price')
@@ -238,8 +241,9 @@ class TradeEngine():
                         if order.get('id') != ret.get('id'):
                             self.auth_client.cancel_order(order.get('id'))
                     ask = ret.get('price')
-                if ret.get('id'):
+                if ret.get('id') and time.time() - last_order_update >= 1.0:
                     ret = self.auth_client.get_order(ret.get('id'))
+                    last_order_update = time.time()
                 amount = self.get_base_currency_from_product_id(product.product_id)
             self.auth_client.cancel_all(product_id=product.product_id)
             amount = self.get_base_currency_from_product_id(product.product_id)
