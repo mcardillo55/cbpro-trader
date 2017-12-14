@@ -9,7 +9,10 @@ import period
 import indicators
 import engine
 import yaml
-import queue
+try:
+    import queue
+except ImportError:
+    import Queue as queue
 import time
 import curses_interface
 import logging
