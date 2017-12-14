@@ -121,7 +121,7 @@ while(True):
         interface.update(trade_engine, indicator_subsys.current_indicators,
                          indicator_period_list, msg)
     except KeyboardInterrupt:
-        trade_engine.close()
+        trade_engine.close(exit=True)
         gdax_websocket.close()
         interface.close()
         break
