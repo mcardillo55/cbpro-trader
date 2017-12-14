@@ -97,7 +97,7 @@ class TradeEngine():
                 if product.order_in_progress:
                     need_updating = True
 
-            if need_updating and self.last_order_update - time.time() >= 0.5:
+            if need_updating and self.last_order_update - time.time() >= 1.0:
                 try:
                     ret = self.auth_client.get_orders()
                     while not isinstance(ret, list):
@@ -112,7 +112,7 @@ class TradeEngine():
                     self.last_order_update = time.time()
                 except Exception:
                     self.error_logger.exception(datetime.datetime.now())
-            time.sleep(1)
+            time.sleep(0.01)
 
     def round_fiat(self, money):
         return Decimal(money).quantize(Decimal('.01'), rounding=ROUND_DOWN)
