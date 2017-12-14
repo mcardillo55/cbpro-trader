@@ -59,17 +59,19 @@ class TradeEngine():
         self.product_list = product_list
         self.is_live = is_live
         self.products = []
-        self.stop_update_order_thread = True
+        self.stop_update_order_thread = False
         self.last_order_update = time.time()
-        self.update_order_thread = None
         for product in self.product_list:
             self.products.append(Product(auth_client, product_id=product))
         self.last_balance_update = 0
         self.update_amounts()
         self.usd_equivalent = 0
         self.last_balance_update = time.time()
+        self.update_order_thread = threading.Thread(target=self.update_orders, name='update_orders')
+        self.update_order_thread.start()
 
     def close(self):
+        self.stop_update_order_thread = False
         for product in self.products:
             # Setting both flags will close any open order threads
             product.buy_flag = False
@@ -89,7 +91,12 @@ class TradeEngine():
 
     def update_orders(self):
         while not self.stop_update_order_thread:
-            if self.last_order_update - time.time() >= 0.5:
+            need_updating = False
+            for product in self.products:
+                if product.order_in_progress:
+                    need_updating = True
+
+            if need_updating and self.last_order_update - time.time() >= 0.5:
                 try:
                     ret = self.auth_client.get_orders()
                     while not isinstance(ret, list):
@@ -166,9 +173,6 @@ class TradeEngine():
 
     def buy(self, product=None, amount=None):
         product.order_in_progress = True
-        self.stop_update_order_thread = False
-        self.update_order_thread = threading.Thread(target=self.update_orders, name='update_orders')
-        self.update_order_thread.start()
         last_order_update = 0
         try:
             ret = self.place_buy(product=product, partial='0.5')
@@ -197,7 +201,6 @@ class TradeEngine():
             product.order_in_progress = False
             self.error_logger.exception(datetime.datetime.now())
         self.auth_client.cancel_all(product_id=product.product_id)
-        self.stop_update_order_thread = True
         product.order_in_progress = False
 
     def place_sell(self, product=None, partial='1.0'):
@@ -220,9 +223,7 @@ class TradeEngine():
 
     def sell(self, product=None, amount=None):
         product.order_in_progress = True
-        self.stop_update_order_thread = False
-        self.update_order_thread = threading.Thread(target=self.update_orders, name='update_orders')
-        self.update_order_thread.start()
+
         last_order_update = 0
         try:
             ret = self.place_sell(product=product, partial='0.5')
@@ -251,7 +252,6 @@ class TradeEngine():
             product.order_in_progress = False
             self.error_logger.exception(datetime.datetime.now())
         self.auth_client.cancel_all(product_id=product.product_id)
-        self.stop_update_order_thread = True
         product.order_in_progress = False
 
     def get_base_currency_from_product_id(self, product_id):
