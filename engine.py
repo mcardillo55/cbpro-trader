@@ -195,6 +195,7 @@ class TradeEngine():
                     ret = self.auth_client.get_order(ret.get('id'))
                     last_order_update = time.time()
                 amount = self.get_quoted_currency_from_product_id(product.product_id)
+                time.sleep(0.01)
             self.auth_client.cancel_all(product_id=product.product_id)
             amount = self.get_quoted_currency_from_product_id(product.product_id)
         except Exception:
@@ -246,6 +247,7 @@ class TradeEngine():
                     ret = self.auth_client.get_order(ret.get('id'))
                     last_order_update = time.time()
                 amount = self.get_base_currency_from_product_id(product.product_id)
+                time.sleep(0.01)
             self.auth_client.cancel_all(product_id=product.product_id)
             amount = self.get_base_currency_from_product_id(product.product_id)
         except Exception:
