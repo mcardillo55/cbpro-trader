@@ -72,10 +72,11 @@ indicator_period_list = []
 trade_period_list = {}
 # List of products that we are actually monitoring
 product_list = set()
+fiat_currency = config['fiat']
 
 for cur_period in config['periods']:
     if cur_period.get('meta'):
-        new_period = period.MetaPeriod(period_size=(60 * cur_period['length']),
+        new_period = period.MetaPeriod(period_size=(60 * cur_period['length']), fiat=fiat_currency,
                                        product=cur_period['product'], name=cur_period['name'])
     else:
         new_period = period.Period(period_size=(60 * cur_period['length']),
@@ -87,7 +88,6 @@ for cur_period in config['periods']:
             trade_period_list[cur_period['product']] = []
         trade_period_list[cur_period['product']].append(new_period)
 
-fiat_currency = config['fiat']
 auth_client = gdax.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
 trade_engine = engine.TradeEngine(auth_client, product_list=product_list, fiat=fiat_currency, is_live=config['live'])
 gdax_websocket = TradeAndHeartbeatWebsocket(fiat=fiat_currency)

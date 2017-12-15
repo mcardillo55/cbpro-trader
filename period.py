@@ -186,9 +186,9 @@ class Period:
             self.candlesticks = np.array([self.cur_candlestick.close_candlestick(self.name)])
 
 class MetaPeriod(Period):
-    def __init__(self, period_size=60, name='Period', product='BTC-USD', initialize=True):
-        self.base = product[:3] + '-USD'
-        self.quoted = product[4:] + '-USD'
+    def __init__(self, period_size=60, name='Period', product='BTC-USD', fiat='USD', initialize=True):
+        self.base = product[:3] + '-' + fiat
+        self.quoted = product[4:] + '-' + fiat
         super(MetaPeriod, self).__init__(period_size=period_size, name=name, product=product, initialize=True)
 
     def process_trade(self, msg):
