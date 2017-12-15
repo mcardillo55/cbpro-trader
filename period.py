@@ -12,6 +12,7 @@ import trade
 import pytz
 import logging
 import time
+import copy
 from decimal import Decimal
 
 
@@ -191,19 +192,20 @@ class MetaPeriod(Period):
         super(MetaPeriod, self).__init__(period_size=period_size, name=name, product=product, initialize=True)
 
     def process_trade(self, msg):
+        newmsg = copy.deepcopy(msg)
         if msg.get('product_id') == self.base:
-            msg['product_id'] = self.product
+            newmsg['product_id'] = self.product
             quoted_last = Decimal(msg.get('price')) / Decimal(self.cur_candlestick.close)
             total_price = quoted_last + Decimal(msg.get('price'))
-            msg['size'] = Decimal(msg.get('size')) * (Decimal(msg.get('price')) / total_price)
-            msg['price'] = Decimal(msg.get('price')) / quoted_last
+            newmsg['size'] = Decimal(msg.get('size')) * (Decimal(msg.get('price')) / total_price)
+            newmsg['price'] = Decimal(msg.get('price')) / quoted_last
         elif msg.get('product_id') == self.quoted:
-            msg['product_id'] = self.product
+            newmsg['product_id'] = self.product
             base_last = Decimal(self.cur_candlestick.close) * Decimal(msg.get('price'))
             total_price = base_last + Decimal(msg.get('price'))
-            msg['size'] = Decimal(msg.get('size')) * (Decimal(msg.get('price')) / total_price)
-            msg['price'] = base_last / Decimal(msg.get('price'))
-        super(MetaPeriod, self).process_trade(msg=msg)
+            newmsg['size'] = Decimal(msg.get('size')) * (Decimal(msg.get('price')) / total_price)
+            newmsg['price'] = base_last / Decimal(msg.get('price'))
+        super(MetaPeriod, self).process_trade(msg=newmsg)
 
     def get_historical_data(self, num_periods=200):
         gdax_client = gdax.PublicClient()
