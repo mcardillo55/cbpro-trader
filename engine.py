@@ -44,6 +44,7 @@ class Product(object):
         self.sell_flag = False
         self.open_orders = []
         self.order_thread = None
+        self.meta = True
         self.last_signal_switch = time.time()
 
         gdax_products = auth_client.get_products()
@@ -53,9 +54,10 @@ class Product(object):
             gdax_products = auth_client.get_products()
 
         for gdax_product in gdax_products:
-                if product_id == gdax_product.get('id'):
-                    self.quote_increment = gdax_product.get('quote_increment')
-                    self.min_size = gdax_product.get('base_min_size')
+            if product_id == gdax_product.get('id'):
+                self.meta = False # If product_id is in response, it must be a real product
+                self.quote_increment = gdax_product.get('quote_increment')
+                self.min_size = gdax_product.get('base_min_size')
 
 
 class TradeEngine():
