@@ -153,7 +153,7 @@ class TradeEngine():
                 return
 
             for product in self.products:
-                if product.order_book.get_current_ticker() and product.order_book.get_current_ticker().get('price'):
+                if not product.meta and product.order_book.get_current_ticker() and product.order_book.get_current_ticker().get('price'):
                     self.fiat_equivalent += self.get_base_currency_from_product_id(product.product_id) * Decimal(product.order_book.get_current_ticker().get('price'))
             self.fiat_equivalent += self.fiat
 
