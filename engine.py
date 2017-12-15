@@ -194,8 +194,12 @@ class TradeEngine():
                             self.auth_client.cancel_order(order.get('id'))
                     bid = ret.get('price')
                 if ret.get('id') and time.time() - last_order_update >= 1.0:
-                    ret = self.auth_client.get_order(ret.get('id'))
-                    last_order_update = time.time()
+                    try:
+                        ret = self.auth_client.get_order(ret.get('id'))
+                        last_order_update = time.time()
+                    except ValueError:
+                        self.error_logger.exception(datetime.datetime.now())
+                        pass
                 amount = self.get_quoted_currency_from_product_id(product.product_id)
                 time.sleep(0.01)
             self.auth_client.cancel_all(product_id=product.product_id)
@@ -246,7 +250,11 @@ class TradeEngine():
                             self.auth_client.cancel_order(order.get('id'))
                     ask = ret.get('price')
                 if ret.get('id') and time.time() - last_order_update >= 1.0:
-                    ret = self.auth_client.get_order(ret.get('id'))
+                    try:
+                        ret = self.auth_client.get_order(ret.get('id'))
+                        self.error_logger.exception(datetime.datetime.now())
+                    except ValueError:
+                        pass
                     last_order_update = time.time()
                 amount = self.get_base_currency_from_product_id(product.product_id)
                 time.sleep(0.01)
