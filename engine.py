@@ -259,8 +259,8 @@ class TradeEngine():
                 if ret.get('id') and time.time() - last_order_update >= 1.0:
                     try:
                         ret = self.auth_client.get_order(ret.get('id'))
-                        self.error_logger.exception(datetime.datetime.now())
                     except ValueError:
+                        self.error_logger.exception(datetime.datetime.now())
                         pass
                     last_order_update = time.time()
                 amount = self.get_base_currency_from_product_id(product.product_id)
