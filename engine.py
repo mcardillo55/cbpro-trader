@@ -45,7 +45,14 @@ class Product(object):
         self.open_orders = []
         self.order_thread = None
         self.last_signal_switch = time.time()
-        for gdax_product in auth_client.get_products():
+
+        gdax_products = auth_client.get_products()
+        while not isinstance(gdax_products, list):
+            # May be rate limited
+            time.sleep(3)
+            gdax_products = auth_client.get_products()
+
+        for gdax_product in gdax_products:
                 if product_id == gdax_product.get('id'):
                     self.quote_increment = gdax_product.get('quote_increment')
                     self.min_size = gdax_product.get('base_min_size')
