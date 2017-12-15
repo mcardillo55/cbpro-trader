@@ -10,11 +10,19 @@ periods:
     product: BTC-USD
     length: 5
     trade: yes
+    meta: no
   - name: ETH
     product: ETH-USD
     length: 15
     trade: yes
+    meta: no
   - name: LTC
     product: LTC-USD
     length: 30
     trade: yes
+    meta: no
+  - name: LTCETH
+    product: LTC-ETH
+    length: 30
+    trade: no
+    meta: yes
