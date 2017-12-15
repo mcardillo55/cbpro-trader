@@ -132,7 +132,6 @@ class TradeEngine():
 
     def update_amounts(self):
         if time.time() - self.last_balance_update > 2.0:
-            self.fiat_equivalent = Decimal('0.0')
             try:
                 self.last_balance_update = time.time()
                 for account in self.auth_client.get_accounts():
@@ -150,8 +149,10 @@ class TradeEngine():
                 self.eth = Decimal('0.0')
                 self.ltc = Decimal('0.0')
                 self.fiat = Decimal('0.0')
+                self.fiat_equivalent = Decimal('0.0')
                 return
 
+            self.fiat_equivalent = Decimal('0.0')
             for product in self.products:
                 if not product.meta and product.order_book.get_current_ticker() and product.order_book.get_current_ticker().get('price'):
                     self.fiat_equivalent += self.get_base_currency_from_product_id(product.product_id) * Decimal(product.order_book.get_current_ticker().get('price'))
