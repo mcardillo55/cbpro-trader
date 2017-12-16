@@ -196,6 +196,7 @@ class TradeEngine():
                 if (((product.order_book.get_ask() - Decimal(product.quote_increment)) / starting_price) - Decimal('1.0')) * Decimal('100.0') > self.max_slippage:
                     self.auth_client.cancel_all(product_id=product.product_id)
                     self.auth_client.buy(type='market', funds=str(self.get_quoted_currency_from_product_id(product.product_id)), product_id=product.product_id)
+                    product.order_in_progress = False
                     return
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
                     ret = self.place_buy(product=product, partial='0.5')
@@ -256,6 +257,7 @@ class TradeEngine():
                 if (Decimal('1') - ((product.order_book.get_bid() + Decimal(product.quote_increment)) / starting_price)) * Decimal('100.0') > self.max_slippage:
                     self.auth_client.cancel_all(product_id=product.product_id)
                     self.auth_client.sell(type='market', size=str(self.get_base_currency_from_product_id(product.product_id)), product_id=product.product_id)
+                    product.order_in_progress = False
                     return
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
                     ret = self.place_sell(product=product, partial='0.5')
