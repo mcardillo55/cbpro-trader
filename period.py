@@ -226,6 +226,9 @@ class MetaPeriod(Period):
             ret_quoted = gdax_client.get_product_historic_rates(self.quoted, granularity=self.period_size, start=start_iso, end=end_iso)
         hist_data_base = np.array(ret_base, dtype='object')
         hist_data_quoted = np.array(ret_quoted, dtype='object')
+        array_size = min(len(ret_base), len(ret_quoted))
+        hist_data_base.resize(array_size, 6)
+        hist_data_quoted.resize(array_size, 6)
 
         for row in hist_data_base:
             row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
