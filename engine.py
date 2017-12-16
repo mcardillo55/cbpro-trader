@@ -253,7 +253,7 @@ class TradeEngine():
             ask = ret.get('price')
             amount = self.get_base_currency_from_product_id(product.product_id)
             while product.sell_flag and (amount >= Decimal(product.min_size) or len(product.open_orders) > 0):
-                if (Decimal('1') - ((product.order_book.get_ask() - Decimal(product.quote_increment)) / starting_price)) * Decimal('100.0') > self.max_slippage:
+                if (Decimal('1') - ((product.order_book.get_bid() + Decimal(product.quote_increment)) / starting_price)) * Decimal('100.0') > self.max_slippage:
                     self.auth_client.cancel_all(product_id=product.product_id)
                     self.auth_client.sell(type='market', size=str(self.get_base_currency_from_product_id(product.product_id)), product_id=product.product_id)
                     return
