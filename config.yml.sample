@@ -5,6 +5,7 @@ live: no
 frontend: curses
 logging: no
 fiat: USD
+max_slippage: 0.10
 periods:
   - name: BTC
     product: BTC-USD

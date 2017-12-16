@@ -14,6 +14,7 @@ import time
 import curses_interface
 import logging
 import datetime
+from decimal import Decimal
 from websocket import WebSocketConnectionClosedException
 
 
@@ -89,7 +90,8 @@ for cur_period in config['periods']:
         trade_period_list[cur_period['product']].append(new_period)
 
 auth_client = gdax.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
-trade_engine = engine.TradeEngine(auth_client, product_list=product_list, fiat=fiat_currency, is_live=config['live'])
+max_slippage = Decimal(str(config['max_slippage']))
+trade_engine = engine.TradeEngine(auth_client, product_list=product_list, fiat=fiat_currency, is_live=config['live'], max_slippage=max_slippage)
 gdax_websocket = TradeAndHeartbeatWebsocket(fiat=fiat_currency)
 gdax_websocket.start()
 indicator_period_list[0].verbose_heartbeat = True

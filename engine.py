@@ -61,7 +61,7 @@ class Product(object):
 
 
 class TradeEngine():
-    def __init__(self, auth_client, product_list=['BTC-USD', 'ETH-USD', 'LTC-USD'], fiat='USD', is_live=False):
+    def __init__(self, auth_client, product_list=['BTC-USD', 'ETH-USD', 'LTC-USD'], fiat='USD', is_live=False, max_slippage=Decimal('0.10')):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
         self.auth_client = auth_client
@@ -77,6 +77,7 @@ class TradeEngine():
         self.update_amounts()
         self.fiat_equivalent = 0
         self.last_balance_update = time.time()
+        self.max_slippage = max_slippage
         self.update_order_thread = threading.Thread(target=self.update_orders, name='update_orders')
         self.update_order_thread.start()
 
@@ -186,11 +187,16 @@ class TradeEngine():
     def buy(self, product=None, amount=None):
         product.order_in_progress = True
         last_order_update = 0
+        starting_price = product.order_book.get_ask() - Decimal(product.quote_increment)
         try:
             ret = self.place_buy(product=product, partial='0.5')
             bid = ret.get('price')
             amount = self.get_quoted_currency_from_product_id(product.product_id)
             while product.buy_flag and (amount >= Decimal(product.min_size) or len(product.open_orders) > 0):
+                if (((product.order_book.get_ask() - Decimal(product.quote_increment)) / starting_price) - Decimal('1.0')) * Decimal('100.0') > self.max_slippage:
+                    self.auth_client.cancel_all(product_id=product.product_id)
+                    self.auth_client.buy(type='market', funds=self.get_quoted_currency_from_product_id(product.product_id), product_id=product.product_id)
+                    return
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
                     ret = self.place_buy(product=product, partial='0.5')
                     bid = ret.get('price')
@@ -240,13 +246,17 @@ class TradeEngine():
 
     def sell(self, product=None, amount=None):
         product.order_in_progress = True
-
         last_order_update = 0
+        starting_price = product.order_book.get_bid() + Decimal(product.quote_increment)
         try:
             ret = self.place_sell(product=product, partial='0.5')
             ask = ret.get('price')
             amount = self.get_base_currency_from_product_id(product.product_id)
             while product.sell_flag and (amount >= Decimal(product.min_size) or len(product.open_orders) > 0):
+                if (Decimal('1') - ((product.order_book.get_ask() - Decimal(product.quote_increment)) / starting_price)) * Decimal('100.0') > self.max_slippage:
+                    self.auth_client.cancel_all(product_id=product.product_id)
+                    self.auth_client.sell(type='market', size=self.get_base_currency_from_product_id(product.product_id), product_id=product.product_id)
+                    return
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
                     ret = self.place_sell(product=product, partial='0.5')
                     ask = ret.get('price')
