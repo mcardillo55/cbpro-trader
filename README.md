@@ -26,7 +26,7 @@ Set `live` to `yes` **only if** you want the bot to execute **actual trades.** T
 
 In config.yml you can list as many periods as you would like under the periods section. Periods will be used for trading logic only if their `trade:` attribute is set to `yes`, otherwise they are just used for gathering indicator data.
 
-There is experimental support for 'meta' periods, which can be used for comparing 2 products that do not currently have a GDAX trading pair, by setting the `meta:` attribute to `yes` in theperiod description. The only real use case for this right now is LTC-ETH. Trading on meta periods is not yet supported (work in progress).
+There is experimental support for 'meta' periods, which can be used for comparing 2 products that do not currently have a GDAX trading pair, by setting the `meta:` attribute to `yes` in the period description. The only real use case for this right now is LTC-ETH. Trading on meta periods is not yet supported (work in progress).
 
 `frontend` can be set to `curses` which is an ncurses display of balances, indicator values, recent candlesticks and trades and current open orders or `debug` which will print the same infromation to the console, line-by-line, as it is available. `debug` tends to fall behind in development, as it's mostly used for debugging (obviously).
 
