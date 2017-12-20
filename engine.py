@@ -138,6 +138,8 @@ class TradeEngine():
                 for account in self.auth_client.get_accounts():
                     if account.get('currency') == 'BTC':
                         self.btc = self.round_coin(account.get('available'))
+                    elif account.get('currency') == 'BCH':
+                        self.bch = self.round_coin(account.get('available'))
                     elif account.get('currency') == 'ETH':
                         self.eth = self.round_coin(account.get('available'))
                     elif account.get('currency') == 'LTC':
@@ -147,6 +149,7 @@ class TradeEngine():
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
                 self.btc = Decimal('0.0')
+                self.bch = Decimal('0.0')
                 self.eth = Decimal('0.0')
                 self.ltc = Decimal('0.0')
                 self.fiat = Decimal('0.0')
@@ -292,6 +295,12 @@ class TradeEngine():
         self.update_amounts()
         if product_id == 'BTC-USD':
             return self.btc
+        elif product_id == 'BCH-USD':
+            return self.bch
+        elif product_id == 'BCH-EUR':
+            return self.bch
+        elif product_id == 'BCH-BTC':
+            return self.bch
         elif product_id == 'BTC-EUR':
             return self.btc
         elif product_id == 'ETH-USD':
@@ -311,6 +320,12 @@ class TradeEngine():
         self.update_amounts()
         if product_id == 'BTC-USD':
             return self.fiat
+        elif product_id == 'BCH-USD':
+            return self.fiat
+        elif product_id == 'BCH-EUR':
+            return self.fiat
+        elif product_id == 'BCH-BTC':
+            return self.btc
         elif product_id == 'BTC-EUR':
             return self.fiat
         elif product_id == 'ETH-USD':
