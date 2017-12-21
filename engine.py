@@ -108,7 +108,7 @@ class TradeEngine():
                 if product.order_in_progress:
                     need_updating = True
 
-            if need_updating and self.last_order_update - time.time() >= 1.0:
+            if need_updating and time.time() - self.last_order_update >= 1.0:
                 try:
                     ret = self.auth_client.get_orders()
                     while not isinstance(ret, list):
