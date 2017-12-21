@@ -135,17 +135,19 @@ class TradeEngine():
         if time.time() - self.last_balance_update > 2.0:
             try:
                 self.last_balance_update = time.time()
-                for account in self.auth_client.get_accounts():
-                    if account.get('currency') == 'BTC':
-                        self.btc = self.round_coin(account.get('available'))
-                    elif account.get('currency') == 'BCH':
-                        self.bch = self.round_coin(account.get('available'))
-                    elif account.get('currency') == 'ETH':
-                        self.eth = self.round_coin(account.get('available'))
-                    elif account.get('currency') == 'LTC':
-                        self.ltc = self.round_coin(account.get('available'))
-                    elif account.get('currency') == self.fiat_currency:
-                        self.fiat = self.round_fiat(account.get('available'))
+                ret = self.auth_client.get_accounts()
+                if isinstance(ret, list):
+                    for account in ret:
+                        if account.get('currency') == 'BTC':
+                            self.btc = self.round_coin(account.get('available'))
+                        elif account.get('currency') == 'BCH':
+                            self.bch = self.round_coin(account.get('available'))
+                        elif account.get('currency') == 'ETH':
+                            self.eth = self.round_coin(account.get('available'))
+                        elif account.get('currency') == 'LTC':
+                            self.ltc = self.round_coin(account.get('available'))
+                        elif account.get('currency') == self.fiat_currency:
+                            self.fiat = self.round_fiat(account.get('available'))
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
                 self.btc = Decimal('0.0')
