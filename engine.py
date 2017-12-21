@@ -111,7 +111,7 @@ class TradeEngine():
             if need_updating and time.time() - self.last_order_update >= 1.0:
                 try:
                     ret = self.auth_client.get_orders()
-                    while not isinstance(ret, list):
+                    while not isinstance(ret[0], list):
                         # May be rate limited, sleep to cool down
                         time.sleep(3)
                         ret = self.auth_client.get_orders()
