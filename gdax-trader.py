@@ -26,7 +26,9 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         super(TradeAndHeartbeatWebsocket, self).__init__()
 
     def on_open(self):
-        self.products = ["BTC-" + self.fiat_currency, 'ETH-' + self.fiat_currency, 'LTC-' + self.fiat_currency, 'ETH-BTC', 'LTC-BTC']
+        self.products = ["BTC-" + self.fiat_currency, 'ETH-' + self.fiat_currency,
+                         'LTC-' + self.fiat_currency, 'BCH-' + self.fiat_currency,
+                         'ETH-BTC', 'LTC-BTC']
         self.type = "heartbeat"
         self.websocket_queue = queue.Queue()
         self.stop = False
