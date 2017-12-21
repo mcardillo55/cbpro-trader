@@ -161,7 +161,7 @@ class TradeEngine():
             self.fiat_equivalent = Decimal('0.0')
             for product in self.products:
                 if not product.meta and product.order_book.get_current_ticker() and product.order_book.get_current_ticker().get('price'):
-                    self.fiat_equivalent += self.get_base_currency_from_product_id(product.product_id) * Decimal(product.order_book.get_current_ticker().get('price'))
+                    self.fiat_equivalent += self.get_base_currency_from_product_id(product.product_id, update=False) * Decimal(product.order_book.get_current_ticker().get('price'))
             self.fiat_equivalent += self.fiat
 
     def print_amounts(self):
@@ -293,8 +293,9 @@ class TradeEngine():
         self.auth_client.cancel_all(product_id=product.product_id)
         product.order_in_progress = False
 
-    def get_base_currency_from_product_id(self, product_id):
-        self.update_amounts()
+    def get_base_currency_from_product_id(self, product_id, update=True):
+        if update:
+            self.update_amounts()
         if product_id == 'BTC-USD':
             return self.btc
         elif product_id == 'BCH-USD':
