@@ -89,6 +89,7 @@ class Period:
         self.updated_hist_data = False
         self.time_of_first_candlestick_close = None
         self.logger = logging.getLogger('trader-logger')
+        self.error_logger = logging.getLogger('error-logger')
         if initialize:
             self.initialize()
         else:
@@ -108,11 +109,15 @@ class Period:
         start = end - datetime.timedelta(seconds=(self.period_size * num_periods))
         start_iso = start.isoformat()
 
-        ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size, start=start_iso, end=end_iso)
+        ret = None
+
         # Check if we got rate limited, which will return a JSON message
         while not isinstance(ret, list):
-            time.sleep(3)
-            ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size, start=start_iso, end=end_iso)
+            try:
+                time.sleep(3)
+                ret = gdax_client.get_product_historic_rates(self.product, granularity=self.period_size, start=start_iso, end=end_iso)
+            except Exception:
+                self.error_logger.exception(datetime.datetime.now())
         hist_data = np.array(ret, dtype='object')
         for row in hist_data:
             row[0] = datetime.datetime.fromtimestamp(row[0], pytz.utc)
