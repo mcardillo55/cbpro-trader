@@ -132,11 +132,11 @@ class TradeEngine():
         return Decimal(money).quantize(Decimal('.00000001'), rounding=ROUND_DOWN)
 
     def update_amounts(self):
-        if time.time() - self.last_balance_update > 2.0:
+        if time.time() - self.last_balance_update > 1.0:
             try:
+                self.last_balance_update = time.time()
                 ret = self.auth_client.get_accounts()
                 if isinstance(ret, list):
-                    self.last_balance_update = time.time()
                     for account in ret:
                         if account.get('currency') == 'BTC':
                             self.btc = self.round_coin(account.get('available'))
