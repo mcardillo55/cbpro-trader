@@ -23,13 +23,13 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
         self.fiat_currency = fiat
-        super(TradeAndHeartbeatWebsocket, self).__init__()
-
-    def on_open(self):
         self.products = ["BTC-" + self.fiat_currency, 'ETH-' + self.fiat_currency,
                          'LTC-' + self.fiat_currency, 'BCH-' + self.fiat_currency,
                          'ETH-BTC', 'LTC-BTC']
-        self.type = "heartbeat"
+        self.channels = ['full', 'heartbeat']
+        super(TradeAndHeartbeatWebsocket, self).__init__(products=self.products, channels=self.channels)
+
+    def on_open(self):
         self.websocket_queue = queue.Queue()
         self.stop = False
         self.logger.debug("-- GDAX Websocket Opened ---")

@@ -1,5 +1,5 @@
 bintrees==2.0.7
--e git+https://github.com/mcardillo55/gdax-python.git@647ab2e4c9c6e22609b4dc546b6ae000383b6a3a#egg=gdax
+-e git+https://github.com/mcardillo55/gdax-python.git@41d24c196dc3c9b788a124d9cec72a9478286101#egg=gdax
 numpy==1.13.1
 pymongo==3.5.1
 python-dateutil==2.6.0
@@ -7,5 +7,5 @@ pytz==2017.2
 PyYAML==3.12
 requests==2.13.0
 six==1.10.0
-TA-Lib==0.4.10
+TA-Lib==0.4.17
 websocket-client==0.40.0
