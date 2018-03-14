@@ -27,16 +27,13 @@ class IndicatorSubsystem:
             volumes = np.append(cur_period.get_volumes(), cur_period.cur_candlestick.volume)
 
             # self.calculate_bbands(cur_period.name, closing_prices_close)
-            self.calculate_macd(cur_period.name, closing_prices_close)
+            # self.calculate_macd(cur_period.name, closing_prices_close)
             self.calculate_obv(cur_period.name, closing_prices_close, volumes)
             self.calculate_adx(cur_period.name, closing_prices_close)
             self.calculate_stoch(cur_period.name, closing_prices_close)
 
             self.current_indicators[cur_period.name]['close'] = cur_period.cur_candlestick.close
             self.current_indicators[cur_period.name]['total_periods'] = total_periods
-
-            self.logger.debug("[INDICATORS %s] Periods: %d : MACD_HIST: %f" %
-                              (cur_period.name, self.current_indicators[cur_period.name]['total_periods'], self.current_indicators[cur_period.name]['macd_hist']))
 
     def calculate_adx(self, period_name, close):
         adx = talib.ADX(self.highs, self.lows, close, timeperiod=14)

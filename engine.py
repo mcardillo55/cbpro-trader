@@ -354,19 +354,15 @@ class TradeEngine():
             new_buy_flag = True
             new_sell_flag = False
             for cur_period in period_list:
-                if cur_period.period_size == (60 * 60):
-                    new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['macd_hist']) > Decimal('0.0')
-                    new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['macd_hist']) < Decimal('0.0')
+                if Decimal(indicators[cur_period.name]['adx']) > Decimal(25.0):
+                    # Trending strategy
+                    new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['obv']) > Decimal(indicators[cur_period.name]['obv_ema'])
+                    new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['obv']) < Decimal(indicators[cur_period.name]['obv_ema'])
                 else:
-                    if Decimal(indicators[cur_period.name]['adx']) > Decimal(25.0):
-                        # Trending strategy
-                        new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['obv']) > Decimal(indicators[cur_period.name]['obv_ema'])
-                        new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['obv']) < Decimal(indicators[cur_period.name]['obv_ema'])
-                    else:
-                        # Ranging strategy
-                        new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['stoch_slowk']) > Decimal(indicators[cur_period.name]['stoch_slowd']) and \
-                                       Decimal(indicators[cur_period.name]['stoch_slowk']) < Decimal('50.0')
-                        new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['stoch_slowk']) < Decimal(indicators[cur_period.name]['stoch_slowd'])
+                    # Ranging strategy
+                    new_buy_flag = new_buy_flag and Decimal(indicators[cur_period.name]['stoch_slowk']) > Decimal(indicators[cur_period.name]['stoch_slowd']) and \
+                                                    Decimal(indicators[cur_period.name]['stoch_slowk']) < Decimal('50.0')
+                    new_sell_flag = new_sell_flag or Decimal(indicators[cur_period.name]['stoch_slowk']) < Decimal(indicators[cur_period.name]['stoch_slowd'])
 
             if product_id == 'LTC-BTC' or product_id == 'ETH-BTC':
                 ltc_or_eth_fiat_product = self.get_product_by_product_id(product_id[:3] + '-' + self.fiat_currency)
@@ -382,8 +378,7 @@ class TradeEngine():
                 amount = self.get_quoted_currency_from_product_id(product_id)
                 bid = product.order_book.get_ask() - Decimal(product.quote_increment)
                 amount = self.round_coin(Decimal(amount) / Decimal(bid))
-                # Throttle to prevent flip flopping over trade signal
-                if amount >= Decimal(product.min_size) and (time.time() - product.last_signal_switch) > 60.0:
+                if amount >= Decimal(product.min_size):
                     if not product.order_in_progress:
                         product.order_thread = threading.Thread(target=self.buy, name='buy_thread', kwargs={'product': product})
                         product.order_thread.start()
@@ -392,8 +387,7 @@ class TradeEngine():
                     product.last_signal_switch = time.time()
                 product.buy_flag = False
                 product.sell_flag = True
-                # Throttle to prevent flip flopping over trade signal
-                if amount_of_coin >= Decimal(product.min_size) and (time.time() - product.last_signal_switch) > 60.0:
+                if amount_of_coin >= Decimal(product.min_size):
                     if not product.order_in_progress:
                         product.order_thread = threading.Thread(target=self.sell, name='sell_thread', kwargs={'product': product})
                         product.order_thread.start()
