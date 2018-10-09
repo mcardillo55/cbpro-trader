@@ -2,9 +2,9 @@
 # bitcoin-trade.py
 # Mike Cardillo
 #
-# Main program for interacting with GDAX websocket and managing trade data
+# Main program for interacting with Coinbase Pro websocket and managing trade data
 
-import gdax
+import cbpro
 import period
 import indicators
 import engine
@@ -18,7 +18,7 @@ from decimal import Decimal
 from websocket import WebSocketConnectionClosedException
 
 
-class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
+class TradeAndHeartbeatWebsocket(cbpro.WebsocketClient):
     def __init__(self, fiat='USD'):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
@@ -32,10 +32,10 @@ class TradeAndHeartbeatWebsocket(gdax.WebsocketClient):
     def on_open(self):
         self.websocket_queue = queue.Queue()
         self.stop = False
-        self.logger.debug("-- GDAX Websocket Opened ---")
+        self.logger.debug("-- CBPRO Websocket Opened ---")
 
     def on_close(self):
-        self.logger.debug("-- GDAX Websocket Closed ---")
+        self.logger.debug("-- CBPRO Websocket Closed ---")
 
     def on_error(self, e):
         self.error_logger.exception(datetime.datetime.now())
@@ -92,11 +92,11 @@ for cur_period in config['periods']:
             trade_period_list[cur_period['product']] = []
         trade_period_list[cur_period['product']].append(new_period)
 
-auth_client = gdax.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
+auth_client = cbpro.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
 max_slippage = Decimal(str(config['max_slippage']))
 trade_engine = engine.TradeEngine(auth_client, product_list=product_list, fiat=fiat_currency, is_live=config['live'], max_slippage=max_slippage)
-gdax_websocket = TradeAndHeartbeatWebsocket(fiat=fiat_currency)
-gdax_websocket.start()
+cbpro_websocket = TradeAndHeartbeatWebsocket(fiat=fiat_currency)
+cbpro_websocket.start()
 indicator_period_list[0].verbose_heartbeat = True
 indicator_subsys = indicators.IndicatorSubsystem(indicator_period_list)
 last_indicator_update = time.time()
@@ -108,9 +108,9 @@ else:
 interface = curses_interface.cursesDisplay(enable=curses_enable)
 while(True):
     try:
-        if gdax_websocket.error:
-            raise gdax_websocket.error
-        msg = gdax_websocket.websocket_queue.get(timeout=15)
+        if cbpro_websocket.error:
+            raise cbpro_websocket.error
+        msg = cbpro_websocket.websocket_queue.get(timeout=15)
         for product in trade_engine.products:
             product.order_book.process_message(msg)
         if msg.get('type') == "match":
@@ -133,16 +133,16 @@ while(True):
                          indicator_period_list, msg)
     except KeyboardInterrupt:
         trade_engine.close(exit=True)
-        gdax_websocket.close()
+        cbpro_websocket.close()
         interface.close()
         break
     except Exception as e:
         error_logger.exception(datetime.datetime.now())
         trade_engine.close()
-        gdax_websocket.close()
-        gdax_websocket.error = None
+        cbpro_websocket.close()
+        cbpro_websocket.error = None
         # Period data cannot be trusted. Re-initialize
         for cur_period in indicator_period_list:
             cur_period.initialize()
         time.sleep(10)
-        gdax_websocket.start()
+        cbpro_websocket.start()

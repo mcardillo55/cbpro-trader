@@ -4,14 +4,14 @@
 #
 # Subsystem containing all trading logic and execution
 import time
-import gdax
+import cbpro 
 import threading
 import logging
 import datetime
 from decimal import *
 
 
-class OrderBookCustom(gdax.OrderBook):
+class OrderBookCustom(cbpro.OrderBook):
     def __init__(self, product_id='BTC-USD'):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
@@ -47,17 +47,17 @@ class Product(object):
         self.meta = True
         self.last_signal_switch = time.time()
 
-        gdax_products = auth_client.get_products()
-        while not isinstance(gdax_products, list):
+        cbpro_products = auth_client.get_products()
+        while not isinstance(cbpro_products, list):
             # May be rate limited
             time.sleep(3)
-            gdax_products = auth_client.get_products()
+            cbpro_products = auth_client.get_products()
 
-        for gdax_product in gdax_products:
-            if product_id == gdax_product.get('id'):
+        for cbpro_product in cbpro_products:
+            if product_id == cbpro_product.get('id'):
                 self.meta = False # If product_id is in response, it must be a real product
-                self.quote_increment = gdax_product.get('quote_increment')
-                self.min_size = gdax_product.get('base_min_size')
+                self.quote_increment = cbpro_product.get('quote_increment')
+                self.min_size = cbpro_product.get('base_min_size')
 
 
 class TradeEngine():

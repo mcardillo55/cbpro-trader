@@ -1,8 +1,8 @@
-# gdax-trader
+# cbpro-trader
 
-gdax-trader is a bot to automate trading on the GDAX cryptocurrency exchange. It is based around the ta-lib and gdax-python libraries, allowing easy trading based on technical analysis indicators.
+cbpro-trader is a bot to automate trading on the Coinbase Pro cryptocurrency exchange. It is based around the ta-lib and coinbasepro-python libraries, allowing easy trading based on technical analysis indicators.
 
-The bot can monitor and trade any ticker supported by GDAX, and will even trade between cryptocurrencies if the opportunity is better.
+The bot can monitor and trade any ticker supported by Coinbase Pro, and will even trade between cryptocurrencies if the opportunity is better.
 
 ## Disclaimer
 
@@ -14,19 +14,19 @@ You can install most requirements with
 
 `pip install -r ./requirements.txt`
 
-Note that it is currently pointing to a custom version of the gdax-python library until I can push my OrderBook changes upstream.
+Note that it is currently pointing to a custom version of the coinbasepro-python library until I can push my OrderBook changes upstream.
 
 Also note that the TA-Lib python library is actually a wrapper for the ta-lib C library, so you will need to install that before. See the "Dependencies" section on https://github.com/mrjbq7/ta-lib for more information on that.
 
 ## Configuration
 
-Copy config.yml.sample to config.yml and include your `key`, `secret`, and `passphrase` values from your GDAX API key.
+Copy config.yml.sample to config.yml and include your `key`, `secret`, and `passphrase` values from your Coinbase Pro API key.
 
 Set `live` to `yes` **only if** you want the bot to execute **actual trades.** The bot will still collect data and calculate indicators when LIVE is set to FALSE.
 
 In config.yml you can list as many periods as you would like under the periods section. Periods will be used for trading logic only if their `trade:` attribute is set to `yes`, otherwise they are just used for gathering indicator data.
 
-There is experimental support for 'meta' periods, which can be used for comparing 2 products that do not currently have a GDAX trading pair, by setting the `meta:` attribute to `yes` in the period description. The only real use case for this right now is LTC-ETH. Trading on meta periods is not yet supported (work in progress).
+There is experimental support for 'meta' periods, which can be used for comparing 2 products that do not currently have a Coinbase Pro trading pair, by setting the `meta:` attribute to `yes` in the period description. The only real use case for this right now is LTC-ETH. Trading on meta periods is not yet supported (work in progress).
 
 `frontend` can be set to `curses` which is an ncurses display of balances, indicator values, recent candlesticks and trades and current open orders or `debug` which will print the same infromation to the console, line-by-line, as it is available. `debug` tends to fall behind in development, as it's mostly used for debugging (obviously).
 

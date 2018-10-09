@@ -1,5 +1,5 @@
 bintrees==2.0.7
--e git+https://github.com/mcardillo55/gdax-python.git@41d24c196dc3c9b788a124d9cec72a9478286101#egg=gdax
+-e git+https://github.com/mcardillo55/coinbasepro-python.git@d2b8bed627339723ab214430fe93ade2331d757e#egg=cbpro
 numpy==1.15.2
 pymongo==3.5.1
 python-dateutil==2.6.0
