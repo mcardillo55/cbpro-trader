@@ -2,3 +2,5 @@
 *.pyc
 config.yml
 *.log
+.pytest_cache
+__pycache__
