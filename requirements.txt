@@ -1,11 +1,18 @@
+atomicwrites==1.2.1
+attrs==18.2.0
 bintrees==2.0.7
 -e git+https://github.com/mcardillo55/coinbasepro-python.git@d2b8bed627339723ab214430fe93ade2331d757e#egg=cbpro
+more-itertools==4.3.0
 numpy==1.15.2
+pluggy==0.8.0
+py==1.7.0
 pymongo==3.5.1
+pytest==4.0.1
 python-dateutil==2.6.0
 pytz==2017.2
 PyYAML==3.13
 requests==2.13.0
 six==1.10.0
+sortedcontainers==2.1.0
 TA-Lib==0.4.17
 websocket-client==0.40.0
