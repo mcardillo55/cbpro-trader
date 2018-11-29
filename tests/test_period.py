@@ -7,6 +7,7 @@
 import period
 import trade
 import datetime
+import numpy as np
 from decimal import Decimal
 
 
@@ -87,3 +88,23 @@ class TestCandlestick(object):
         assert candlestick.low == Decimal("38.50")
         assert candlestick.close == Decimal("38.50")
         assert candlestick.volume == Decimal("15235.235") + Decimal("105.34")
+
+    def test_close_candlestick__all_fields_none(self):
+
+        candlestick = period.Candlestick(isotime=self.test_datetime)
+        prev_stick = [self.test_datetime_zero_sec_ms, Decimal("39.57"), Decimal("42.45"),
+                      Decimal("40.25"), Decimal("39.87"), Decimal("15235.235")]
+        ret = candlestick.close_candlestick("TEST STICK", prev_stick=prev_stick)
+
+        assert candlestick.new is False
+        assert isinstance(ret, type(np.array([])))
+        np.testing.assert_array_equal(ret, [self.test_datetime_zero_sec_ms, Decimal("39.87"), Decimal("39.87"), Decimal("39.87"), Decimal("39.87"), Decimal("0")])
+
+    def test_close_candlestick__close_not_none(self):
+        existing_candlestick = [self.test_datetime_zero_sec_ms, Decimal("58.00"), Decimal("59.50"),
+                                Decimal("58.10"), Decimal("58.50"), Decimal("15235.235")]
+        candlestick = period.Candlestick(existing_candlestick=existing_candlestick)
+        ret = candlestick.close_candlestick("TEST STICK")
+
+        assert isinstance(ret, type(np.array([])))
+        np.testing.assert_array_equal(ret, existing_candlestick)
