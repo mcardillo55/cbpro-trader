@@ -6,16 +6,15 @@
 
 import dateutil.parser
 import logging
-from decimal import Decimal
 
 
 class Trade:
     def __init__(self, msg):
-        self.seq = Decimal(msg.get('sequence'))
-        self.trade_id = Decimal(msg.get('trade_id'))
+        self.seq = int(msg.get('sequence'))
+        self.trade_id = int(msg.get('trade_id'))
         self.time = dateutil.parser.parse(msg.get('time'))
-        self.price = Decimal(msg.get('price'))
-        self.volume = Decimal(msg.get('size'))
+        self.price = float(msg.get('price'))
+        self.volume = float(msg.get('size'))
         self.logger = logging.getLogger('trader-logger')
 
     def print_trade(self):
