@@ -111,15 +111,10 @@ class TradeEngine():
             if need_updating and time.time() - self.last_order_update >= 1.0:
                 try:
                     ret = self.auth_client.get_orders()
-                    while not isinstance(ret, list):
-                        # May be rate limited, sleep to cool down
-                        time.sleep(3)
-                        ret = self.auth_client.get_orders()
                     for product in self.products:
                         product.open_orders = []
-                    for order in ret[0]:
+                    for order in ret:
                         self.get_product_by_product_id(order.get('product_id')).open_orders.append(order)
-                        self.logger.debug(self.get_product_by_product_id(order.get('product_id')).open_orders)
                     self.last_order_update = time.time()
                 except Exception:
                     self.error_logger.exception(datetime.datetime.now())
