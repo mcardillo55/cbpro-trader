@@ -82,8 +82,7 @@ class cursesDisplay:
                     order_in_progress = True
             starty += 1
             if order_in_progress:
-                ret = trade_engine.auth_client.get_orders()[0]
-                if isinstance(ret, list):
+                ret = trade_engine.auth_client.get_orders()
                     for order in ret:
                         self.order_pad.addstr(starty, 0, "%s %s Price: %s Size: %s Status: %s" %
                                               (order.get('side').upper(), order.get('product_id'),

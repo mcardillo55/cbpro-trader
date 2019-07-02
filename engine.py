@@ -111,7 +111,7 @@ class TradeEngine():
             if need_updating and time.time() - self.last_order_update >= 1.0:
                 try:
                     ret = self.auth_client.get_orders()
-                    while not isinstance(ret[0], list):
+                    while not isinstance(ret, list):
                         # May be rate limited, sleep to cool down
                         time.sleep(3)
                         ret = self.auth_client.get_orders()
@@ -179,9 +179,8 @@ class TradeEngine():
 
         if amount >= Decimal(product.min_size):
             self.logger.debug("Placing buy... Price: %.8f Size: %.8f" % (bid, amount))
-            ret = self.auth_client.buy(type='limit', size=str(amount),
-                                       price=str(bid), post_only=True,
-                                       product_id=product.product_id)
+            ret = self.auth_client.place_limit_order(product.product_id, "buy", size=str(amount),
+                                                     price=str(bid), post_only=True)
             if ret.get('status') == 'pending' or ret.get('status') == 'open':
                 product.open_orders.append(ret)
             return ret
@@ -200,7 +199,7 @@ class TradeEngine():
             while product.buy_flag and (amount >= Decimal(product.min_size) or len(product.open_orders) > 0):
                 if (((product.order_book.get_ask() - Decimal(product.quote_increment)) / starting_price) - Decimal('1.0')) * Decimal('100.0') > self.max_slippage:
                     self.auth_client.cancel_all(product_id=product.product_id)
-                    self.auth_client.buy(type='market', funds=str(self.get_quoted_currency_from_product_id(product.product_id)), product_id=product.product_id)
+                    self.auth_client.place_market_order(product.product_id, "buy", funds=str(self.get_quoted_currency_from_product_id(product.product_id)))
                     product.order_in_progress = False
                     return
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
@@ -240,9 +239,8 @@ class TradeEngine():
 
         if amount >= Decimal(product.min_size):
             self.logger.debug("Placing sell... Price: %.2f Size: %.8f" % (ask, amount))
-            ret = self.auth_client.sell(type='limit', size=str(amount),
-                                        price=str(ask), post_only=True,
-                                        product_id=product.product_id)
+            ret = self.auth_client.place_limit_order(product.product_id, "sell", size=str(amount),
+                                                     price=str(ask), post_only=True)
             if ret.get('status') == 'pending' or ret.get('status') == 'open':
                 product.open_orders.append(ret)
             return ret
@@ -261,7 +259,7 @@ class TradeEngine():
             while product.sell_flag and (amount >= Decimal(product.min_size) or len(product.open_orders) > 0):
                 if (Decimal('1') - ((product.order_book.get_bid() + Decimal(product.quote_increment)) / starting_price)) * Decimal('100.0') > self.max_slippage:
                     self.auth_client.cancel_all(product_id=product.product_id)
-                    self.auth_client.sell(type='market', size=str(self.get_base_currency_from_product_id(product.product_id)), product_id=product.product_id)
+                    self.auth_client.place_market_order(product.product_id, "sell", size=str(self.get_base_currency_from_product_id(product.product_id)))
                     product.order_in_progress = False
                     return
                 if ret.get('status') == 'rejected' or ret.get('status') == 'done' or ret.get('message') == 'NotFound':
