@@ -1,6 +1,7 @@
 key: mykey
 secret: mysecret
 passphrase: mypassphrase
+sandbox: yes
 live: no
 frontend: curses
 logging: no

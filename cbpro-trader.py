@@ -78,7 +78,12 @@ trade_period_list = {}
 product_list = set()
 fiat_currency = config['fiat']
 
-auth_client = cbpro.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
+if config['sandbox']:
+    api_url = "https://api-public.sandbox.pro.coinbase.com"
+else:
+    api_url = "https://api.pro.coinbase.com"
+
+auth_client = cbpro.AuthenticatedClient(config['key'], config['secret'], config['passphrase'], api_url=api_url)
 
 for cur_period in config['periods']:
     if cur_period.get('meta'):
