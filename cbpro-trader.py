@@ -23,9 +23,7 @@ class TradeAndHeartbeatWebsocket(cbpro.WebsocketClient):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
         self.fiat_currency = fiat
-        self.products = ["BTC-" + self.fiat_currency, 'ETH-' + self.fiat_currency,
-                         'LTC-' + self.fiat_currency, 'BCH-' + self.fiat_currency,
-                         'ETH-BTC', 'LTC-BTC']
+        self.products = ["BTC-" + self.fiat_currency]
         self.channels = ['full', 'heartbeat']
         super(TradeAndHeartbeatWebsocket, self).__init__(products=self.products, channels=self.channels)
 
