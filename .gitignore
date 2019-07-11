@@ -4,3 +4,4 @@ config.yml
 *.log
 .pytest_cache
 __pycache__
+.vscode
