@@ -19,13 +19,17 @@ from websocket import WebSocketConnectionClosedException
 
 
 class TradeAndHeartbeatWebsocket(cbpro.WebsocketClient):
-    def __init__(self, fiat='USD'):
+    def __init__(self, fiat='USD', sandbox=False):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
         self.fiat_currency = fiat
         self.products = ["BTC-" + self.fiat_currency]
         self.channels = ['full', 'heartbeat']
-        super(TradeAndHeartbeatWebsocket, self).__init__(products=self.products, channels=self.channels)
+        if sandbox:
+            url="wss://ws-feed-public.sandbox.pro.coinbase.com"
+        else:
+            url="wss://ws-feed.pro.coinbase.com"
+        super(TradeAndHeartbeatWebsocket, self).__init__(products=self.products, channels=self.channels, url=url)
 
     def on_open(self):
         self.websocket_queue = queue.Queue()
@@ -99,7 +103,7 @@ for cur_period in config['periods']:
 
 max_slippage = Decimal(str(config['max_slippage']))
 trade_engine = engine.TradeEngine(auth_client, product_list=product_list, fiat=fiat_currency, is_live=config['live'], max_slippage=max_slippage)
-cbpro_websocket = TradeAndHeartbeatWebsocket(fiat=fiat_currency)
+cbpro_websocket = TradeAndHeartbeatWebsocket(fiat=fiat_currency, sandbox=config['sandbox'])
 cbpro_websocket.start()
 indicator_period_list[0].verbose_heartbeat = True
 indicator_subsys = indicators.IndicatorSubsystem(indicator_period_list)
