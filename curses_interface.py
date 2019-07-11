@@ -83,12 +83,12 @@ class cursesDisplay:
             starty += 1
             if order_in_progress:
                 ret = trade_engine.auth_client.get_orders()
-                    for order in ret:
-                        self.order_pad.addstr(starty, 0, "%s %s Price: %s Size: %s Status: %s" %
-                                              (order.get('side').upper(), order.get('product_id'),
-                                               order.get('price'), order.get('size'),
-                                               order.get('status')))
-                        starty += 1
+                for order in ret:
+                    self.order_pad.addstr(starty, 0, "%s %s Price: %s Size: %s Status: %s" %
+                                            (order.get('side').upper(), order.get('product_id'),
+                                            order.get('price'), order.get('size'),
+                                            order.get('status')))
+                    starty += 1
             else:
                 self.order_pad.addstr(starty, 0, 'None')
             self.last_order_update = time.time()
