@@ -1,64 +1,9 @@
-#
-# engine.py
-# Mike Cardillo
-#
-# Subsystem containing all trading logic and execution
 import time
-import cbpro 
-import threading
 import logging
+import threading
 import datetime
-from decimal import *
-
-
-class OrderBookCustom(cbpro.OrderBook):
-    def __init__(self, product_id='BTC-USD'):
-        self.logger = logging.getLogger('trader-logger')
-        self.error_logger = logging.getLogger('error-logger')
-        super(OrderBookCustom, self).__init__(product_id=product_id)
-
-    def is_ready(self):
-        try:
-            super(OrderBookCustom, self).get_ask()
-        except (ValueError, AttributeError):
-            return False
-        return True
-
-    def get_ask(self):
-        while not self.is_ready():
-            time.sleep(0.01)
-        return super(OrderBookCustom, self).get_ask()
-
-    def get_bid(self):
-        while not self.is_ready():
-            time.sleep(0.01)
-        return super(OrderBookCustom, self).get_bid()
-
-
-class Product(object):
-    def __init__(self, auth_client, product_id='BTC-USD'):
-        self.product_id = product_id
-        self.order_book = OrderBookCustom(product_id=product_id)
-        self.order_in_progress = False
-        self.buy_flag = False
-        self.sell_flag = False
-        self.open_orders = []
-        self.order_thread = None
-        self.meta = True
-        self.last_signal_switch = time.time()
-
-        cbpro_products = auth_client.get_products()
-        while not isinstance(cbpro_products, list):
-            # May be rate limited
-            time.sleep(3)
-            cbpro_products = auth_client.get_products()
-
-        for cbpro_product in cbpro_products:
-            if product_id == cbpro_product.get('id'):
-                self.meta = False # If product_id is in response, it must be a real product
-                self.quote_increment = cbpro_product.get('quote_increment')
-                self.min_size = cbpro_product.get('base_min_size')
-
+from decimal import Decimal, ROUND_DOWN
+from .Product import Product
 
 class TradeEngine():
     def __init__(self, auth_client, product_list=['BTC-USD', 'ETH-USD', 'LTC-USD'], fiat='USD', is_live=False, max_slippage=Decimal('0.10')):

@@ -1,9 +1,3 @@
-#
-# indicators.py
-# Mike Cardillo
-#
-# System for containing all technical indicators and processing associated data
-
 import talib
 import logging
 import numpy as np

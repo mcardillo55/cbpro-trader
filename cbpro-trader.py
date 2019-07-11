@@ -11,7 +11,7 @@ import engine
 import yaml
 import queue
 import time
-import curses_interface
+import interface
 import logging
 import datetime
 from decimal import Decimal
@@ -30,6 +30,7 @@ class TradeAndHeartbeatWebsocket(cbpro.WebsocketClient):
         else:
             url="wss://ws-feed.pro.coinbase.com"
         super(TradeAndHeartbeatWebsocket, self).__init__(products=self.products, channels=self.channels, url=url)
+
 
     def on_open(self):
         self.websocket_queue = queue.Queue()
@@ -113,7 +114,7 @@ if config['frontend'] == 'curses':
     curses_enable = True
 else:
     curses_enable = False
-interface = curses_interface.cursesDisplay(enable=curses_enable)
+interface = interface.cursesDisplay(enable=curses_enable)
 while(True):
     try:
         if cbpro_websocket.error:

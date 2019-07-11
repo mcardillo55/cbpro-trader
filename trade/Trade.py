@@ -1,9 +1,3 @@
-#
-# trade.py
-# Mike Cardillo
-#
-# Objects relating to individual trade data
-
 import dateutil.parser
 import logging
 
