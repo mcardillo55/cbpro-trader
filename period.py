@@ -78,7 +78,7 @@ class Candlestick:
 
 
 class Period:
-    def __init__(self, period_size=60, name='Period', product='BTC-USD', initialize=True):
+    def __init__(self, period_size=60, name='Period', product='BTC-USD', initialize=True, cbpro_client=cbpro.PublicClient()):
         self.period_size = period_size
         self.name = name
         self.product = product
@@ -90,6 +90,7 @@ class Period:
         self.time_of_first_candlestick_close = None
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
+        self.cbpro_client = cbpro_client
         if initialize:
             self.initialize()
         else:
@@ -102,8 +103,6 @@ class Period:
         self.cur_candlestick_start = self.cur_candlestick.time
 
     def get_historical_data(self, num_periods=200):
-        cbpro_client = cbpro.PublicClient()
-
         end = datetime.datetime.utcnow()
         end_iso = end.isoformat()
         start = end - datetime.timedelta(seconds=(self.period_size * num_periods))
@@ -115,7 +114,7 @@ class Period:
         while not isinstance(ret, list):
             try:
                 time.sleep(3)
-                ret = cbpro_client.get_product_historic_rates(self.product, granularity=self.period_size, start=start_iso, end=end_iso)
+                ret = self.cbpro_client.get_product_historic_rates(self.product, granularity=self.period_size, start=start_iso, end=end_iso)
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
         hist_data = np.array(ret, dtype='object')
@@ -191,10 +190,10 @@ class Period:
             self.candlesticks = np.array([self.cur_candlestick.close_candlestick(self.name)])
 
 class MetaPeriod(Period):
-    def __init__(self, period_size=60, name='Period', product='BTC-USD', fiat='USD', initialize=True):
+    def __init__(self, period_size=60, name='Period', product='BTC-USD', fiat='USD', initialize=True, cbpro_client=cbpro.PublicClient()):
         self.base = product[:3] + '-' + fiat
         self.quoted = product[4:] + '-' + fiat
-        super(MetaPeriod, self).__init__(period_size=period_size, name=name, product=product, initialize=True)
+        super(MetaPeriod, self).__init__(period_size=period_size, name=name, product=product, initialize=True, cbpro_client=cbpro_client)
 
     def process_trade(self, msg):
         newmsg = copy.deepcopy(msg)
@@ -213,22 +212,20 @@ class MetaPeriod(Period):
         super(MetaPeriod, self).process_trade(msg=newmsg)
 
     def get_historical_data(self, num_periods=200):
-        cbpro_client = cbpro.PublicClient()
-
         end = datetime.datetime.utcnow()
         end_iso = end.isoformat()
         start = end - datetime.timedelta(seconds=(self.period_size * num_periods))
         start_iso = start.isoformat()
 
-        ret_base = cbpro_client.get_product_historic_rates(self.base, granularity=self.period_size, start=start_iso, end=end_iso)
-        ret_quoted = cbpro_client.get_product_historic_rates(self.quoted, granularity=self.period_size, start=start_iso, end=end_iso)
+        ret_base = self.cbpro_client.get_product_historic_rates(self.base, granularity=self.period_size, start=start_iso, end=end_iso)
+        ret_quoted = self.cbpro_client.get_product_historic_rates(self.quoted, granularity=self.period_size, start=start_iso, end=end_iso)
         # Check if we got rate limited, which will return a JSON message
         while not isinstance(ret_base, list):
             time.sleep(3)
-            ret_base = cbpro_client.get_product_historic_rates(self.base, granularity=self.period_size, start=start_iso, end=end_iso)
+            ret_base = self.cbpro_client.get_product_historic_rates(self.base, granularity=self.period_size, start=start_iso, end=end_iso)
         while not isinstance(ret_quoted, list):
             time.sleep(3)
-            ret_quoted = cbpro_client.get_product_historic_rates(self.quoted, granularity=self.period_size, start=start_iso, end=end_iso)
+            ret_quoted = self.cbpro_client.get_product_historic_rates(self.quoted, granularity=self.period_size, start=start_iso, end=end_iso)
         hist_data_base = np.array(ret_base, dtype='object')
         hist_data_quoted = np.array(ret_quoted, dtype='object')
         array_size = min(len(ret_base), len(ret_quoted))

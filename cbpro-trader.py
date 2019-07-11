@@ -78,13 +78,15 @@ trade_period_list = {}
 product_list = set()
 fiat_currency = config['fiat']
 
+auth_client = cbpro.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
+
 for cur_period in config['periods']:
     if cur_period.get('meta'):
         new_period = period.MetaPeriod(period_size=(60 * cur_period['length']), fiat=fiat_currency,
-                                       product=cur_period['product'], name=cur_period['name'])
+                                       product=cur_period['product'], name=cur_period['name'], cbpro_client=auth_client)
     else:
         new_period = period.Period(period_size=(60 * cur_period['length']),
-                                   product=cur_period['product'], name=cur_period['name'])
+                                   product=cur_period['product'], name=cur_period['name'], cbpro_client=auth_client)
     indicator_period_list.append(new_period)
     product_list.add(cur_period['product'])
     if cur_period['trade']:
@@ -92,7 +94,6 @@ for cur_period in config['periods']:
             trade_period_list[cur_period['product']] = []
         trade_period_list[cur_period['product']].append(new_period)
 
-auth_client = cbpro.AuthenticatedClient(config['key'], config['secret'], config['passphrase'])
 max_slippage = Decimal(str(config['max_slippage']))
 trade_engine = engine.TradeEngine(auth_client, product_list=product_list, fiat=fiat_currency, is_live=config['live'], max_slippage=max_slippage)
 cbpro_websocket = TradeAndHeartbeatWebsocket(fiat=fiat_currency)
