@@ -3,11 +3,12 @@ import time
 import logging
 
 class OrderBookCustom(cbpro.OrderBook):
-    def __init__(self, product_id='BTC-USD'):
+    def __init__(self, product_id='BTC-USD', auth_client=None):
         self.logger = logging.getLogger('trader-logger')
         self.error_logger = logging.getLogger('error-logger')
         super(OrderBookCustom, self).__init__(product_id=product_id)
-        self._client = cbpro.PublicClient(api_url="https://api-public.sandbox.pro.coinbase.com")
+        if auth_client is not None:
+            self._client = auth_client
 
     def is_ready(self):
         try:

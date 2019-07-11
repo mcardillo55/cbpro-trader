@@ -4,7 +4,7 @@ from .OrderBookCustom import OrderBookCustom
 class Product(object):
     def __init__(self, auth_client, product_id='BTC-USD'):
         self.product_id = product_id
-        self.order_book = OrderBookCustom(product_id=product_id)
+        self.order_book = OrderBookCustom(product_id=product_id, auth_client=auth_client)
         self.order_in_progress = False
         self.buy_flag = False
         self.sell_flag = False
