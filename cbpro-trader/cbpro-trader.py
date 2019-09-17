@@ -14,6 +14,7 @@ import time
 import interface
 import logging
 import datetime
+import threading
 from decimal import Decimal
 from websocket import WebSocketConnectionClosedException
 
@@ -73,6 +74,11 @@ class CBProTrader(object):
         else:
             curses_enable = False
         self.interface = interface.cursesDisplay(enable=curses_enable)
+
+        if config['frontend'] == 'web':
+            web_interface = interface.web(self.indicator_subsys)
+            server_thread = threading.Thread(target=web_interface.start, daemon=True)
+            server_thread.start()
 
     def start(self):
         while(True):

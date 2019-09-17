@@ -8,8 +8,18 @@ class IndicatorSubsystem:
     def __init__(self, period_list):
         self.logger = logging.getLogger('trader-logger')
         self.current_indicators = {}
-        for period in period_list:
+        self.period_list = period_list
+        for period in self.period_list:
             self.current_indicators[period.name] = {}
+
+    def get_period_data(self):
+        period_data = []
+        for period in self.period_list:
+            period_data.append({'name': period.name,
+                                'product': period.product,
+                                'period_size': period.period_size,
+                                'candlesticks': period.candlesticks.tolist()})
+        return period_data
 
     def recalculate_indicators(self, cur_period):
         total_periods = len(cur_period.candlesticks)
