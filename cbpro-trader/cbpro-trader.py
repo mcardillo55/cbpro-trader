@@ -91,12 +91,12 @@ class CBProTrader(object):
                 if msg.get('type') == "match":
                     for cur_period in self.indicator_period_list:
                         cur_period.process_trade(msg)
-                    if time.time() - last_indicator_update >= 1.0:
+                    if time.time() - self.last_indicator_update >= 1.0:
                         for cur_period in self.indicator_period_list:
                             self.indicator_subsys.recalculate_indicators(cur_period)
                         for product_id, period_list in self.trade_period_list.items():
                             self.trade_engine.determine_trades(product_id, period_list, self.indicator_subsys.current_indicators)
-                        last_indicator_update = time.time()
+                        self.last_indicator_update = time.time()
                 elif msg.get('type') == "heartbeat":
                     for cur_period in self.indicator_period_list:
                         cur_period.process_heartbeat(msg)
