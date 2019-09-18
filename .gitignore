@@ -5,3 +5,5 @@ config.yml
 .pytest_cache
 __pycache__
 .vscode
+cbpro-trader/config.live
+cbpro-trader/config.sandbox
