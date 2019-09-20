@@ -6,7 +6,7 @@
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-scripts": "3.1.1",
-    "victory": "^33.0.5"
+    "victory": "^33.0.6"
   },
   "scripts": {
     "start": "react-scripts start",
