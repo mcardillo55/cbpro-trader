@@ -15,10 +15,13 @@ class IndicatorSubsystem:
     def get_period_data(self):
         period_data = []
         for period in self.period_list:
+            candlesticks = period.candlesticks.tolist()
+            if period.cur_candlestick is not None:
+                candlesticks.append(period.cur_candlestick.to_list())
             period_data.append({'name': period.name,
                                 'product': period.product,
                                 'period_size': period.period_size,
-                                'candlesticks': period.candlesticks.tolist()})
+                                'candlesticks': candlesticks})
         return period_data
 
     def get_indicator_data(self):

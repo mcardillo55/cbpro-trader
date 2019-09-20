@@ -56,6 +56,10 @@ class Candlestick:
         return np.array([self.time, self.low, self.high, self.open,
                         self.close, self.volume])
 
+    def to_list(self):
+        return [self.time, self.low, self.high, self.open,
+                        self.close, self.volume]
+
     def print_stick(self, period_name):
         self.logger.debug("[CANDLESTICK %s] Time: %s Open: %s High: %s Low: %s Close: %s Vol: %s" %
                           (period_name, self.time, self.open, self.high, self.low,
