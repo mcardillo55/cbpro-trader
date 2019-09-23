@@ -4,18 +4,18 @@ import { VictoryCandlestick, VictoryChart, VictoryAxis, VictoryTheme } from 'vic
 class Chart extends Component {
     constructor(props) {
         super(props);
-        this.state = {periods: []};
+        this.state = {candlesticks: []};
     }
     componentDidMount() {
         setInterval(() => {
-            fetch("/periods/")
+            fetch("/periods/" + this.props.period_name)
                 .then(response => {
                     return response.json()
                 })
                 .then(myJson => {
-                    this.setState({periods: myJson})
+                    this.setState({candlesticks: myJson})
                 })
-            }, 1000);
+        }, 1000)
     }
 
     render() {
@@ -46,20 +46,14 @@ class Chart extends Component {
                 }}
                 dependentAxis
             />
-               {
-                this.state.periods.map(period => {
-                    return (
-                    <VictoryCandlestick
-                    candleColors={{ positive: "green", negative: "red" }}
-                    data={period.candlesticks.slice(period.candlesticks.length-50, period.candlesticks.length)}
-                    x={(d) => Date.parse(d[0])}
-                    open={3}
-                    close={4}
-                    high={2}
-                    low={1} />
-                    )
-                })
-            }
+            <VictoryCandlestick
+            candleColors={{ positive: "green", negative: "red" }}
+            data={this.state.candlesticks.slice(this.state.candlesticks.length-50, this.state.candlesticks.length)}
+            x={(d) => Date.parse(d[0])}
+            open={3}
+            close={4}
+            high={2}
+            low={1} />
             </VictoryChart>
         )
     }
