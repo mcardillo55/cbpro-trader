@@ -23,6 +23,7 @@ class Chart extends Component {
             <VictoryChart 
                 theme={VictoryTheme.material}
                 domainPadding={{ x: 10 }}
+                padding={20}
                 height={200}
                 width={300}
                 scale={{ x: "time"}}

@@ -18,15 +18,15 @@ class ChartController extends Component {
 
     render() {
         return (
-            <div>
-                <ul>
+            <div id="chart-controller">
+                <Chart period_name={this.state.active_period} />
+                <ul id="currency-list">
                     {this.state.period_list.map(period_name => {
                         return(
                             <li onClick={() => this.setState({active_period: period_name})}>{period_name}</li>
                         )
                     })}
                 </ul>
-                <Chart period_name={this.state.active_period} />
             </div>
         )
     }
