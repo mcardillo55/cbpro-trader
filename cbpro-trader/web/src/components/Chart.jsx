@@ -20,42 +20,43 @@ class Chart extends Component {
 
     render() {
         return (
-            <VictoryChart 
-                theme={VictoryTheme.material}
-                domainPadding={{ x: 10 }}
-                padding={20}
-                height={200}
-                width={300}
-                scale={{ x: "time"}}
-            >
-            <VictoryAxis 
-                tickFormat={(t) => `${t.toLocaleString(undefined, {year: "2-digit",
-                                                        month: "numeric",
-                                                        day: "numeric",
-                                                        hour: "numeric",
-                                                        minute: "numeric",
-                                                        hourCycle: "h24"
-                                                        }).replace(',', '\n')}`}
-                tickCount={25}
-                style={{
-                    tickLabels: {fontSize: 2}
-                }}
-            />
-            <VictoryAxis 
-                style={{
-                    tickLabels: {fontSize: 2}
-                }}
-                dependentAxis
-            />
-            <VictoryCandlestick
-            candleColors={{ positive: "green", negative: "red" }}
-            data={this.state.candlesticks.slice(this.state.candlesticks.length-50, this.state.candlesticks.length)}
-            x={(d) => Date.parse(d[0])}
-            open={3}
-            close={4}
-            high={2}
-            low={1} />
-            </VictoryChart>
+            <div id="chart">
+                <VictoryChart 
+                    theme={VictoryTheme.material}
+                    domainPadding={{ x: 10 }}
+                    height={600}
+                    width={1000}
+                    scale={{ x: "time"}}
+                >
+                <VictoryAxis 
+                    tickFormat={(t) => `${t.toLocaleString(undefined, {year: "2-digit",
+                                                            month: "numeric",
+                                                            day: "numeric",
+                                                            hour: "numeric",
+                                                            minute: "numeric",
+                                                            hourCycle: "h24"
+                                                            }).replace(',', '\n')}`}
+                    tickCount={25}
+                    style={{
+                        tickLabels: {fontSize: 2}
+                    }}
+                />
+                <VictoryAxis 
+                    style={{
+                        tickLabels: {fontSize: 2}
+                    }}
+                    dependentAxis
+                />
+                <VictoryCandlestick
+                candleColors={{ positive: "green", negative: "red" }}
+                data={this.state.candlesticks.slice(this.state.candlesticks.length-50, this.state.candlesticks.length)}
+                x={(d) => Date.parse(d[0])}
+                open={3}
+                close={4}
+                high={2}
+                low={1} />
+                </VictoryChart>
+            </div>
         )
     }
 };

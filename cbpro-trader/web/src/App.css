@@ -1,14 +1,21 @@
 .VictoryContainer {
-  height: 90%;
   background: white;
 }
 
+#chart {
+  height: 600px;
+  width: 1000px;
+}
 #chart-controller {
-  padding: 0 200px 0 200px;
+  display: inline-block;
+  width: 1000px;
+  height: 650px;
 }
 #currency-list {
   list-style-type: none;
-  margin-bottom: 0px;
+  margin: 0px;
+  padding: 0px;
+  height: 42px;
 }
 
 li {
@@ -18,8 +25,10 @@ li {
   padding: 10px;
   text-decoration: none;
   border: 1px solid;
+  height: 42px;
 }
 
 body {
   background: gray;
+  text-align: center;
 }
