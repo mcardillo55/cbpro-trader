@@ -3,8 +3,9 @@
 }
 
 #chart {
-  height: 600px;
+  height: 630px;
   width: 1000px;
+  border: 1px solid;
 }
 #chart-controller {
   display: inline-block;

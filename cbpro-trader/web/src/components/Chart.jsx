@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { VictoryCandlestick, VictoryChart, VictoryAxis, VictoryTheme } from 'victory';
+import { VictoryCandlestick, VictoryChart, VictoryAxis, VictoryLabel, VictoryTheme } from 'victory';
 
 class Chart extends Component {
     constructor(props) {
@@ -23,38 +23,33 @@ class Chart extends Component {
             <div id="chart">
                 <VictoryChart 
                     theme={VictoryTheme.material}
-                    domainPadding={{ x: 10 }}
+                    domainPadding={{ x: 15 }}
                     height={600}
                     width={1000}
                     scale={{ x: "time"}}
                 >
-                <VictoryAxis 
-                    tickFormat={(t) => `${t.toLocaleString(undefined, {year: "2-digit",
-                                                            month: "numeric",
-                                                            day: "numeric",
-                                                            hour: "numeric",
-                                                            minute: "numeric",
-                                                            hourCycle: "h24"
-                                                            }).replace(',', '\n')}`}
-                    tickCount={25}
-                    style={{
-                        tickLabels: {fontSize: 2}
-                    }}
-                />
-                <VictoryAxis 
-                    style={{
-                        tickLabels: {fontSize: 2}
-                    }}
-                    dependentAxis
-                />
-                <VictoryCandlestick
-                candleColors={{ positive: "green", negative: "red" }}
-                data={this.state.candlesticks.slice(this.state.candlesticks.length-50, this.state.candlesticks.length)}
-                x={(d) => Date.parse(d[0])}
-                open={3}
-                close={4}
-                high={2}
-                low={1} />
+                    <VictoryLabel text={this.props.period_name} x={480} y={6}/>
+                    <VictoryAxis 
+                        tickFormat={(t) => `${t.toLocaleString(undefined, {year: "2-digit",
+                                                                month: "numeric",
+                                                                day: "numeric",
+                                                                hour: "numeric",
+                                                                minute: "numeric",
+                                                                hourCycle: "h24"
+                                                                }).replace(',', '\n')}`}
+                        tickCount={25}
+                    />
+                    <VictoryAxis 
+                        dependentAxis
+                    />
+                    <VictoryCandlestick
+                    candleColors={{ positive: "green", negative: "red" }}
+                    data={this.state.candlesticks.slice(this.state.candlesticks.length-50, this.state.candlesticks.length)}
+                    x={(d) => Date.parse(d[0])}
+                    open={3}
+                    close={4}
+                    high={2}
+                    low={1} />
                 </VictoryChart>
             </div>
         )
