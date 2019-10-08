@@ -11,6 +11,7 @@
   display: inline-block;
   width: 1000px;
   height: 650px;
+  margin-top: 50px;
 }
 #currency-list {
   list-style-type: none;
