@@ -3,7 +3,7 @@
 }
 
 #chart {
-  height: 630px;
+  height: 600px;
   width: 1000px;
   border: 1px solid;
 }
@@ -15,9 +15,9 @@
 }
 #currency-list {
   list-style-type: none;
-  margin: 0px;
+  margin: 0px 0px 1px 0px;
   padding: 0px;
-  height: 42px;
+  height: 40px;
 }
 
 li {
@@ -27,10 +27,10 @@ li {
   padding: 10px;
   text-decoration: none;
   border: 1px solid;
-  height: 42px;
+  height: 20px;
 }
 
 body {
-  background: gray;
+  background: rgb(19, 23, 34);
   text-align: center;
 }
