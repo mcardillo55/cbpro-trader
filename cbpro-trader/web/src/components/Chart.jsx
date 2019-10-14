@@ -28,7 +28,11 @@ class Chart extends Component {
                     width={1000}
                     scale={{ x: "time"}}
                 >
-                    <VictoryLabel text={this.props.period_name} x={480} y={15} style={{"font-weight": "bold", fill: "rgb(217, 217, 217)"}}/>
+                    <VictoryLabel text={this.props.period_name} x={20} y={20} style={{
+                                                                                        fontWeight: "bold",
+                                                                                        fontSize: 20,
+                                                                                        fill: "rgb(217, 217, 217)"
+                                                                                      }}/>
                     <VictoryAxis 
                         tickFormat={(t) => `${t.toLocaleString(undefined, {year: "2-digit",
                                                                 month: "numeric",
