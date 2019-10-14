@@ -28,7 +28,7 @@ class Chart extends Component {
                     width={1000}
                     scale={{ x: "time"}}
                 >
-                    <VictoryLabel text={this.props.period_name} x={480} y={15} style={{"font-weight": "bold"}}/>
+                    <VictoryLabel text={this.props.period_name} x={480} y={15} style={{"font-weight": "bold", fill: "rgb(217, 217, 217)"}}/>
                     <VictoryAxis 
                         tickFormat={(t) => `${t.toLocaleString(undefined, {year: "2-digit",
                                                                 month: "numeric",
@@ -38,12 +38,23 @@ class Chart extends Component {
                                                                 hourCycle: "h24"
                                                                 }).replace(',', '\n')}`}
                         tickCount={25}
+                        style={{
+                            tickLabels: {
+                                fill: "rgb(217, 217, 217)"
+                            }
+                        }}
                     />
                     <VictoryAxis 
                         dependentAxis
+                        style={{
+                            tickLabels: {
+                                fill: "rgb(217, 217, 217)"
+                            }
+                        }}
                     />
                     <VictoryCandlestick
-                    candleColors={{ positive: "green", negative: "red" }}
+                    candleColors={{ positive: "#53b987", negative: "#eb4d5c" }}
+
                     data={this.state.candlesticks.slice(this.state.candlesticks.length-50, this.state.candlesticks.length)}
                     x={(d) => Date.parse(d[0])}
                     open={3}

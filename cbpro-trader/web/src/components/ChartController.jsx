@@ -23,7 +23,7 @@ class ChartController extends Component {
                 <ul id="currency-list">
                     {this.state.period_list.map(period_name => {
                         return(
-                            <li onClick={() => this.setState({active_period: period_name})}>{period_name}</li>
+                            <li className={this.state.active_period === period_name ? "focused" : ""} onClick={() => this.setState({active_period: period_name})}>{period_name}</li>
                         )
                     })}
                 </ul>
