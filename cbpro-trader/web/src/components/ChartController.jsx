@@ -19,6 +19,7 @@ class ChartController extends Component {
     render() {
         return (
             <div id="chart-controller">
+                <Chart period_name={this.state.active_period} />
                 <ul id="currency-list">
                     {this.state.period_list.map(period_name => {
                         return(
@@ -26,7 +27,6 @@ class ChartController extends Component {
                         )
                     })}
                 </ul>
-                <Chart period_name={this.state.active_period} />
             </div>
         )
     }

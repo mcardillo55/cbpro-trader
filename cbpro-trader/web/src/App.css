@@ -3,27 +3,21 @@
 }
 
 #chart {
-  height: 600px;
-  width: 1000px;
   border: 1px solid;
 }
 #chart-controller {
-  display: inline-block;
-  width: 1000px;
-  height: 650px;
-  margin-top: 50px;
+  display: grid;
+  grid-template-columns: 9fr 3fr;
 }
 #currency-list {
   list-style-type: none;
-  margin: 0px 0px 1px 0px;
   padding: 0px;
-  height: 40px;
+  margin: 0px;
 }
 
 li {
   background: white;
   display: block;
-  float: left;
   padding: 10px;
   text-decoration: none;
   border: 1px solid;
@@ -32,5 +26,4 @@ li {
 
 body {
   background: rgb(19, 23, 34);
-  text-align: center;
 }
