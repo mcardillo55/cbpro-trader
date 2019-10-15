@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Chart from './Chart';
+import Details from './Details';
 
 class ChartController extends Component {
     constructor(props) {
@@ -20,13 +21,16 @@ class ChartController extends Component {
         return (
             <div id="chart-controller">
                 <Chart period_name={this.state.active_period} />
-                <ul id="currency-list">
-                    {this.state.period_list.map(period_name => {
-                        return(
-                            <li className={this.state.active_period === period_name ? "focused" : ""} onClick={() => this.setState({active_period: period_name})}>{period_name}</li>
-                        )
-                    })}
-                </ul>
+                <div id="sidebar">
+                    <ul id="currency-list">
+                        {this.state.period_list.map(period_name => {
+                            return(
+                                <li className={this.state.active_period === period_name ? "focused" : ""} onClick={() => this.setState({active_period: period_name})}>{period_name}</li>
+                            )
+                        })}
+                    </ul>
+                    <Details period_name={this.state.active_period}/>
+                </div>
             </div>
         )
     }

@@ -12,12 +12,13 @@ class web(object):
         self.app.add_url_rule('/periods/', 'periods', self.periods)
         self.app.add_url_rule('/periods/<periodName>', 'periods', self.periods)
         self.app.add_url_rule('/indicators/', 'indicators', self.indicators)
+        self.app.add_url_rule('/indicators/<periodName>', 'indicators', self.indicators)
     
     def periods(self, periodName=None):
         return jsonify(self.indicator_subsys.get_period_data(periodName))
 
-    def indicators(self):
-        return jsonify(self.indicator_subsys.get_indicator_data())
+    def indicators(self, periodName=None):
+        return jsonify(self.indicator_subsys.get_indicator_data(periodName))
 
     def start(self):
         self.app.run()

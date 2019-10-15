@@ -6,7 +6,19 @@
   list-style-type: none;
   padding: 0px;
   margin: 0px;
+}
+#sidebar {
+  display: grid;
+  grid-template-rows: 2fr 1fr;
   border-left: 5px solid;
+}
+#details {
+  border-top: 5px solid;
+  font-weight: bold;
+  padding: 10px;
+}
+#last-trade {
+  font-size: 28px;
 }
 
 li {
