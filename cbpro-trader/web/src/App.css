@@ -3,22 +3,31 @@
   grid-template-columns: 9fr 3fr;
 }
 #currency-list {
+  overflow-y: auto;
   list-style-type: none;
   padding: 0px;
   margin: 0px;
 }
 #sidebar {
   display: grid;
-  grid-template-rows: 2fr 1fr;
+  grid-template-rows: 1fr 2fr;
   border-left: 5px solid;
+  max-height: 100vh;
 }
 #details {
+  overflow-y: auto;
   border-top: 5px solid;
   font-weight: bold;
   padding: 10px;
 }
 #last-trade {
   font-size: 28px;
+}
+.indicator-data {
+  font-weight: normal;
+}
+.indicator {
+  margin: 8px 0px;
 }
 
 li {

@@ -21,7 +21,19 @@ class Details extends Component {
         return(
             <div id="details">
                 <div id="last-trade-label">Last Trade</div>
-                <div id="last-trade">{this.state.details.close}</div>
+                <div id="last-trade">{this.state.details.close && this.state.details.close.toFixed(2)}</div>
+                <div id="indicators">
+                    {
+                        Object.keys(this.state.details).map((indicator) => {
+                            return(
+                                <div class="indicator">
+                                    <div class="indicator-title">{indicator.toUpperCase()}</div>
+                                    <div class="indicator-data">{this.state.details[indicator]}</div>
+                                </div>
+                            )
+                        })
+                    }
+                </div>
             </div>
         )
     }
