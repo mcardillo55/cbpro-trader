@@ -29,7 +29,14 @@ class ChartController extends Component {
                             )
                         })}
                     </ul>
-                    <Details period_name={this.state.active_period}/>
+                    <div id="secondary-section">
+                        <div id="secondary-selector">
+                            <button>Details</button>
+                            <button>Flags</button>
+                            <button>Orders</button>
+                        </div>
+                        <Details period_name={this.state.active_period}/>
+                    </div>
                 </div>
             </div>
         )
