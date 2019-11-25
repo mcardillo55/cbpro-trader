@@ -24,3 +24,5 @@ const chart = (state = {period_list: []}, action) => {
             return state
     }
 }
+
+export default chart;
