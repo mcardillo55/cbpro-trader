@@ -1,4 +1,4 @@
-export const changeActivePeriod = activePeriod => ({
+export const changeActivePeriod = period_name => ({
     type: 'CHANGE_ACTIVE_PERIOD',
     period_name
 })
