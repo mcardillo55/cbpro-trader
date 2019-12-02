@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
-import Chart from './Chart'
-import Details from './Details'
+import { connect } from 'react-redux'
+import { addPeriod, changeActivePeriod } from '../actions'
+import Chart from '../components/Chart'
+import Details from '../components/Details'
 
 class ChartController extends Component {
     componentDidMount() {
@@ -44,4 +46,14 @@ class ChartController extends Component {
     }
 }
 
-export default ChartController
+const mapStateToProps = state => ({
+    period_list: state.period_list,
+    active_period: state.active_period
+  })
+  
+  const mapDispatchToProps = dispatch => ({
+    addPeriod: period_name => dispatch(addPeriod(period_name)),
+    changeActivePeriod: period_name => dispatch(changeActivePeriod(period_name))
+  })
+
+export default connect(mapStateToProps, mapDispatchToProps)(ChartController);

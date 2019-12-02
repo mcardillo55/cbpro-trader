@@ -1,12 +1,12 @@
 import React from 'react';
-import ChartControllerContainer from './containers/ChartControllerContainer'
+import ChartController from './containers/ChartController'
 
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <ChartControllerContainer />
+      <ChartController />
     </div>
   );
 }
