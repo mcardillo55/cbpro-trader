@@ -13,7 +13,7 @@ export const updateCandlesticks = candlesticks => ({
     candlesticks
 })
 
-export const updateIndicators = period_name => ({
+export const updateIndicators = indicators => ({
     type: 'UPDATE_INDICATORS',
-    period_name
+    indicators
 })

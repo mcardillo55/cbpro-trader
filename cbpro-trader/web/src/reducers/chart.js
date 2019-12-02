@@ -1,4 +1,4 @@
-const chart = (state = {period_list: [], candlesticks: []}, action) => {
+const chart = (state = {period_list: [], candlesticks: [], indicators: []}, action) => {
     switch (action.type) {
         case 'CHANGE_ACTIVE_PERIOD':
             return {

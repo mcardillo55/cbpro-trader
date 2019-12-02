@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { addPeriod, changeActivePeriod, updateCandlesticks } from '../actions'
+import { addPeriod, changeActivePeriod, updateCandlesticks, updateIndicators } from '../actions'
 import ChartContainer from '../containers/ChartContainer'
-import Details from '../components/Details'
+import DetailsContainer from '../containers/DetailsContainer'
 
 class ChartController extends Component {
     componentDidMount() {
@@ -18,7 +18,7 @@ class ChartController extends Component {
                 
             })
             .then(
-              setInterval(() => {
+                setInterval(() => {
                 fetch("/periods/" + this.props.active_period)
                     .then(response => {
                         return response.json()
@@ -26,7 +26,18 @@ class ChartController extends Component {
                     .then(myJson => {
                         this.props.updateCandlesticks(myJson)
                     })
-              }, 1000)
+                }, 1000)
+            )
+            .then(
+                setInterval(() => {
+                    fetch("/indicators/" + this.props.active_period)
+                        .then(response => {
+                            return response.json()
+                        })
+                        .then(myJson => {
+                            this.props.updateIndicators(myJson)
+                        })
+                }, 1000)
             )
     }
 
@@ -49,7 +60,7 @@ class ChartController extends Component {
                             <button>Flags</button>
                             <button>Orders</button>
                         </div>
-                        <Details period_name={active_period}/>
+                        <DetailsContainer />
                     </div>
                 </div>
             </div>
@@ -65,7 +76,8 @@ const mapStateToProps = state => ({
   const mapDispatchToProps = dispatch => ({
     addPeriod: period_name => dispatch(addPeriod(period_name)),
     changeActivePeriod: period_name => dispatch(changeActivePeriod(period_name)),
-    updateCandlesticks: candlesticks => dispatch(updateCandlesticks(candlesticks))
+    updateCandlesticks: candlesticks => dispatch(updateCandlesticks(candlesticks)),
+    updateIndicators: indicators => dispatch(updateIndicators(indicators))
   })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChartController);
