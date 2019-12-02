@@ -18,14 +18,15 @@ class ChartController extends Component {
     }
 
     render() {
+        const { active_period, period_list, changeActivePeriod } = this.props;
         return (
             <div id="chart-controller">
-                <Chart period_name={this.props.active_period} />
+                <Chart period_name={active_period} />
                 <div id="sidebar">
                     <ul id="currency-list">
-                        {this.props.period_list.map(period_name => {
+                        {period_list.map(period_name => {
                             return(
-                                <li className={this.props.active_period === period_name ? "focused" : ""} onClick={() => {this.props.changeActivePeriod(period_name)}}>{period_name}</li>
+                                <li className={active_period === period_name ? "focused" : ""} onClick={() => {changeActivePeriod(period_name)}}>{period_name}</li>
                             )
                         })}
                     </ul>
@@ -35,7 +36,7 @@ class ChartController extends Component {
                             <button>Flags</button>
                             <button>Orders</button>
                         </div>
-                        <Details period_name={this.props.active_period}/>
+                        <Details period_name={active_period}/>
                     </div>
                 </div>
             </div>
