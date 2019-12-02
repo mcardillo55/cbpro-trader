@@ -29,6 +29,9 @@
 #last-trade {
   font-size: 28px;
 }
+.active-button{
+  background-color: rgb(33, 56, 77);
+}
 .indicator-data {
   font-weight: normal;
 }
