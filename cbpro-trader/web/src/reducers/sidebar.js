@@ -1,9 +1,9 @@
-const sidebar = (state = {indicators: []}, action) => {
+const sidebar = (state = {indicators: [], active_section: "details"}, action) => {
     switch (action.type) {
         case 'CHANGE_ACTIVE_SECTION':
             return {
                 ...state,
-                active_section: action.active_section
+                active_section: action.section_name
             }
         case 'UPDATE_INDICATORS':
             return {

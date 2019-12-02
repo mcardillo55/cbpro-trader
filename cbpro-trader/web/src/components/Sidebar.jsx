@@ -1,8 +1,8 @@
 import React from 'react';
 import DetailsContainer from '../containers/DetailsContainer'
 
-function Chart(props) {
-    const { active_period, period_list, changeActivePeriod } = props;
+function Sidebar(props) {
+    const { active_period, period_list, active_section, changeActiveSection, changeActivePeriod } = props;
     return (
         <div id="sidebar">
             <ul id="currency-list">
@@ -14,9 +14,9 @@ function Chart(props) {
             </ul>
             <div id="secondary-section">
                 <div id="secondary-selector">
-                    <button>Details</button>
-                    <button>Flags</button>
-                    <button>Orders</button>
+                    <button className={active_section === "details" ? "active-button" : ""} onClick={() => {changeActiveSection("details")}}>Details</button>
+                    <button className={active_section === "flags" ? "active-button" : ""} onClick={() => {changeActiveSection("flags")}}>Flags</button>
+                    <button className={active_section === "orders" ? "active-button" : ""} onClick={() => {changeActiveSection("orders")}}>Orders</button>
                 </div>
                 <DetailsContainer />
             </div>
@@ -24,4 +24,4 @@ function Chart(props) {
     )
 }
 
-export default Chart;
+export default Sidebar;
