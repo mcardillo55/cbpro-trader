@@ -15,11 +15,6 @@ const chart = (state = {period_list: [], candlesticks: [], indicators: []}, acti
                 ...state,
                 candlesticks: action.candlesticks
             }
-        case 'UPDATE_INDICATORS':
-            return {
-                ...state,
-                indicators: action.indicators
-            }
         default:
             return state
     }

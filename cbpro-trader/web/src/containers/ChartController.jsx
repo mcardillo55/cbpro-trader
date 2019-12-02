@@ -69,8 +69,8 @@ class ChartController extends Component {
 }
 
 const mapStateToProps = state => ({
-    period_list: state.period_list,
-    active_period: state.active_period
+    period_list: state.chart.period_list,
+    active_period: state.chart.active_period
   })
   
   const mapDispatchToProps = dispatch => ({
