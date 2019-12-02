@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { addPeriod, changeActivePeriod } from '../actions'
-import Chart from '../components/Chart'
+import { addPeriod, changeActivePeriod, updateCandlesticks } from '../actions'
+import ChartContainer from '../containers/ChartContainer'
 import Details from '../components/Details'
 
 class ChartController extends Component {
@@ -17,13 +17,24 @@ class ChartController extends Component {
                 })
                 
             })
+            .then(
+              setInterval(() => {
+                fetch("/periods/" + this.props.active_period)
+                    .then(response => {
+                        return response.json()
+                    })
+                    .then(myJson => {
+                        this.props.updateCandlesticks(myJson)
+                    })
+              }, 1000)
+            )
     }
 
     render() {
         const { active_period, period_list, changeActivePeriod } = this.props;
         return (
             <div id="chart-controller">
-                <Chart period_name={active_period} />
+                <ChartContainer />
                 <div id="sidebar">
                     <ul id="currency-list">
                         {period_list.map(period_name => {
@@ -53,7 +64,8 @@ const mapStateToProps = state => ({
   
   const mapDispatchToProps = dispatch => ({
     addPeriod: period_name => dispatch(addPeriod(period_name)),
-    changeActivePeriod: period_name => dispatch(changeActivePeriod(period_name))
+    changeActivePeriod: period_name => dispatch(changeActivePeriod(period_name)),
+    updateCandlesticks: candlesticks => dispatch(updateCandlesticks(candlesticks))
   })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChartController);
