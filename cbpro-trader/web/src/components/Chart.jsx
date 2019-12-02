@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { VictoryCandlestick, VictoryChart, VictoryAxis, VictoryLabel, VictoryTheme } from 'victory';
 
 function Chart (props) {
