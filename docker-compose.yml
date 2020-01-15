@@ -1,0 +1,5 @@
+version: "3"
+services:
+  cbpro:
+    build: ./cbpro-trader
+    command: python3 ./cbpro-trader.py
