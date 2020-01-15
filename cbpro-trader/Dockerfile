@@ -26,6 +26,3 @@ COPY . /cbpro-trader/
 WORKDIR /cbpro-trader/
 RUN pip3 install numpy==1.15.2
 RUN pip3 install -r ./requirements.txt
-WORKDIR /cbpro-trader/cbpro-trader/
-
-CMD python3 cbpro-trader.py
