@@ -21,4 +21,4 @@ class web(object):
         return jsonify(self.indicator_subsys.get_indicator_data(periodName))
 
     def start(self):
-        self.app.run()
+        self.app.run(host='0.0.0.0')

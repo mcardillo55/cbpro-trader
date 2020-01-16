@@ -3,3 +3,6 @@ services:
   cbpro:
     build: ./cbpro-trader
     command: python3 ./cbpro-trader.py
+  web:
+    build: ./cbpro-trader/web
+    command: npm start
