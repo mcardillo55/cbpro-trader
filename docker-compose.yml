@@ -5,4 +5,6 @@ services:
     command: python3 ./cbpro-trader.py
   web:
     build: ./cbpro-trader/web
-    command: npm start
+    command: bash -c "npm install && npm start"
+    volumes:
+      - ./cbpro-trader/web/:/frontend/
