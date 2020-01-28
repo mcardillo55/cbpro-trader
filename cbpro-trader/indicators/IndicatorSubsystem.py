@@ -20,7 +20,7 @@ class IndicatorSubsystem:
         else:
             for period in self.period_list:
                 if period.name == period_name:
-                    period_data = period.candlesticks.tolist()
+                    period_data = period.candlesticks.tolist() + [period.cur_candlestick.to_list()]
         return period_data
 
     def get_indicator_data(self, period_name):
