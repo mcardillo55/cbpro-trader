@@ -76,7 +76,7 @@ class CBProTrader(object):
         self.interface = interface.cursesDisplay(enable=curses_enable)
 
         if config['frontend'] == 'web':
-            web_interface = interface.web(self.indicator_subsys)
+            web_interface = interface.web(self.indicator_subsys, self.trade_engine)
             server_thread = threading.Thread(target=web_interface.start, daemon=True)
             server_thread.start()
 
