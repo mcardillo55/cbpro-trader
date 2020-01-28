@@ -8,6 +8,11 @@ export const changeActiveSection = section_name => ({
     section_name
 })
 
+export const updateFlags = flags => ({
+    type: 'UPDATE_FLAGS',
+    flags
+})
+
 export const addPeriod = period_name => ({
     type: 'ADD_PERIOD',
     period_name

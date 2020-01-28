@@ -1,5 +1,6 @@
 import React from 'react';
 import DetailsContainer from '../containers/DetailsContainer'
+import FlagsContainer from '../containers/FlagsContainer'
 
 function Sidebar(props) {
     const { active_period, period_list, active_section, changeActiveSection, changeActivePeriod } = props;
@@ -18,7 +19,9 @@ function Sidebar(props) {
                     <button className={active_section === "flags" ? "active-button" : ""} onClick={() => {changeActiveSection("flags")}}>Flags</button>
                     <button className={active_section === "orders" ? "active-button" : ""} onClick={() => {changeActiveSection("orders")}}>Orders</button>
                 </div>
-                <DetailsContainer />
+                {active_section === "details" && <DetailsContainer />}
+                {active_section === "flags" && <FlagsContainer />}
+                {active_section === "orders" && <p>Orders Section</p>}
             </div>
         </div>
     )
