@@ -8,11 +8,32 @@ The bot can monitor and trade any ticker supported by Coinbase Pro, and will eve
 
 This bot is still in early stages and may have bugs. The strategies also need major reworking. **Do not use with any money you are not 100% willing to lose.**
 
-## Requirements
+## Installation
+### Docker
 
-You can install most requirements with 
+A docker-compose file is included to try to ease installation.
 
+If you are using the `web` frontend, you can simply run `docker-compose up` and then visit the URL provided by the frontend server.
+
+If you are using the `curses` or `debug` frontends, you can run
+
+`docker-compose build cbpro`
+`docker run -it cbpro-trader_cbpro`
+
+to build and run the image, then`python3 ./cbpro-trader.py` to start the bot
+
+You will need to run `docker-compose up --build` if you change the config after the initial build.
+
+### Manual
+
+You can install most requirements with
+
+`cd ./cbpro-trader`
 `pip install -r ./requirements.txt`
+
+then run with
+
+`python3 ./cbpro-trader.py`
 
 Note that it is currently pointing to a custom version of the coinbasepro-python library until I can push my OrderBook changes upstream.
 
@@ -22,15 +43,16 @@ Also note that the TA-Lib python library is actually a wrapper for the ta-lib C 
 
 Copy config.yml.sample to config.yml and include your `key`, `secret`, and `passphrase` values from your Coinbase Pro API key.
 
-Set `live` to `yes` **only if** you want the bot to execute **actual trades.** The bot will still collect data and calculate indicators when LIVE is set to FALSE.
+Set `live` to `yes`  **only if** you want the bot to execute **actual trades.** The bot will still collect data and calculate indicators when LIVE is set to FALSE. You may also wish to test functionality with a Coinbase Pro sandbox API key first.
 
 In config.yml you can list as many periods as you would like under the periods section. Periods will be used for trading logic only if their `trade:` attribute is set to `yes`, otherwise they are just used for gathering indicator data.
 
 There is experimental support for 'meta' periods, which can be used for comparing 2 products that do not currently have a Coinbase Pro trading pair, by setting the `meta:` attribute to `yes` in the period description. The only real use case for this right now is LTC-ETH. Trading on meta periods is not yet supported (work in progress).
 
-`frontend` can be set to `curses` which is an ncurses display of balances, indicator values, recent candlesticks and trades and current open orders or `debug` which will print the same infromation to the console, line-by-line, as it is available. `debug` tends to fall behind in development, as it's mostly used for debugging (obviously).
-
-I'm throwing around an idea of making a local web frontend, maybe in React or something similar, to better visualize the current data recorded by the bot.
+`frontend` can have the following values
+* `web` - a web based frontend to be viewed in your web browser (WORK IN PROGRESS)
+* `curses` - an ncurses display of balances, indicator values, recent candlesticks and trades and current open orders or `debug` which will print the same infromation to the console, line-by-line, as it is available.
+* `debug` used for debugging (obviously).
 
 ## Tweaking indicators and trade logic
 
