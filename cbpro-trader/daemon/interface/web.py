@@ -33,3 +33,9 @@ class web(object):
 
     def start(self):
         self.app.run(host='0.0.0.0')
+
+    def update(self):
+        pass
+
+    def close(self):
+        pass

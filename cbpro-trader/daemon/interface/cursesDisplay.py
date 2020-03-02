@@ -4,7 +4,7 @@ import logging
 from decimal import Decimal
 
 
-class cursesDisplay:
+class cursesDisplay(object):
     def __init__(self, enable=True):
         self.enable = enable
         if not self.enable:

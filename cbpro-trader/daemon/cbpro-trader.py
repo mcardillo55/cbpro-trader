@@ -11,7 +11,7 @@ import engine
 import yaml
 import queue
 import time
-import interface
+from interface import Interface
 import logging
 import datetime
 import threading
@@ -69,16 +69,7 @@ class CBProTrader(object):
         self.indicator_subsys = indicators.IndicatorSubsystem(self.indicator_period_list)
         self.last_indicator_update = time.time()
 
-        if config['frontend'] == 'curses':
-            curses_enable = True
-        else:
-            curses_enable = False
-        self.interface = interface.cursesDisplay(enable=curses_enable)
-
-        if config['frontend'] == 'web':
-            web_interface = interface.web(self.indicator_subsys, self.trade_engine)
-            server_thread = threading.Thread(target=web_interface.start, daemon=True)
-            server_thread.start()
+        self.interface = Interface.get_interface(config['frontend'], self.indicator_subsys, self.trade_engine)
 
     def start(self):
         while(True):
