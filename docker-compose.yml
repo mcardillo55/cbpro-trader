@@ -1,10 +1,12 @@
 version: "3"
 services:
   cbpro:
-    build: ./cbpro-trader
+    build: ./cbpro-trader/daemon
     command: python3 ./cbpro-trader.py
+    volumes:
+      - ./cbpro-trader/daemon/:/cbpro-trader/:Z
   web:
     build: ./cbpro-trader/web
     command: bash -c "npm install && npm start"
     volumes:
-      - ./cbpro-trader/web/:/frontend/
+      - ./cbpro-trader/web/:/frontend/:Z
