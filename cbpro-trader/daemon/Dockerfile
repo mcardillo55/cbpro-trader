@@ -20,9 +20,10 @@ RUN make install
 
 # Copy bot files
 RUN mkdir -p /cbpro-trader
-COPY . /cbpro-trader/
+COPY ./requirements.txt /
 
 # Install Python dependencies
-WORKDIR /cbpro-trader/
+WORKDIR /
 RUN pip3 install numpy==1.15.2
 RUN pip3 install -r ./requirements.txt
+WORKDIR /cbpro-trader/
