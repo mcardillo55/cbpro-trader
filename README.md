@@ -18,9 +18,9 @@ If you are using the `web` frontend, you can simply run `docker-compose up` and 
 If you are using the `curses` or `debug` frontends, you can run
 
 `docker-compose build cbpro`
-`docker run -it cbpro-trader_cbpro`
+`docker run -it cbpro-trader_cbpro -v $ABSOLUTE_PATH_TO_PROJECT/cbpro-trader/cbpro-trader/daemon/:/cbpro-trader/:Z`
 
-to build and run the image, then`python3 ./cbpro-trader.py` to start the bot
+to build and run the image, making sure to replace the absolute path of the project, then`python3 ./cbpro-trader.py` to start the bot
 
 You will need to run `docker-compose up --build` if you change the config after the initial build.
 
