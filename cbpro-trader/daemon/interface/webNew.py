@@ -1,7 +1,19 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from . import Interface
+from . import models
 
 class Web(Interface):
-    def __init__(self, enable=True):
+    def __init__(self, indicator_subsys):
+        engine = create_engine('sqlite:///data.db')
+        models.create_all(engine)
+
+        Session = sessionmaker(bind=engine)
+        session = Session()
+
+        for period in indicator_subsys.period_list:
+            session.add(models.Period(name=period.name))
+        session.commit()
         return
 
     def update_balances(self, trade_engine):
@@ -39,9 +51,4 @@ class Web(Interface):
         self.pad.refresh(0, 0, 0, 0, (height - 1), (width - 1))
 
     def close(self):
-        if not self.enable:
-            return
-        curses.nocbreak()
-        self.stdscr.keypad(0)
-        curses.echo()
-        curses.endwin()
+        return

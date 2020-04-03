@@ -18,6 +18,8 @@ import threading
 from decimal import Decimal
 from websocket import WebSocketConnectionClosedException
 
+from interface.webNew import Web
+
 class CBProTrader(object):
     def __init__(self):
         with open("config.yml", 'r') as ymlfile:
@@ -70,6 +72,7 @@ class CBProTrader(object):
         self.last_indicator_update = time.time()
 
         self.interface = Interface.get_interface(config['frontend'], self.indicator_subsys, self.trade_engine)
+        Web(self.indicator_subsys)
 
     def start(self):
         while(True):

@@ -7,3 +7,4 @@ __pycache__
 .vscode
 cbpro-trader/config.live
 cbpro-trader/config.sandbox
+*.db
