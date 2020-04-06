@@ -34,3 +34,10 @@ class Indicator(Base):
     period_id = Column(Integer, ForeignKey('periods.id'))
     name = Column(String)
     value = Column(Numeric)
+
+class Product(Base):
+    __tablename__ = 'products'
+
+    id = Column(Integer, primary_key=True)
+    product_id = Column(String)
+    signal = Column(String)

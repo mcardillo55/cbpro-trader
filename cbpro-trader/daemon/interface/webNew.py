@@ -35,6 +35,8 @@ class Web(object):
                                                volume=candlestick[5]))
 
         
+        for product in self.trade_engine.products:
+            session.add(models.Product(product_id=product.product_id))
         session.commit()
         session.close()
         return
@@ -93,6 +95,17 @@ class Web(object):
         return
 
     def update_signals(self, trade_engine):
+        session = self.Session()
+        for product in self.trade_engine.products:
+            cur_product = session.query(models.Product).filter_by(product_id=product.product_id).one()
+            if product.buy_flag:
+                cur_product.signal = "BUY"
+            elif product.sell_flag:
+                cur_product.signal = "SELL"
+            else:
+                cur_product.signal = "HOLD"
+        session.commit()
+        session.close() 
         return
 
     def update(self, trade_engine, indicators, period_list, msg):
