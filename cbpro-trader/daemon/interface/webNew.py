@@ -1,10 +1,13 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from . import Interface
 from . import models
 
-class Web(Interface):
-    def __init__(self, indicator_subsys):
+        try:
+            os.remove('data.db')
+        except FileNotFoundError:
+            pass
         engine = create_engine('sqlite:///data.db')
         models.create_all(engine)
 
