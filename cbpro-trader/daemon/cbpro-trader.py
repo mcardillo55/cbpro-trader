@@ -72,7 +72,6 @@ class CBProTrader(object):
         self.last_indicator_update = time.time()
 
         self.interface = Interface.get_interface(config['frontend'], self.indicator_subsys, self.trade_engine)
-        Web(self.indicator_subsys)
 
     def start(self):
         while(True):

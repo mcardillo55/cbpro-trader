@@ -1,6 +1,6 @@
 from .cursesDisplay import cursesDisplay
 import threading
-from .web import web
+from .webNew import Web
 from abc import ABC, abstractmethod
 
 class Interface(ABC):
@@ -9,9 +9,7 @@ class Interface(ABC):
         if interface_type == "curses":
             return cursesDisplay(enable=True)
         elif interface_type == "web":
-            web_interface = web(indicator_subsys, trade_engine)
-            server_thread = threading.Thread(target=web_interface.start, daemon=True)
-            server_thread.start()
+            web_interface = Web(indicator_subsys, trade_engine)
             return web_interface
         else:
             raise ValueError("Invalid Interface type provided")
