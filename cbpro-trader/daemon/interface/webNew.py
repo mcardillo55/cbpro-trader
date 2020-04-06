@@ -70,6 +70,20 @@ class Web(object):
         return
 
     def update_indicators(self, period_list, indicators):
+        session = self.Session()
+        for period in self.indicator_subsys.current_indicators:
+            period_indicators = self.indicator_subsys.current_indicators[period]
+            period_object = session.query(models.Period).filter_by(name=period).one()
+            for indicator in period_indicators:
+                value = period_indicators[indicator]
+                try:
+                    cur_indicator = session.query(models.Indicator).filter_by(period_id=period_object.id, name=indicator).one()
+                except NoResultFound:
+                    session.add(models.Indicator(period_id=period_object.id, name=indicator, value=value))
+                else:
+                    cur_indicator.value = value
+        session.commit()
+        session.close()        
         return
 
     def update_fills(self, trade_engine):

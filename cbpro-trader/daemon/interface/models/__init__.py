@@ -13,6 +13,7 @@ class Period(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     candlesticks = relationship("Candlestick")
+    indicators = relationship("Indicator")
 
 class Candlestick(Base):
     __tablename__ = 'candlesticks'
@@ -25,3 +26,11 @@ class Candlestick(Base):
     low = Column(Numeric)
     close = Column(Numeric)
     volume = Column(Numeric)
+
+class Indicator(Base):
+    __tablename__ = 'indicators'
+
+    id = Column(Integer, primary_key=True)
+    period_id = Column(Integer, ForeignKey('periods.id'))
+    name = Column(String)
+    value = Column(Numeric)
