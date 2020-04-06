@@ -24,3 +24,4 @@ class Candlestick(Base):
     high = Column(Numeric)
     low = Column(Numeric)
     close = Column(Numeric)
+    volume = Column(Numeric)
