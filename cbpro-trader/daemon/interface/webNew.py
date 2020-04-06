@@ -1,4 +1,5 @@
 import os
+import time
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
@@ -8,6 +9,7 @@ class Web(object):
     def __init__(self, indicator_subsys, trade_engine):
         self.indicator_subsys = indicator_subsys
         self.trade_engine = trade_engine
+        self.last_update_time = 0
         try:
             os.remove('data.db')
         except FileNotFoundError:
@@ -80,14 +82,16 @@ class Web(object):
         return
 
     def update(self, trade_engine, indicators, period_list, msg):
-        self.update_balances(trade_engine)
-        self.update_heartbeat()
-        self.update_signals(trade_engine)
-        # Make sure indicator dict is populated
-        if len(indicators[period_list[0].name]) > 0:
-            self.update_indicators(period_list, indicators)
-        self.update_candlesticks(period_list)
-        self.update_orders(trade_engine)
+        if time.time() > self.last_update_time + 1:
+            self.update_balances(trade_engine)
+            self.update_heartbeat()
+            self.update_signals(trade_engine)
+            # Make sure indicator dict is populated
+            if len(indicators[period_list[0].name]) > 0:
+                self.update_indicators(period_list, indicators)
+            self.update_candlesticks(period_list)
+            self.update_orders(trade_engine)
+            self.last_update_time = time.time()
 
     def close(self):
         return
