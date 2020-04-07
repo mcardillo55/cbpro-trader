@@ -3,7 +3,7 @@ import time
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
-from . import models
+from .models import *
 
 class Web(object):
     def __init__(self, indicator_subsys, trade_engine):
@@ -15,18 +15,18 @@ class Web(object):
         except FileNotFoundError:
             pass
         engine = create_engine('sqlite:///data.db')
-        models.create_all(engine)
+        create_all(engine)
 
         self.Session = sessionmaker(bind=engine)
         session = self.Session()
 
         for period in indicator_subsys.period_list:
-            period_object = models.Period(name=period.name)
+            period_object = Period(name=period.name)
             session.add(period_object)
             session.flush()
             
             for candlestick in period.candlesticks:
-                session.add(models.Candlestick(period_id=period_object.id,
+                session.add(Candlestick(period_id=period_object.id,
                                                time=candlestick[0],
                                                low=candlestick[1],
                                                high=candlestick[2],
@@ -36,7 +36,7 @@ class Web(object):
 
         
         for product in self.trade_engine.products:
-            session.add(models.Product(product_id=product.product_id))
+            session.add(Product(product_id=product.product_id))
         session.commit()
         session.close()
         return
@@ -47,11 +47,11 @@ class Web(object):
     def update_candlesticks(self, period_list):
         session = self.Session()
         for period in self.indicator_subsys.period_list:
-            period_object = session.query(models.Period).filter_by(name=period.name).one()
+            period_object = session.query(Period).filter_by(name=period.name).one()
             try:
-                cur_candlestick = session.query(models.Candlestick).filter_by(period_id=period_object.id, time=period.cur_candlestick.time).one()
+                cur_candlestick = session.query(Candlestick).filter_by(period_id=period_object.id, time=period.cur_candlestick.time).one()
             except NoResultFound:
-                session.add(models.Candlestick(period_id=period_object.id,
+                session.add(Candlestick(period_id=period_object.id,
                                                time=period.cur_candlestick.time,
                                                low=period.cur_candlestick.low,
                                                high=period.cur_candlestick.high,
@@ -75,13 +75,13 @@ class Web(object):
         session = self.Session()
         for period in self.indicator_subsys.current_indicators:
             period_indicators = self.indicator_subsys.current_indicators[period]
-            period_object = session.query(models.Period).filter_by(name=period).one()
+            period_object = session.query(Period).filter_by(name=period).one()
             for indicator in period_indicators:
                 value = period_indicators[indicator]
                 try:
-                    cur_indicator = session.query(models.Indicator).filter_by(period_id=period_object.id, name=indicator).one()
+                    cur_indicator = session.query(Indicator).filter_by(period_id=period_object.id, name=indicator).one()
                 except NoResultFound:
-                    session.add(models.Indicator(period_id=period_object.id, name=indicator, value=value))
+                    session.add(Indicator(period_id=period_object.id, name=indicator, value=value))
                 else:
                     cur_indicator.value = value
         session.commit()
@@ -97,7 +97,7 @@ class Web(object):
     def update_signals(self, trade_engine):
         session = self.Session()
         for product in self.trade_engine.products:
-            cur_product = session.query(models.Product).filter_by(product_id=product.product_id).one()
+            cur_product = session.query(Product).filter_by(product_id=product.product_id).one()
             if product.buy_flag:
                 cur_product.signal = "BUY"
             elif product.sell_flag:
