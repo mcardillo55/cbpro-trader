@@ -10,7 +10,15 @@ class web(object):
         @app.route('/periods/')
         @app.route('/periods/<periodName>')
         def periods(periodName=None):
-            return jsonify(self.indicator_subsys.get_period_data(periodName))
+            period_data = []
+            if periodName is None:
+                for period in self.indicator_subsys.period_list:
+                    period_data.append(period.name)
+            else:
+                for period in self.indicator_subsys.period_list:
+                    if period.name == periodName:
+                        period_data = period.candlesticks.tolist() + [period.cur_candlestick.to_list()]
+            return jsonify(period_data)
 
         @app.route('/indicators/')
         @app.route('/indicators/<periodName>')
