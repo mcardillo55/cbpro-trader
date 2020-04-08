@@ -12,12 +12,6 @@ class IndicatorSubsystem:
         for period in self.period_list:
             self.current_indicators[period.name] = {}
 
-    def get_indicator_data(self, period_name):
-        if period_name is None:
-            return self.current_indicators
-        else:
-            return self.current_indicators.get(period_name)
-
     def recalculate_indicators(self, cur_period):
         total_periods = len(cur_period.candlesticks)
         if total_periods > 0:

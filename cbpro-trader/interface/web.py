@@ -23,7 +23,10 @@ class web(object):
         @app.route('/indicators/')
         @app.route('/indicators/<periodName>')
         def indicators(periodName=None):
-            return jsonify(self.indicator_subsys.get_indicator_data(periodName))
+            if periodName is None:
+                return jsonify(self.indicator_subsys.current_indicators)
+            else:
+                return jsonify(self.indicator_subsys.current_indicators.get(periodName))
 
         @app.route('/flags/')
         def flags():
