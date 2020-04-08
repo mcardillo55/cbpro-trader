@@ -18,46 +18,46 @@ class ChartController extends Component {
                 
             })
             .then(
-                setInterval(() => {
-                fetch("/periods/" + this.props.active_period)
-                    .then(response => {
-                        return response.json()
-                    })
-                    .then(myJson => {
-                        this.props.updateCandlesticks(myJson)
-                    })
-                }, 1000)
-            )
-            .then(
-                setInterval(() => {
-                    switch(this.props.active_section) {
-                        case "details":
-                            fetch("/indicators/" + this.props.active_period)
-                                .then(response => {
-                                    return response.json()
-                                })
-                                .then(myJson => {
-                                    this.props.updateIndicators(myJson)
-                                })
-                            break;
-                        case "flags":
-                            fetch("/flags/")
-                                .then(response => {
-                                    return response.json()
-                                })
-                                .then(myJson => {
-                                    this.props.updateFlags(myJson)
-                                })
-                            break;
-                        default:
-                            break;
-                    }
-
-                }, 1000)
+                setInterval(() => this.update(), 1000)
             )
     }
 
+    update() {
+        if (this.props.active_period) {
+            fetch("/periods/" + this.props.active_period)
+                .then(response => {
+                    return response.json()
+                })
+                .then(myJson => {
+                    this.props.updateCandlesticks(myJson)
+                })
+            switch(this.props.active_section) {
+                case "details":
+                    fetch("/indicators/" + this.props.active_period)
+                        .then(response => {
+                            return response.json()
+                        })
+                        .then(myJson => {
+                            this.props.updateIndicators(myJson)
+                        })
+                    break;
+                case "flags":
+                    fetch("/flags/")
+                        .then(response => {
+                            return response.json()
+                        })
+                        .then(myJson => {
+                            this.props.updateFlags(myJson)
+                        })
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     render() {
+        this.update();
         return (
             <div id="chart-controller">
                 <ChartContainer />
