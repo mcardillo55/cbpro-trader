@@ -31,7 +31,7 @@ class web(object):
         @app.route('/orders/')
         @app.route('/orders/<productId>')
         def orders(productId=None):
-            return jsonify(trade_engine.all_open_orders)
+            return jsonify({'orders': trade_engine.all_open_orders, 'fills': trade_engine.recent_fills})
 
         @app.route('/flags/')
         def flags():

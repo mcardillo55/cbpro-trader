@@ -2,6 +2,7 @@ import time
 import logging
 import threading
 import datetime
+import itertools
 from decimal import Decimal, ROUND_DOWN
 from .Product import Product
 
@@ -18,6 +19,7 @@ class TradeEngine():
         self.stop_update_order_thread = False
         self.last_order_update = time.time()
         self.all_open_orders = []
+        self.recent_fills = []
         for product in self.product_list:
             self.products.append(Product(auth_client, product_id=product))
         self.last_balance_update = 0
@@ -54,18 +56,23 @@ class TradeEngine():
                 if product.order_in_progress:
                     need_updating = True
 
-            if need_updating and time.time() - self.last_order_update >= 1.0:
-                try:
-                    self.all_open_orders = list(self.auth_client.get_orders())
-                    for product in self.products:
-                        product.open_orders = []
-                    for order in self.all_open_orders:
-                        self.get_product_by_product_id(order.get('product_id')).open_orders.append(order)
-                    self.last_order_update = time.time()
-                except Exception:
-                    self.error_logger.exception(datetime.datetime.now())
-            elif not need_updating:
-                self.all_open_orders = []
+            if time.time() - self.last_order_update >= 1.0:
+                self.temp_recent_fills = []
+                for product in self.products:
+                    self.temp_recent_fills += list(itertools.islice(self.auth_client.get_fills(product_id=product.product_id), 5))
+                self.recent_fills = sorted(self.temp_recent_fills, key=lambda x: x['created_at'], reverse=True)[:5]
+                if need_updating:
+                    try:
+                        self.all_open_orders = list(self.auth_client.get_orders())
+                        for product in self.products:
+                            product.open_orders = []
+                        for order in self.all_open_orders:
+                            self.get_product_by_product_id(order.get('product_id')).open_orders.append(order)
+                        self.last_order_update = time.time()
+                    except Exception:
+                        self.error_logger.exception(datetime.datetime.now())
+                elif not need_updating:
+                    self.all_open_orders = []
             time.sleep(0.01)
 
     def round_fiat(self, money):
