@@ -20,9 +20,11 @@ function Sidebar(props) {
                     <button className={active_section === "flags" ? "active-button" : ""} onClick={() => {changeActiveSection("flags")}}>Flags</button>
                     <button className={active_section === "orders" ? "active-button" : ""} onClick={() => {changeActiveSection("orders")}}>Orders</button>
                 </div>
-                {active_section === "details" && <DetailsContainer />}
-                {active_section === "flags" && <FlagsContainer />}
-                {active_section === "orders" && <OrdersContainer />}
+                <div id="secondary-details">
+                    {active_section === "details" && <DetailsContainer />}
+                    {active_section === "flags" && <FlagsContainer />}
+                    {active_section === "orders" && <OrdersContainer />}
+                </div>
             </div>
         </div>
     )

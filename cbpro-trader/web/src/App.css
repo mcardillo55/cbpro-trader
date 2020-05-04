@@ -15,14 +15,17 @@
   max-height: 100vh;
 }
 #secondary-section {
-  overflow-x: auto;
   overflow-y: auto;
+}
+#secondary-details {
+  overflow-x: auto;
   white-space: nowrap;
-  border-top: 5px solid;
 }
 #secondary-selector {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  border-top: 5px solid;
+  border-bottom: 5px solid;
 }
 #details {
   font-weight: bold;
