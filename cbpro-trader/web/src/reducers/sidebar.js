@@ -1,4 +1,4 @@
-const sidebar = (state = {indicators: [], flags: {}, active_section: "details"}, action) => {
+const sidebar = (state = {indicators: [], flags: {}, orders: [], active_section: "details"}, action) => {
     switch (action.type) {
         case 'CHANGE_ACTIVE_SECTION':
             return {
@@ -14,6 +14,11 @@ const sidebar = (state = {indicators: [], flags: {}, active_section: "details"},
             return {
                 ...state,
                 flags: action.flags
+            }
+        case 'UPDATE_ORDERS':
+            return {
+                ...state,
+                orders: action.orders
             }
         default:
             return state

@@ -27,3 +27,8 @@ export const updateIndicators = indicators => ({
     type: 'UPDATE_INDICATORS',
     indicators
 })
+
+export const updateOrders = orders => ({
+    type: 'UPDATE_ORDERS',
+    orders
+})

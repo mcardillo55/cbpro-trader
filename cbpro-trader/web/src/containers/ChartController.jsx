@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { addPeriod, changeActivePeriod, updateCandlesticks, updateIndicators, updateFlags } from '../actions'
+import { addPeriod, changeActivePeriod, updateCandlesticks, updateIndicators, updateFlags, updateOrders } from '../actions'
 import ChartContainer from '../containers/ChartContainer'
 import SidebarContainer from '../containers/SidebarContainer'
 
@@ -50,6 +50,15 @@ class ChartController extends Component {
                             this.props.updateFlags(myJson)
                         })
                     break;
+                case "orders":
+                    fetch("/orders/")
+                        .then(response => {
+                            return response.json()
+                        })
+                        .then(myJson => {
+                            this.props.updateOrders(myJson)
+                        })
+                    break;
                 default:
                     break;
             }
@@ -77,7 +86,8 @@ const mapDispatchToProps = dispatch => ({
     changeActivePeriod: period_name => dispatch(changeActivePeriod(period_name)),
     updateCandlesticks: candlesticks => dispatch(updateCandlesticks(candlesticks)),
     updateIndicators: indicators => dispatch(updateIndicators(indicators)),
-    updateFlags: flags => dispatch(updateFlags(flags))
+    updateFlags: flags => dispatch(updateFlags(flags)),
+    updateOrders: orders => dispatch(updateOrders(orders))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChartController);

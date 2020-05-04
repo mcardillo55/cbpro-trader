@@ -1,6 +1,7 @@
 import React from 'react';
 import DetailsContainer from '../containers/DetailsContainer'
 import FlagsContainer from '../containers/FlagsContainer'
+import OrdersContainer from '../containers/OrdersContainer'
 
 function Sidebar(props) {
     const { active_period, period_list, active_section, changeActiveSection, changeActivePeriod } = props;
@@ -21,7 +22,7 @@ function Sidebar(props) {
                 </div>
                 {active_section === "details" && <DetailsContainer />}
                 {active_section === "flags" && <FlagsContainer />}
-                {active_section === "orders" && <p>Orders Section</p>}
+                {active_section === "orders" && <OrdersContainer />}
             </div>
         </div>
     )
