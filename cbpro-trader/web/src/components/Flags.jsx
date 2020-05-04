@@ -4,7 +4,7 @@ function Flags(props) {
     const { flags } = props;
     return(
         <div id="flags" className="sidebar-section">
-            <h2>Flags</h2>
+            <h2 className="first-h2">Flags</h2>
             {
                 Object.keys(flags).map((flag) => {
                     return(

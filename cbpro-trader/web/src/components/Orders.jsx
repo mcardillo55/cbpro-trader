@@ -4,7 +4,7 @@ function Orders(props) {
     const { orders } = props;
     return(
         <div id="orders" className="sidebar-section">
-            <h2>Orders</h2>
+            <h2 className="first-h2">Orders</h2>
             <table>
                 <tr>
                     <th>Side</th>

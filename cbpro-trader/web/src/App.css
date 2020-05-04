@@ -42,7 +42,7 @@
 .sidebar-section {
   padding: 10px;
 }
-.sidebar-section h2{
+.sidebar-section h2.first-h2{
   margin-top: 0px;
 }
 .flag-title {
@@ -80,4 +80,18 @@ li.focused{
 body {
   color: rgb(217, 217, 217);
   background: rgb(19, 23, 34);
+}
+
+th {
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+}
+th:last-child {
+  border-right: 0;
+}
+td {
+  border-right: 1px solid;
+}
+td:last-child {
+  border-right: 0;
 }
