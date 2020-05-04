@@ -55,7 +55,6 @@ class TradeEngine():
                     need_updating = True
 
             if need_updating and time.time() - self.last_order_update >= 1.0:
-                self.all_open_orders = []
                 try:
                     self.all_open_orders = list(self.auth_client.get_orders())
                     for product in self.products:
@@ -65,6 +64,8 @@ class TradeEngine():
                     self.last_order_update = time.time()
                 except Exception:
                     self.error_logger.exception(datetime.datetime.now())
+            elif not need_updating:
+                self.all_open_orders = []
             time.sleep(0.01)
 
     def round_fiat(self, money):
