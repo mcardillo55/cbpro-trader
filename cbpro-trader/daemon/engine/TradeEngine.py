@@ -14,6 +14,7 @@ class TradeEngine():
         self.fiat_currency = fiat
         self.is_live = is_live
         self.products = []
+        self.balances = {}
         self.stop_update_order_thread = False
         self.last_order_update = time.time()
         self.all_open_orders = []
@@ -21,7 +22,6 @@ class TradeEngine():
             self.products.append(Product(auth_client, product_id=product))
         self.last_balance_update = 0
         self.update_amounts()
-        self.fiat_equivalent = 0
         self.last_balance_update = time.time()
         self.max_slippage = max_slippage
         self.update_order_thread = threading.Thread(target=self.update_orders, name='update_orders')
@@ -81,34 +81,18 @@ class TradeEngine():
                 ret = self.auth_client.get_accounts()
                 if isinstance(ret, list):
                     for account in ret:
-                        if account.get('currency') == 'BTC':
-                            self.btc = self.round_coin(account.get('available'))
-                        elif account.get('currency') == 'BCH':
-                            self.bch = self.round_coin(account.get('available'))
-                        elif account.get('currency') == 'ETH':
-                            self.eth = self.round_coin(account.get('available'))
-                        elif account.get('currency') == 'LTC':
-                            self.ltc = self.round_coin(account.get('available'))
-                        elif account.get('currency') == self.fiat_currency:
-                            self.fiat = self.round_fiat(account.get('available'))
+                        self.balances[account['currency']] = self.round_coin(account.get('available'))
             except Exception:
                 self.error_logger.exception(datetime.datetime.now())
-                self.btc = Decimal('0.0')
-                self.bch = Decimal('0.0')
-                self.eth = Decimal('0.0')
-                self.ltc = Decimal('0.0')
-                self.fiat = Decimal('0.0')
-                self.fiat_equivalent = Decimal('0.0')
                 return
-
-            self.fiat_equivalent = Decimal('0.0')
+            self.balances['fiat_equivalent'] = Decimal('0.0')
             for product in self.products:
                 if not product.meta and product.order_book.get_current_ticker() and product.order_book.get_current_ticker().get('price'):
-                    self.fiat_equivalent += self.get_base_currency_from_product_id(product.product_id, update=False) * Decimal(product.order_book.get_current_ticker().get('price'))
-            self.fiat_equivalent += self.fiat
+                    self.balances['fiat_equivalent'] += self.get_base_currency_from_product_id(product.product_id, update=False) * Decimal(product.order_book.get_current_ticker().get('price'))
+            self.balances['fiat_equivalent'] += self.balances[self.fiat_currency]
 
     def print_amounts(self):
-        self.logger.debug("[BALANCES] %s: %.2f BTC: %.8f" % (self.fiat_currency, self.fiat, self.btc))
+        self.logger.debug("[BALANCES] %s: %.2f BTC: %.8f" % (self.fiat_currency, self.balances[self.fiat_currency], self.balances['BTC']))
 
     def place_buy(self, product=None, partial='1.0'):
         amount = self.get_quoted_currency_from_product_id(product.product_id) * Decimal(partial)
@@ -237,53 +221,11 @@ class TradeEngine():
     def get_base_currency_from_product_id(self, product_id, update=True):
         if update:
             self.update_amounts()
-        if product_id == 'BTC-USD':
-            return self.btc
-        elif product_id == 'BCH-USD':
-            return self.bch
-        elif product_id == 'BCH-EUR':
-            return self.bch
-        elif product_id == 'BCH-BTC':
-            return self.bch
-        elif product_id == 'BTC-EUR':
-            return self.btc
-        elif product_id == 'ETH-USD':
-            return self.eth
-        elif product_id == 'ETH-EUR':
-            return self.eth
-        elif product_id == 'LTC-USD':
-            return self.ltc
-        elif product_id == 'LTC-EUR':
-            return self.ltc
-        elif product_id == 'ETH-BTC':
-            return self.eth
-        elif product_id == 'LTC-BTC':
-            return self.ltc
+        return self.balances[product_id[:3]]
 
     def get_quoted_currency_from_product_id(self, product_id):
         self.update_amounts()
-        if product_id == 'BTC-USD':
-            return self.fiat
-        elif product_id == 'BCH-USD':
-            return self.fiat
-        elif product_id == 'BCH-EUR':
-            return self.fiat
-        elif product_id == 'BCH-BTC':
-            return self.btc
-        elif product_id == 'BTC-EUR':
-            return self.fiat
-        elif product_id == 'ETH-USD':
-            return self.fiat
-        elif product_id == 'ETH-EUR':
-            return self.fiat
-        elif product_id == 'LTC-USD':
-            return self.fiat
-        elif product_id == 'LTC-EUR':
-            return self.fiat
-        elif product_id == 'ETH-BTC':
-            return self.btc
-        elif product_id == 'LTC-BTC':
-            return self.btc
+        return self.balances[product_id[4:]]
 
     def determine_trades(self, product_id, period_list, indicators):
         self.update_amounts()
