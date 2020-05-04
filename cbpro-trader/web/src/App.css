@@ -26,7 +26,6 @@
 }
 #details {
   font-weight: bold;
-  padding: 10px;
 }
 #last-trade {
   font-size: 28px;
@@ -39,6 +38,15 @@
 }
 .indicator {
   margin: 8px 0px;
+}
+.sidebar-section {
+  padding: 10px;
+}
+.sidebar-section h2{
+  margin-top: 0px;
+}
+.flag-title {
+  font-weight: bold;
 }
 
 button {

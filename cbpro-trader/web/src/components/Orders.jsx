@@ -3,7 +3,7 @@ import React from 'react';
 function Orders(props) {
     const { orders } = props;
     return(
-        <div id="orders">
+        <div id="orders" className="sidebar-section">
             <h2>Orders</h2>
             <table>
                 <tr>

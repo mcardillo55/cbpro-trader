@@ -3,7 +3,7 @@ import React from 'react';
 function Details(props) {
     const { indicators } = props;
     return(
-        <div id="details">
+        <div id="details" className="sidebar-section">
             <div id="last-trade-label">Last Trade</div>
             <div id="last-trade">{indicators.close && indicators.close.toFixed(2)}</div>
             <div id="indicators">
