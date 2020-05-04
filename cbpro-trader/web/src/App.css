@@ -15,7 +15,9 @@
   max-height: 100vh;
 }
 #secondary-section {
+  overflow-x: auto;
   overflow-y: auto;
+  white-space: nowrap;
   border-top: 5px solid;
 }
 #secondary-selector {

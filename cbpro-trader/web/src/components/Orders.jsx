@@ -5,27 +5,51 @@ function Orders(props) {
     return(
         <div id="orders">
             <h2>Orders</h2>
+            <table>
+                <tr>
+                    <th>Side</th>
+                    <th>Size</th>
+                    <th>Filled</th>
+                    <th>Fees</th>
+                    <th>Price</th>
+                </tr>
             {
                 orders['orders'].map((order) => {
                     return(
-                        
-                        <div class="order">
-                            {order.side} {order.size} {order.filled_size} {order.fill_fees} {order.price} 
-                        </div>
+                        <tr>    
+                            <td>{order.side}</td>
+                            <td>{order.size}</td>
+                            <td>{order.filled_size}</td>
+                            <td>{parseFloat(order.fill_fees).toFixed(8)}</td>
+                            <td>{parseFloat(order.price).toFixed(2)}</td>
+                        </tr>
                     )
                 })
             }
+            </table>
             <h2>Fills</h2>
+            <table>
+                <tr>
+                    <th>Product</th>
+                    <th>Side</th>
+                    <th>Size</th>
+                    <th>Fee</th>
+                    <th>Price</th>
+                </tr>  
             {
                 orders['fills'].map((fill) => {
                     return(
-                        
-                        <div class="fill">
-                            {fill.product_id} {fill.side} {fill.size} {fill.fee} {fill.price} 
-                        </div>
+                        <tr>
+                            <td>{fill.product_id}</td>
+                            <td>{fill.side}</td>
+                            <td>{fill.size}</td>
+                            <td>{parseFloat(fill.fee).toFixed(8)}</td>
+                            <td>{parseFloat(fill.price).toFixed(2)}</td>
+                        </tr>
                     )
                 })
             }
+            </table>
         </div>
     )
 }
