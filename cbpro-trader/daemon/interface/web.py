@@ -28,6 +28,11 @@ class web(object):
             else:
                 return jsonify(self.indicator_subsys.current_indicators.get(periodName))
 
+        @app.route('/orders/')
+        @app.route('/orders/<productId>')
+        def orders(productId=None):
+            return jsonify(trade_engine.all_open_orders)
+
         @app.route('/flags/')
         def flags():
             flags = {}

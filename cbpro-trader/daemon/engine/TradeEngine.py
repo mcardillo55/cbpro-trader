@@ -54,11 +54,12 @@ class TradeEngine():
                     need_updating = True
 
             if need_updating and time.time() - self.last_order_update >= 1.0:
+                self.all_open_orders = []
                 try:
-                    ret = self.auth_client.get_orders()
+                    self.all_open_orders = list(self.auth_client.get_orders())
                     for product in self.products:
                         product.open_orders = []
-                    for order in ret:
+                    for order in self.all_open_orders:
                         self.get_product_by_product_id(order.get('product_id')).open_orders.append(order)
                     self.last_order_update = time.time()
                 except Exception:
