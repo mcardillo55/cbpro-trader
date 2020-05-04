@@ -16,6 +16,7 @@ class TradeEngine():
         self.products = []
         self.stop_update_order_thread = False
         self.last_order_update = time.time()
+        self.all_open_orders = []
         for product in self.product_list:
             self.products.append(Product(auth_client, product_id=product))
         self.last_balance_update = 0
