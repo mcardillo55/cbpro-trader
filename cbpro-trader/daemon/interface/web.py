@@ -33,6 +33,14 @@ class web(object):
         def orders(productId=None):
             return jsonify({'orders': trade_engine.all_open_orders, 'fills': trade_engine.recent_fills})
 
+        @app.route('/balances/')
+        @app.route('/balances/<currency>')
+        def balances(currency=None):
+            balances = trade_engine.balances
+            for key in balances:
+                balances[key] = '{0:.8f}'.format(balances[key])
+            return jsonify(balances)
+
         @app.route('/flags/')
         def flags():
             flags = {}
