@@ -3,9 +3,19 @@ export const changeActivePeriod = period_name => ({
     period_name
 })
 
-export const changeActiveSection = section_name => ({
-    type: 'CHANGE_ACTIVE_SECTION',
+export const changePrimarySection = section_name => ({
+    type: 'CHANGE_PRIMARY_SECTION',
     section_name
+})
+
+export const changeSecondarySection = section_name => ({
+    type: 'CHANGE_SECONDARY_SECTION',
+    section_name
+})
+
+export const updateBalances = balances => ({
+    type: 'UPDATE_BALANCES',
+    balances
 })
 
 export const updateFlags = flags => ({

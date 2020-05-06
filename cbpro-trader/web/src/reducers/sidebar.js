@@ -1,9 +1,20 @@
-const sidebar = (state = {indicators: [], flags: {}, orders: {'fills': [], 'orders': []}, active_section: "details"}, action) => {
+const sidebar = (state = {indicators: [], flags: {}, balances: {}, orders: {'fills': [], 'orders': []},
+                          primary_section: "periods", secondary_section: "details"}, action) => {
     switch (action.type) {
-        case 'CHANGE_ACTIVE_SECTION':
+        case 'CHANGE_PRIMARY_SECTION':
             return {
                 ...state,
-                active_section: action.section_name
+                primary_section: action.section_name
+            }
+        case 'CHANGE_SECONDARY_SECTION':
+            return {
+                ...state,
+                secondary_section: action.section_name
+            }
+        case 'UPDATE_BALANCES':
+            return {
+                ...state,
+                balances: action.balances
             }
         case 'UPDATE_INDICATORS':
             return {

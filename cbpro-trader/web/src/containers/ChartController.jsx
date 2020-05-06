@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { addPeriod, changeActivePeriod, updateCandlesticks, updateIndicators, updateFlags, updateOrders } from '../actions'
+import { addPeriod, changeActivePeriod, updateCandlesticks, updateIndicators, updateFlags, updateOrders, updateBalances } from '../actions'
 import ChartContainer from '../containers/ChartContainer'
 import SidebarContainer from '../containers/SidebarContainer'
 
@@ -31,7 +31,16 @@ class ChartController extends Component {
                 .then(myJson => {
                     this.props.updateCandlesticks(myJson)
                 })
-            switch(this.props.active_section) {
+            if (this.props.primary_section === "balances") {
+                fetch("/balances/")
+                    .then(response => {
+                        return response.json()
+                    })
+                    .then(myJson => {
+                        this.props.updateBalances(myJson)
+                    })
+            } 
+            switch(this.props.secondary_section) {
                 case "details":
                     fetch("/indicators/" + this.props.active_period)
                         .then(response => {
@@ -78,7 +87,8 @@ class ChartController extends Component {
 
 const mapStateToProps = state => ({
     active_period: state.chart.active_period,
-    active_section: state.sidebar.active_section
+    primary_section: state.sidebar.primary_section,
+    secondary_section: state.sidebar.secondary_section
   })
   
 const mapDispatchToProps = dispatch => ({
@@ -87,7 +97,8 @@ const mapDispatchToProps = dispatch => ({
     updateCandlesticks: candlesticks => dispatch(updateCandlesticks(candlesticks)),
     updateIndicators: indicators => dispatch(updateIndicators(indicators)),
     updateFlags: flags => dispatch(updateFlags(flags)),
-    updateOrders: orders => dispatch(updateOrders(orders))
+    updateOrders: orders => dispatch(updateOrders(orders)),
+    updateBalances: balances => dispatch(updateBalances(balances))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChartController);
