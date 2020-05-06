@@ -36,7 +36,7 @@ class web(object):
         @app.route('/balances/')
         @app.route('/balances/<currency>')
         def balances(currency=None):
-            balances = trade_engine.balances
+            balances = trade_engine.balances.copy()
             for key in balances:
                 balances[key] = '{0:.8f}'.format(balances[key])
             return jsonify(balances)
