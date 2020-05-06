@@ -18,7 +18,7 @@ function Sidebar(props) {
                         <ul id="period-list">
                             {period_list.map(period_name => {
                                 return(
-                                    <li className={active_period === period_name ? "focused" : ""} onClick={() => {changeActivePeriod(period_name)}}>{period_name}</li>
+                                    <li className={active_period === period_name ? "focused period" : "period"} onClick={() => {changeActivePeriod(period_name)}}>{period_name}</li>
                                 )
                             })}
                         </ul>

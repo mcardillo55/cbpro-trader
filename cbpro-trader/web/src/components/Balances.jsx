@@ -3,17 +3,15 @@ import React from 'react';
 function Balances(props) {
     const { balances } = props;
     return(
-        <div id="balances" className="sidebar-section">
+        <ul id="balances" className="sidebar-section">
             {
                 Object.keys(balances).map((currency) => {
                     return(
-                        <div class="balances">
-                            <span className="currency">{ currency.toUpperCase() }:</span> { balances[currency] }
-                        </div>
+                        <li className="currency"><span className="currency">{ currency.toUpperCase() }</span>: { balances[currency] }</li>
                     )
                 })
             }
-        </div>
+        </ul>
     )
 }
 

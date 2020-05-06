@@ -45,6 +45,11 @@
 .active-button{
   background-color: rgb(33, 56, 77);
 }
+#balances {
+  padding-top: 0px;
+  list-style-type: none;
+  overflow-y: auto;
+}
 .currency {
   font-weight: bold;
 }
@@ -77,18 +82,18 @@ button:hover {
   background-color: #2a2e39;
 }
 
-li {
+li.period{
   display: block;
   padding: 10px;
   text-decoration: none;
   height: 20px;
 }
 
-li:nth-child(odd) {
+li:nth-child(odd).period{
   background-color: rgb(28, 32, 48);
 }
 
-li.focused{
+li.focused.period{
   background-color: rgb(33, 56, 77);
 }
 
