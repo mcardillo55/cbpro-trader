@@ -1,4 +1,6 @@
+import os
 from flask import Flask, jsonify
+from gevent.pywsgi import WSGIServer
 
 class web(object):
     def __init__(self, indicator_subsys, trade_engine):
@@ -52,4 +54,8 @@ class web(object):
             return jsonify(flags)
 
     def start(self):
-        self.app.run(host='0.0.0.0')
+        if 'PRODUCTION' in os.environ:
+            http_server = WSGIServer(('', 8080), self.app)
+            http_server.serve_forever()
+        else:
+            self.app.run(host='0.0.0.0')

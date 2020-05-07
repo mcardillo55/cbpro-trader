@@ -1,0 +1,7 @@
+version: "3"
+services:
+  cbpro:
+    ports:
+      - "8080:8080"
+    environment:
+      PRODUCTION: 'true'
