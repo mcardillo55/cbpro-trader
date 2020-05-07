@@ -5,8 +5,13 @@ import ChartContainer from '../containers/ChartContainer'
 import SidebarContainer from '../containers/SidebarContainer'
 
 class ChartController extends Component {
+    constructor() {
+        super();
+        this.SERVER = process.env.REACT_APP_SERVER || ''; 
+    }
+    
     componentDidMount() {
-        fetch("/periods/")
+        fetch(this.SERVER + "/periods/")
             .then(response => {
                 return response.json()
             })
@@ -24,7 +29,7 @@ class ChartController extends Component {
 
     update() {
         if (this.props.active_period) {
-            fetch("/periods/" + this.props.active_period)
+            fetch(this.SERVER + "/periods/" + this.props.active_period)
                 .then(response => {
                     return response.json()
                 })
@@ -32,7 +37,7 @@ class ChartController extends Component {
                     this.props.updateCandlesticks(myJson)
                 })
             if (this.props.primary_section === "balances") {
-                fetch("/balances/")
+                fetch(this.SERVER + "/balances/")
                     .then(response => {
                         return response.json()
                     })
@@ -42,7 +47,7 @@ class ChartController extends Component {
             } 
             switch(this.props.secondary_section) {
                 case "details":
-                    fetch("/indicators/" + this.props.active_period)
+                    fetch(this.SERVER + "/indicators/" + this.props.active_period)
                         .then(response => {
                             return response.json()
                         })
@@ -51,7 +56,7 @@ class ChartController extends Component {
                         })
                     break;
                 case "flags":
-                    fetch("/flags/")
+                    fetch(this.SERVER + "/flags/")
                         .then(response => {
                             return response.json()
                         })
@@ -60,7 +65,7 @@ class ChartController extends Component {
                         })
                     break;
                 case "orders":
-                    fetch("/orders/")
+                    fetch(this.SERVER + "/orders/")
                         .then(response => {
                             return response.json()
                         })
