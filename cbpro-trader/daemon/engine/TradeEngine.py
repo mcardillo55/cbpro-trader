@@ -72,11 +72,11 @@ class TradeEngine():
                             product.open_orders = []
                         for order in self.all_open_orders:
                             self.get_product_by_product_id(order.get('product_id')).open_orders.append(order)
-                        self.last_order_update = time.time()
                     except Exception:
                         self.error_logger.exception(datetime.datetime.now())
                 elif not need_updating:
                     self.all_open_orders = []
+                self.last_order_update = time.time()
             time.sleep(0.01)
 
     def round_fiat(self, money):
