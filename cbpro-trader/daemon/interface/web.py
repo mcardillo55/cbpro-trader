@@ -1,11 +1,13 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 from gevent.pywsgi import WSGIServer
 
 class web(object):
-    def __init__(self, indicator_subsys, trade_engine):
+    def __init__(self, indicator_subsys, trade_engine, config, init_engine_and_indicators):
         self.indicator_subsys = indicator_subsys
         self.trade_engine = trade_engine
+        self.config = config
+        self.init_engine_and_indicators = init_engine_and_indicators
         app = Flask(__name__)
         self.app = app
     
@@ -52,6 +54,22 @@ class web(object):
                 else:
                     flags[product.product_id] = "sell"
             return jsonify(flags)
+
+        @app.route('/config/', methods=['GET', 'POST'])
+        def config(periodName=None):
+            if request.method == 'POST':
+                self.trade_engine.close()
+                new_config = request.get_json()
+                self.config.update(new_config)
+                init_engine_and_indicators()
+
+            # Remove key/secret info from the response
+            new_config = self.config.copy()
+            del new_config['key']
+            del new_config['secret']
+            del new_config['passphrase']
+
+            return jsonify(new_config)
 
     def start(self):
         if 'PRODUCTION' in os.environ:
