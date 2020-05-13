@@ -6,6 +6,14 @@ import BalancesContainer from '../containers/BalancesContainer';
 
 function Sidebar(props) {
     const { active_period, period_list, primary_section, secondary_section, changePrimarySection, changeSecondarySection, changeActivePeriod } = props;
+    
+    let period_list_map = period_list.map(period_name => {
+                                return(
+                                    <li className={active_period === period_name ? "focused period" : "period"} 
+                                        onClick={() => {changeActivePeriod(period_name)}}>{period_name}</li>
+                                )
+                            })
+
     return (
         <div id="sidebar">
             <div id="primary-section">
@@ -14,15 +22,7 @@ function Sidebar(props) {
                     <button className={primary_section === "balances" ? "active-button" : ""} onClick={() => {changePrimarySection("balances")}}>Balances</button>
                 </div>
                 <div id="primary-details">
-                    { primary_section === "periods" && 
-                        <ul id="period-list">
-                            {period_list.map(period_name => {
-                                return(
-                                    <li className={active_period === period_name ? "focused period" : "period"} onClick={() => {changeActivePeriod(period_name)}}>{period_name}</li>
-                                )
-                            })}
-                        </ul>
-                    }   
+                    { primary_section === "periods" &&  period_list_map }
                     { primary_section === "balances" && <BalancesContainer /> }
                 </div>
             </div>
