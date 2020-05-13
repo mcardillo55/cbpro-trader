@@ -3,6 +3,7 @@ import DetailsContainer from '../containers/DetailsContainer'
 import FlagsContainer from '../containers/FlagsContainer'
 import OrdersContainer from '../containers/OrdersContainer'
 import BalancesContainer from '../containers/BalancesContainer';
+import Config from '../components/Config';
 
 function Sidebar(props) {
     const { active_period, period_list, primary_section, secondary_section, changePrimarySection, changeSecondarySection, changeActivePeriod } = props;
@@ -20,10 +21,12 @@ function Sidebar(props) {
                 <div id="primary-selector">
                     <button className={primary_section === "periods" ? "active-button" : ""} onClick={() => {changePrimarySection("periods")}}>Periods</button>
                     <button className={primary_section === "balances" ? "active-button" : ""} onClick={() => {changePrimarySection("balances")}}>Balances</button>
+                    <button className={primary_section === "config" ? "active-button" : ""} onClick={() => {changePrimarySection("config")}}>Config</button>
                 </div>
                 <div id="primary-details">
                     { primary_section === "periods" &&  period_list_map }
                     { primary_section === "balances" && <BalancesContainer /> }
+                    { primary_section === "config" && <Config /> }
                 </div>
             </div>
             <div id="secondary-section">
