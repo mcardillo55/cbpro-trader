@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 class Config extends Component {
     constructor(){
         super();
+        this.SERVER = process.env.REACT_APP_SERVER || '';
         this.state = {"config": {"periods": []}}
         this.handleConfigChange = this.handleConfigChange.bind(this)
         this.handlePeriodChange = this.handlePeriodChange.bind(this)
@@ -10,7 +11,7 @@ class Config extends Component {
     }
     
     componentDidMount() {
-        fetch('/config/')
+        fetch(this.SERVER + '/config/')
         .then(response => response.json())
         .then(myJson => this.setState({"config": myJson}))
     }
@@ -39,7 +40,7 @@ class Config extends Component {
 
     handleSubmit(event){
         event.preventDefault()
-        fetch('/config/', {
+        fetch(this.SERVER + '/config/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
