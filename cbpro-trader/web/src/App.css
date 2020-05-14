@@ -2,6 +2,9 @@
   display: grid;
   grid-template-columns: 9fr 3fr;
 }
+#config {
+  padding: 10px;
+}
 #period-list {
   overflow-y: auto;
   list-style-type: none;
@@ -114,4 +117,19 @@ td {
 }
 td:last-child {
   border-right: 0;
+}
+input {
+  margin: 5px;
+}
+input[type=text], input[type=number]{
+  width: 70px;
+}
+label {
+  display: inline-block;
+  width: 100px;
+  text-align: right;
+}
+input[type=submit]{
+  display: block;
+  margin-left: 25%
 }

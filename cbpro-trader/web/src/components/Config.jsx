@@ -136,7 +136,7 @@ class Config extends Component {
                 }
             });
         return (
-            <form>
+            <form id="config">
                 {config_list}
                 <input type="submit" value="Save and Restart" onClick={this.handleSubmit}/>
             </form>
