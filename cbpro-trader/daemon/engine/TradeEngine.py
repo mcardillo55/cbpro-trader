@@ -15,6 +15,7 @@ class TradeEngine():
         self.fiat_currency = fiat
         self.is_live = is_live
         self.market_orders = True # TODO: make this a config option
+        self.available_products = []
         self.products = []
         self.balances = {}
         self.stop_update_order_thread = False
@@ -25,6 +26,7 @@ class TradeEngine():
             self.products.append(Product(auth_client, product_id=product))
         self.last_balance_update = 0
         self.update_amounts()
+        self.init_available_products()
         self.last_balance_update = time.time()
         self.max_slippage = max_slippage
         self.update_order_thread = threading.Thread(target=self.update_orders, name='update_orders')
@@ -49,6 +51,10 @@ class TradeEngine():
             if product.product_id == product_id:
                 return product
         return None
+
+    def init_available_products(self):
+        for product in self.auth_client.get_products():
+            self.available_products.append(product.get('id'))
 
     def update_orders(self):
         while not self.stop_update_order_thread:

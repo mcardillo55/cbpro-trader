@@ -10,6 +10,10 @@ class web(object):
         self.init_engine_and_indicators = init_engine_and_indicators
         app = Flask(__name__)
         self.app = app
+
+        @app.route('/products/')
+        def products():
+            return jsonify(self.trade_engine.available_products)
     
         @app.route('/periods/')
         @app.route('/periods/<periodName>')
