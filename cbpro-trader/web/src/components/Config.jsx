@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { addPeriod, changeActivePeriod, clearPeriods } from '../actions'
 
 class Config extends Component {
     constructor(){
@@ -46,6 +48,19 @@ class Config extends Component {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(this.state.config)
+        })
+        .then(() => {
+            this.props.clearPeriods()
+            fetch(this.SERVER + "/periods/")
+            .then(response => {
+                return response.json()
+            })
+            .then(myJson => {
+                myJson.map((period_name, idx) => {
+                    (idx === 0) && this.props.changeActivePeriod(period_name);
+                    return this.props.addPeriod(period_name);
+                })
+            })
         })
     }
 
@@ -129,4 +144,10 @@ class Config extends Component {
     }
 }
 
-export default Config;
+const mapDispatchToProps = dispatch => ({
+    addPeriod: period_name => dispatch(addPeriod(period_name)),
+    changeActivePeriod: period_name => dispatch(changeActivePeriod(period_name)),
+    clearPeriods: () => dispatch(clearPeriods())
+})
+
+export default connect(null, mapDispatchToProps)(Config);

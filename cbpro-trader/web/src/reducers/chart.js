@@ -10,6 +10,11 @@ const chart = (state = {period_list: [], candlesticks: [], indicators: []}, acti
                 ...state,
                 period_list: [...state.period_list, action.period_name]
             }
+        case 'CLEAR_PERIODS':
+            return {
+                ...state,
+                period_list: []
+            }
         case 'UPDATE_CANDLESTICKS':
             return {
                 ...state,

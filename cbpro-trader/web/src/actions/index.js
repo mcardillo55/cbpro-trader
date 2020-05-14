@@ -28,6 +28,10 @@ export const addPeriod = period_name => ({
     period_name
 })
 
+export const clearPeriods = () => ({
+    type: 'CLEAR_PERIODS'
+})
+
 export const updateCandlesticks = candlesticks => ({
     type: 'UPDATE_CANDLESTICKS',
     candlesticks
