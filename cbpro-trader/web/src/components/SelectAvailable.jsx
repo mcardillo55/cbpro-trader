@@ -1,18 +1,22 @@
 import React, { Component } from 'react'
 
-class ProductSelect extends Component {
+class SelectAvailable extends Component {
     constructor(props){
         super(props)
         this.SERVER = process.env.REACT_APP_SERVER || ''
-        this.state = {products: []}
+        this.state = {options: []}
     }
     componentDidMount() {
-        fetch(this.SERVER + '/products/')
-        .then(response => response.json())
-        .then(myJson => this.setState({products: myJson}))
+        if (this.props.url) {
+            fetch(this.SERVER + this.props.url)
+            .then(response => response.json())
+            .then(myJson => this.setState({options: myJson}))
+        } else if (this.props.options) {
+            this.setState({options: this.props.options})
+        }
     }
     render() {
-        let options = this.state.products.map(option => {
+        let options = this.state.options.map(option => {
             return <option value={option} onChange={this.handleChange} selected={option === this.props.selected ? true : ""}>{option}</option>
         })
         return (
@@ -23,4 +27,4 @@ class ProductSelect extends Component {
     }
 }
 
-export default ProductSelect;
+export default SelectAvailable;

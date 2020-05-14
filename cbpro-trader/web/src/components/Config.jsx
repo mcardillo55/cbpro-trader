@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { addPeriod, changeActivePeriod, clearPeriods } from '../actions'
-import ProductSelect from './ProductSelect'
+import SelectAvailable from './SelectAvailable'
 
 class Config extends Component {
     constructor(){
@@ -68,6 +68,12 @@ class Config extends Component {
     parseEventData(event) {
         switch (event.target.type) {
             case "select-one":
+                switch (event.target.name.split("+")[1]) {
+                    case "length":
+                        return parseFloat(event.target.value)
+                    default:
+                        return event.target.value
+                }
             case "text":
                 return event.target.value
             case "number":
@@ -94,17 +100,25 @@ class Config extends Component {
     createInput(label, value, period) {
         let type = this.parseType(value)
         let checked = type === "checkbox" && value ? "checked" : ""
-        if (period && label.split("+")[1] == "product") {
-            return <ProductSelect selected={value}
-                                  name={label}
-                                  onChange={this.handlePeriodChange} />
-        } else {
-            return <input type={type} 
-                        checked={checked}
-                        value={value} 
-                        name={label} 
-                        onChange={period ? this.handlePeriodChange : this.handleConfigChange}/>
+        if (period) {
+            switch(label.split("+")[1]) {
+                case "product":
+                    return <SelectAvailable selected={value}
+                                            name={label}
+                                            url="/products/"
+                                            onChange={this.handlePeriodChange} />
+                case "length":
+                    return <SelectAvailable selected={value}
+                                            name={label}
+                                            options={[1, 5, 15, 60, 360, 1440]}
+                                            onChange={this.handlePeriodChange} /> 
+            }
         }
+        return <input type={type} 
+                    checked={checked}
+                    value={value} 
+                    name={label} 
+                    onChange={period ? this.handlePeriodChange : this.handleConfigChange}/>
     }
 
     render() {
