@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { addPeriod, changeActivePeriod, clearPeriods } from '../actions'
+import ProductSelect from './ProductSelect'
 
 class Config extends Component {
     constructor(){
@@ -66,6 +67,7 @@ class Config extends Component {
 
     parseEventData(event) {
         switch (event.target.type) {
+            case "select-one":
             case "text":
                 return event.target.value
             case "number":
@@ -73,7 +75,7 @@ class Config extends Component {
             case "checkbox":
                 return event.target.checked
             default:
-                return "text"
+                return event.target.value
         } 
     }
 
@@ -92,11 +94,17 @@ class Config extends Component {
     createInput(label, value, period) {
         let type = this.parseType(value)
         let checked = type === "checkbox" && value ? "checked" : ""
-        return <input type={type} 
-                      checked={checked}
-                      value={value} 
-                      name={label} 
-                      onChange={period ? this.handlePeriodChange : this.handleConfigChange}/>
+        if (period && label.split("+")[1] == "product") {
+            return <ProductSelect selected={value}
+                                  name={label}
+                                  onChange={this.handlePeriodChange} />
+        } else {
+            return <input type={type} 
+                        checked={checked}
+                        value={value} 
+                        name={label} 
+                        onChange={period ? this.handlePeriodChange : this.handleConfigChange}/>
+        }
     }
 
     render() {

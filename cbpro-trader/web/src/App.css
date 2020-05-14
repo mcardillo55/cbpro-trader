@@ -118,11 +118,11 @@ td {
 td:last-child {
   border-right: 0;
 }
-input {
+input, select {
   margin: 5px;
 }
 input[type=text], input[type=number]{
-  width: 70px;
+  width: 100px;
 }
 label {
   display: inline-block;
