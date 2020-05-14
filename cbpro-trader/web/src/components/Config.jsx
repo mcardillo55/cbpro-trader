@@ -12,6 +12,25 @@ class Config extends Component {
         .then(myJson => this.setState({"config": myJson}))
     }
 
+    parseType(data) {
+        switch (typeof(data)) {
+            case "text":
+                return "text"
+            case "number":
+                return "number"
+            case "boolean":
+                return "checkbox"
+            default:
+                return "text"
+        } 
+
+    }
+    createInput(value) {
+        let type = this.parseType(value)
+        let checked = type === "checkbox" && value ? "checked" : ""
+        return <input type={type} checked={checked} value={value} />
+    }
+
     render() {
         let periods_list = 
             this.state.config["periods"].map((period) => {
@@ -22,7 +41,7 @@ class Config extends Component {
                                 <label>
                                     {period_value}:
                                 </label>
-                                <input type="text" value={period[period_value].toString()} />
+                                {this.createInput(period[period_value])}
                             </div>
                         )
                     })
@@ -43,7 +62,7 @@ class Config extends Component {
                             <label>
                                 {config}:
                             </label>
-                            <input type="text" value={this.state.config[config].toString()} />
+                            {this.createInput(this.state.config[config])}
                         </div>
                     )  
                 }
