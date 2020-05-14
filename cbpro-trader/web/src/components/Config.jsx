@@ -6,6 +6,7 @@ class Config extends Component {
         this.state = {"config": {"periods": []}}
         this.handleConfigChange = this.handleConfigChange.bind(this)
         this.handlePeriodChange = this.handlePeriodChange.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
     }
     
     componentDidMount() {
@@ -34,6 +35,17 @@ class Config extends Component {
                                 periods: periods
                                 }
                         })
+    }
+
+    handleSubmit(event){
+        event.preventDefault()
+        fetch('/config/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(this.state.config)
+        })
     }
 
     parseEventData(event) {
@@ -110,6 +122,7 @@ class Config extends Component {
         return (
             <form>
                 {config_list}
+                <input type="submit" value="Save and Restart" onClick={this.handleSubmit}/>
             </form>
         );
     }
