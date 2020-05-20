@@ -21,14 +21,16 @@ class IndicatorSubsystem:
             self.lows = np.append(cur_period.get_lows(), cur_period.cur_candlestick.low)
             volumes = np.append(cur_period.get_volumes(), cur_period.cur_candlestick.volume)
 
-            # self.calculate_bbands(cur_period.name, closing_prices_close)
-            # self.calculate_macd(cur_period.name, closing_prices_close)
-            self.calculate_obv(cur_period.name, closing_prices_close, volumes)
-            self.calculate_adx(cur_period.name, closing_prices_close)
-            self.calculate_stoch(cur_period.name, closing_prices_close)
+            self.calculate_sma(cur_period.name, closing_prices_close)
 
             self.current_indicators[cur_period.name]['close'] = cur_period.cur_candlestick.close
             self.current_indicators[cur_period.name]['total_periods'] = total_periods
+
+    def calculate_sma(self, period_name, closing_prices):
+        sma = talib.SMA(closing_prices, timeperiod=9)
+
+        self.current_indicators[period_name]['sma'] = sma[-1]
+        self.current_indicators[period_name]['sma_trend'] = sma[-1] - sma[-2]
 
     def calculate_adx(self, period_name, close):
         adx = talib.ADX(self.highs, self.lows, close, timeperiod=14)
