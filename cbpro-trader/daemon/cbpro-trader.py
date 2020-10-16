@@ -21,7 +21,7 @@ from websocket import WebSocketConnectionClosedException
 class CBProTrader(object):
     def __init__(self):
         with open("config.yml", 'r') as ymlfile:
-            config = yaml.load(ymlfile)
+            config = yaml.load(ymlfile, Loader=yaml.Loader)
         
         self.logger = logging.getLogger('trader-logger')
         self.logger.setLevel(logging.DEBUG)
