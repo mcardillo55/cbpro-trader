@@ -101,26 +101,28 @@ class Config extends Component {
         let type = this.parseType(value)
         let checked = type === "checkbox" && value ? "checked" : ""
         if (period) {
-            switch(label.split("+")[1]) {
-                case "product":
-                    return <SelectAvailable selected={value}
-                                            name={label}
-                                            url="/products/"
-                                            onChange={this.handlePeriodChange} />
-                case "length":
-                    return <SelectAvailable selected={value}
-                                            name={label}
-                                            options={[1, 5, 15, 60, 360, 1440]}
-                                            onChange={this.handlePeriodChange} />
-                default:
-                    return
-            }
+            label = label.split("+")[1]
         }
-        return <input type={type} 
-                    checked={checked}
-                    value={value} 
-                    name={label} 
-                    onChange={period ? this.handlePeriodChange : this.handleConfigChange}/>
+            
+        switch (label) 
+        {
+            case "product":
+                return <SelectAvailable selected={value}
+                                        name={label}
+                                        url="/products/"
+                                        onChange={this.handlePeriodChange} />
+            case "length":
+                return <SelectAvailable selected={value}
+                                        name={label}
+                                        options={[1, 5, 15, 60, 360, 1440]}
+                                        onChange={this.handlePeriodChange} />
+            default:
+                return <input type={type} 
+                                checked={checked}
+                                value={value} 
+                                name={label} 
+                                onChange={period ? this.handlePeriodChange : this.handleConfigChange}/>
+        }
     }
 
     render() {
