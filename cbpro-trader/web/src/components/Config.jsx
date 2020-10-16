@@ -111,7 +111,9 @@ class Config extends Component {
                     return <SelectAvailable selected={value}
                                             name={label}
                                             options={[1, 5, 15, 60, 360, 1440]}
-                                            onChange={this.handlePeriodChange} /> 
+                                            onChange={this.handlePeriodChange} />
+                default:
+                    return
             }
         }
         return <input type={type} 
