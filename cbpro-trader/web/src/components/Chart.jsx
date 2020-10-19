@@ -1,17 +1,16 @@
 import React from 'react';
 import * as LightweightCharts from 'lightweight-charts';
 
-let chart = null;
-let candlestickSeries;
-
 function Chart (props) {
     const ref = React.useRef(null);
+    const [chart, setChart] = React.useState(null);
+    const [candlestickSeries, setCandlestickSeries] = React.useState(null);
     const { candlesticks } = props;
 
     React.useEffect(() => {
         if (!chart) {
             console.log(chart)
-        chart = LightweightCharts.createChart(ref.current, {
+        setChart(LightweightCharts.createChart(ref.current, {
             width: 1300,
           height: 700,
             layout: {
@@ -36,18 +35,22 @@ function Chart (props) {
                 timeVisible: true,
                 borderColor: 'rgba(197, 203, 206, 0.8)',
             },
-        });
-        
-        candlestickSeries = chart.addCandlestickSeries({
-          upColor: '#53b987',
-          downColor: '#eb4d5c',
-          borderDownColor: '#eb4d5c',
-          borderUpColor: '#53b987',
-          wickDownColor: '#eb4d5c',
-          wickUpColor: '#53b987',
-        });
+        }));
     }
     }, [])
+
+    React.useEffect(() => {
+        if(chart) {
+            setCandlestickSeries(chart.addCandlestickSeries({
+                upColor: '#53b987',
+                downColor: '#eb4d5c',
+                borderDownColor: '#eb4d5c',
+                borderUpColor: '#53b987',
+                wickDownColor: '#eb4d5c',
+                wickUpColor: '#53b987',
+            }))
+        };
+    }, [chart]);
 
     React.useEffect(() => {
         if (candlestickSeries) {
