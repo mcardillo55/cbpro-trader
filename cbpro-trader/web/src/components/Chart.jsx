@@ -1,55 +1,61 @@
 import React from 'react';
-import { VictoryCandlestick, VictoryChart, VictoryAxis, VictoryLabel, VictoryTheme } from 'victory';
+import * as LightweightCharts from 'lightweight-charts';
+
+let chart = null;
+let candlestickSeries;
 
 function Chart (props) {
-    const { active_period, candlesticks } = props;
-    return (
-        <div id="chart">
-            <VictoryChart 
-                theme={VictoryTheme.material}
-                domainPadding={{ x: 15 }}
-                height={600}
-                width={1000}
-                scale={{ x: "time"}}
-            >
-                <VictoryLabel text={active_period} x={20} y={20} style={{
-                                                                                    fontWeight: "bold",
-                                                                                    fontSize: 20,
-                                                                                    fill: "rgb(217, 217, 217)"
-                                                                                    }}/>
-                <VictoryAxis 
-                    tickFormat={(t) => `${t.toLocaleString(undefined, {year: "2-digit",
-                                                            month: "numeric",
-                                                            day: "numeric",
-                                                            hour: "numeric",
-                                                            minute: "numeric",
-                                                            hourCycle: "h24"
-                                                            }).replace(',', '\n')}`}
-                    tickCount={25}
-                    style={{
-                        tickLabels: {
-                            fill: "rgb(217, 217, 217)"
-                        }
-                    }}
-                />
-                <VictoryAxis 
-                    dependentAxis
-                    style={{
-                        tickLabels: {
-                            fill: "rgb(217, 217, 217)"
-                        }
-                    }}
-                />
-                <VictoryCandlestick
-                candleColors={{ positive: "#53b987", negative: "#eb4d5c" }}
+    const ref = React.useRef(null);
+    const { candlesticks } = props;
 
-                data={candlesticks.slice(candlesticks.length-50, candlesticks.length)}
-                x={(d) => Date.parse(d[0])}
-                open={3}
-                close={4}
-                high={2}
-                low={1} />
-            </VictoryChart>
+    React.useEffect(() => {
+        if (!chart) {
+            console.log(chart)
+        chart = LightweightCharts.createChart(ref.current, {
+            width: 1300,
+          height: 700,
+            layout: {
+                backgroundColor: 'Transparent',
+                textColor: 'rgba(255, 255, 255, 0.9)',
+            },
+            grid: {
+                vertLines: {
+                    color: 'rgba(197, 203, 206, 0.5)',
+                },
+                horzLines: {
+                    color: 'rgba(197, 203, 206, 0.5)',
+                },
+            },
+            crosshair: {
+                mode: LightweightCharts.CrosshairMode.Normal,
+            },
+            rightPriceScale: {
+                borderColor: 'rgba(197, 203, 206, 0.8)',
+            },
+            timeScale: {
+                borderColor: 'rgba(197, 203, 206, 0.8)',
+            },
+        });
+        
+        candlestickSeries = chart.addCandlestickSeries({
+          upColor: '#53b987',
+          downColor: '#eb4d5c',
+          borderDownColor: '#eb4d5c',
+          borderUpColor: '#53b987',
+          wickDownColor: '#eb4d5c',
+          wickUpColor: '#53b987',
+        });
+    }
+    }, [])
+
+    React.useEffect(() => {
+        if (candlestickSeries) {
+            candlestickSeries.setData(candlesticks);
+        }
+    }, [candlesticks]);
+
+    return (
+        <div id="chart" ref={ref}>
         </div>
     )
 }

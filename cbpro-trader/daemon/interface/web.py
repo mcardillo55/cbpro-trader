@@ -22,11 +22,19 @@ class web(object):
             if periodName is None:
                 for period in self.indicator_subsys.period_list:
                     period_data.append(period.name)
+                return jsonify(period_data)
             else:
                 for period in self.indicator_subsys.period_list:
                     if period.name == periodName:
                         period_data = period.candlesticks.tolist() + [period.cur_candlestick.to_list()]
-            return jsonify(period_data)
+                return jsonify([{
+                                'time': stick[0].timestamp(), 
+                                'low': stick[1],
+                                'high': stick[2],
+                                'open': stick[3],
+                                'close': stick[4]
+                                }
+                                for stick in period_data])
 
         @app.route('/indicators/')
         @app.route('/indicators/<periodName>')
