@@ -33,6 +33,7 @@ function Chart (props) {
                 borderColor: 'rgba(197, 203, 206, 0.8)',
             },
             timeScale: {
+                timeVisible: true,
                 borderColor: 'rgba(197, 203, 206, 0.8)',
             },
         });
