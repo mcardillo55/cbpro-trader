@@ -6,38 +6,41 @@ function Chart (props) {
     const [chart, setChart] = React.useState(null);
     const [candlestickSeries, setCandlestickSeries] = React.useState(null);
     const { candlesticks } = props;
+    let clientWidth, clientHeight;
+
+    clientWidth = ref.current && ref.current.clientWidth;
+    clientHeight = ref.current && ref.current.clientHeight;
 
     React.useEffect(() => {
         if (!chart) {
-            console.log(chart)
-        setChart(LightweightCharts.createChart(ref.current, {
-            width: 1300,
-          height: 700,
-            layout: {
-                backgroundColor: 'Transparent',
-                textColor: 'rgba(255, 255, 255, 0.9)',
-            },
-            grid: {
-                vertLines: {
-                    color: 'rgba(197, 203, 206, 0.5)',
+            setChart(LightweightCharts.createChart(ref.current, {
+            width: 0,
+            height: 0,
+                layout: {
+                    backgroundColor: 'Transparent',
+                    textColor: 'rgba(255, 255, 255, 0.9)',
                 },
-                horzLines: {
-                    color: 'rgba(197, 203, 206, 0.5)',
+                grid: {
+                    vertLines: {
+                        color: 'rgba(197, 203, 206, 0.5)',
+                    },
+                    horzLines: {
+                        color: 'rgba(197, 203, 206, 0.5)',
+                    },
                 },
-            },
-            crosshair: {
-                mode: LightweightCharts.CrosshairMode.Normal,
-            },
-            rightPriceScale: {
-                borderColor: 'rgba(197, 203, 206, 0.8)',
-            },
-            timeScale: {
-                timeVisible: true,
-                borderColor: 'rgba(197, 203, 206, 0.8)',
-            },
-        }));
-    }
-    }, [])
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+                rightPriceScale: {
+                    borderColor: 'rgba(197, 203, 206, 0.8)',
+                },
+                timeScale: {
+                    timeVisible: true,
+                    borderColor: 'rgba(197, 203, 206, 0.8)',
+                },
+            }));
+        }
+    });
 
     React.useEffect(() => {
         if(chart) {
@@ -57,6 +60,17 @@ function Chart (props) {
             candlestickSeries.setData(candlesticks);
         }
     }, [candlesticks]);
+
+    function resizeChart() {
+        if (chart) {
+            chart.resize(0, 0);
+            chart.resize(ref.current.clientWidth, ref.current.clientHeight);
+        }
+    }
+
+    window.addEventListener('resize', () => resizeChart());
+
+    React.useEffect(() => resizeChart(), [window.innerHeight, window.innerWidth, clientHeight, clientWidth]);
 
     return (
         <div id="chart" ref={ref}>
