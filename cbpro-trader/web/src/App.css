@@ -1,5 +1,6 @@
 #chart-controller {
   display: grid;
+  height: 100vh;
   grid-template-columns: 9fr 3fr;
 }
 #config {
