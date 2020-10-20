@@ -40,6 +40,18 @@
   border-top: 5px solid;
   border-bottom: 5px solid;
 }
+#tooltip {
+  display: block;
+  position: absolute;
+  top: 3px;
+  left: 10px;
+}
+#tooltip-title {
+  font-size: 26px;
+}
+#tooltip-prices {
+  font-size: 18px;
+}
 #details {
   font-weight: bold;
 }

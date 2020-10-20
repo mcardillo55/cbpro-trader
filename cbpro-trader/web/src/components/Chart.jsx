@@ -1,12 +1,15 @@
 import React from 'react';
 import * as LightweightCharts from 'lightweight-charts';
+import Tooltip from './Tooltip';
 
 function Chart (props) {
     const ref = React.useRef(null);
     const [chart, setChart] = React.useState(null);
     const [initialZoomSet, setInitialZoomSet] = React.useState(false); // Tracks if we have set the initial zoom yet
+    const [tooltipPrices, setTooltipPrices] = React.useState({});
+    const [hovering, setHovering] = React.useState(false); // True if hovering a data series;
     const [candlestickSeries, setCandlestickSeries] = React.useState(null);
-    const { candlesticks } = props;
+    const { active_period, candlesticks } = props;
     let clientWidth, clientHeight;
 
     clientWidth = ref.current && ref.current.clientWidth;
@@ -45,20 +48,33 @@ function Chart (props) {
 
     React.useEffect(() => {
         if(chart) {
-            setCandlestickSeries(chart.addCandlestickSeries({
+            let series = chart.addCandlestickSeries({
                 upColor: '#53b987',
                 downColor: '#eb4d5c',
                 borderDownColor: '#eb4d5c',
                 borderUpColor: '#53b987',
                 wickDownColor: '#eb4d5c',
                 wickUpColor: '#53b987',
-            }))
+            });
+            setCandlestickSeries(series);
+
+            chart.subscribeCrosshairMove(function(param) {
+                if (param.seriesPrices.size) {
+                    setHovering(true);
+                    setTooltipPrices(param.seriesPrices.get(series));
+                } else {
+                    setHovering(false);
+                }
+            })
         };
     }, [chart]);
 
     React.useEffect(() => {
         if (candlestickSeries) {
             candlestickSeries.setData(candlesticks);
+            if (!hovering) {
+                setTooltipPrices(candlesticks[candlesticks.length - 1]);
+            }
         }
 
         if (!initialZoomSet && chart && chart.timeScale().getVisibleRange()) {
@@ -68,6 +84,7 @@ function Chart (props) {
                 to: candlesticks[candlesticks.length -1]['time'],
             })
             setInitialZoomSet(true);
+            setTooltipPrices(candlesticks[candlesticks.length - 1])
         }
     }, [candlesticks]);
 
@@ -84,6 +101,7 @@ function Chart (props) {
 
     return (
         <div id="chart" ref={ref}>
+            <Tooltip title={active_period} prices={tooltipPrices} />
         </div>
     )
 }
