@@ -4,6 +4,7 @@ import * as LightweightCharts from 'lightweight-charts';
 function Chart (props) {
     const ref = React.useRef(null);
     const [chart, setChart] = React.useState(null);
+    const [initialZoomSet, setInitialZoomSet] = React.useState(false); // Tracks if we have set the initial zoom yet
     const [candlestickSeries, setCandlestickSeries] = React.useState(null);
     const { candlesticks } = props;
     let clientWidth, clientHeight;
@@ -58,6 +59,15 @@ function Chart (props) {
     React.useEffect(() => {
         if (candlestickSeries) {
             candlestickSeries.setData(candlesticks);
+        }
+
+        if (!initialZoomSet && chart && chart.timeScale().getVisibleRange()) {
+            let timeDiff = candlesticks[candlesticks.length -1]['time'] - candlesticks[candlesticks.length -2]['time'];
+            chart.timeScale().setVisibleRange({
+                from: candlesticks[candlesticks.length -1]['time'] - (timeDiff * 30), // Show 30 candles by default
+                to: candlesticks[candlesticks.length -1]['time'],
+            })
+            setInitialZoomSet(true);
         }
     }, [candlesticks]);
 
