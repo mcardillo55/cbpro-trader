@@ -15,36 +15,34 @@ function Chart (props) {
     clientWidth = ref.current && ref.current.clientWidth;
     clientHeight = ref.current && ref.current.clientHeight;
 
-    React.useEffect(() => {
-        if (!chart) {
-            setChart(LightweightCharts.createChart(ref.current, {
-            width: 0,
-            height: 0,
-                layout: {
-                    backgroundColor: 'Transparent',
-                    textColor: 'rgba(255, 255, 255, 0.9)',
+    if (ref.current && !chart) {
+        setChart(LightweightCharts.createChart(ref.current, {
+        width: 0,
+        height: 0,
+            layout: {
+                backgroundColor: 'Transparent',
+                textColor: 'rgba(255, 255, 255, 0.9)',
+            },
+            grid: {
+                vertLines: {
+                    color: 'rgba(197, 203, 206, 0.5)',
                 },
-                grid: {
-                    vertLines: {
-                        color: 'rgba(197, 203, 206, 0.5)',
-                    },
-                    horzLines: {
-                        color: 'rgba(197, 203, 206, 0.5)',
-                    },
+                horzLines: {
+                    color: 'rgba(197, 203, 206, 0.5)',
                 },
-                crosshair: {
-                    mode: LightweightCharts.CrosshairMode.Normal,
-                },
-                rightPriceScale: {
-                    borderColor: 'rgba(197, 203, 206, 0.8)',
-                },
-                timeScale: {
-                    timeVisible: true,
-                    borderColor: 'rgba(197, 203, 206, 0.8)',
-                },
-            }));
-        }
-    });
+            },
+            crosshair: {
+                mode: LightweightCharts.CrosshairMode.Normal,
+            },
+            rightPriceScale: {
+                borderColor: 'rgba(197, 203, 206, 0.8)',
+            },
+            timeScale: {
+                timeVisible: true,
+                borderColor: 'rgba(197, 203, 206, 0.8)',
+            },
+        }));
+    }
 
     React.useEffect(() => {
         if(chart) {
@@ -70,7 +68,7 @@ function Chart (props) {
     }, [chart]);
 
     React.useEffect(() => {
-        if (candlestickSeries) {
+        if (candlesticks.length && candlestickSeries) {
             candlestickSeries.setData(candlesticks);
             if (!hovering) {
                 setTooltipPrices(candlesticks[candlesticks.length - 1]);
@@ -86,7 +84,7 @@ function Chart (props) {
             setInitialZoomSet(true);
             setTooltipPrices(candlesticks[candlesticks.length - 1])
         }
-    }, [candlesticks]);
+    }, [candlesticks, candlestickSeries, chart, hovering, initialZoomSet]);
 
     function resizeChart() {
         if (chart) {
@@ -97,7 +95,7 @@ function Chart (props) {
 
     window.addEventListener('resize', () => resizeChart());
 
-    React.useEffect(() => resizeChart(), [window.innerHeight, window.innerWidth, clientHeight, clientWidth]);
+    React.useEffect(resizeChart, [window.innerHeight, window.innerWidth, clientHeight, clientWidth]);
 
     return (
         <div id="chart" ref={ref}>
