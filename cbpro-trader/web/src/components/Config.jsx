@@ -133,47 +133,56 @@ class Config extends Component {
     }
 
     render() {
-        let periods_list = 
-            this.state.config["periods"].map((period, idx) => {
-                return(
-                    Object.keys(period).map((period_value, idx2) => {
+        if (this.state.config['web_config']) {
+            let periods_list = 
+                this.state.config["periods"].map((period, idx) => {
+                    return(
+                        Object.keys(period).map((period_value, idx2) => {
+                            return(
+                                <div key={idx + ',' + idx2}>
+                                    <label>
+                                        {this.prettifyLabel(period_value)}:
+                                    </label>
+                                    {this.createInput(idx + "+" + period_value, period[period_value], true)}
+                                </div>
+                            )
+                        })
+                    )
+                });
+            let config_list = 
+                Object.keys(this.state.config).map((config, idx) => {
+                    if (config === "periods") {
                         return(
-                            <div key={idx + ',' + idx2}>
-                                <label>
-                                    {this.prettifyLabel(period_value)}:
-                                </label>
-                                {this.createInput(idx + "+" + period_value, period[period_value], true)}
+                            <div key={idx}>
+                                Periods:
+                                    {periods_list}
                             </div>
                         )
-                    })
-                )
-            });
-        let config_list = 
-            Object.keys(this.state.config).map((config, idx) => {
-                if (config === "periods") {
-                    return(
-                        <div key={idx}>
-                            Periods:
-                                {periods_list}
-                        </div>
-                    )
-                } else {
-                    return (
-                        <div key={idx}>
-                            <label>
-                                {this.prettifyLabel(config)}:
-                            </label>
-                            {this.createInput(config, this.state.config[config], false)}
-                        </div>
-                    )  
-                }
-            });
-        return (
-            <form id="config">
-                {config_list}
-                <input type="submit" value="Save and Restart" onClick={this.handleSubmit}/>
-            </form>
-        );
+                    } else {
+                        return (
+                            <div key={idx}>
+                                <label>
+                                    {this.prettifyLabel(config)}:
+                                </label>
+                                {this.createInput(config, this.state.config[config], false)}
+                            </div>
+                        )  
+                    }
+                });
+            return (
+                <form id="config">
+                    {config_list}
+                    <input type="submit" value="Save and Restart" onClick={this.handleSubmit}/>
+                </form>
+            );
+        }
+        else {
+            return (
+                <div id="config">
+                    <h3>Web config disabled</h3>
+                </div>
+            )
+        }
     }
 }
 
