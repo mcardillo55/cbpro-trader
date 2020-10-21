@@ -43,7 +43,31 @@ Also note that the TA-Lib python library is actually a wrapper for the ta-lib C 
 
 Copy config.yml.sample to config.yml and include your `key`, `secret`, and `passphrase` values from your Coinbase Pro API key.
 
-Set `live` to `yes`  **only if** you want the bot to execute **actual trades.** The bot will still collect data and calculate indicators when LIVE is set to FALSE. You may also wish to test functionality with a Coinbase Pro sandbox API key first.
+| Name         | Type    | Description                                                                      |
+| ------------ | ------- | -------------------------------------------------------------------------------- |
+| key          | string  | Coinbase API key                                                                 |
+| secret       | string  | Coinbase API secret                                                              |
+| passphrase   | string  | Coinbase API passphrase                                                          |
+| sandbox      | boolean | Set to 'yes' to use Coinbase sandbox servers (for testing)                       |
+| live         | boolean | Set to 'yes' to to toggle live trading                                           |
+| frontend     | string  | Which frontend to use - 'console', 'web' or 'debug'. See below for more info.    |
+| web_config   | boolean | Set to 'yes' to allow setting config from the web API                            |
+| logging      | boolean | Set to 'yes' to add additional logging to debug.log file                         |
+| fiat         | string  | Which fiat currency to use - e.g. 'USD' or 'EUR'                                 |
+| max_slippage | float   | Max percentage change in limit orders before executing a market order            |
+| periods      | list    | A YAML list of periods, each including the options listed in the periods section |
+
+For each period in the `periods` list, include the following options
+
+| Name    | Type    | Description                                                                    |
+| ------- | ------- | ------------------------------------------------------------------------------ |
+| name    | string  | The display name of the period                                                 |
+| product | string  | The Coinbase product to trade                                                  |
+| length  | integer | The period length in minutes                                                   |
+| trade   | boolean | Set to 'yes' to trade this period                                              |
+| meta    | boolean | Set to 'yes' if this is a 'meta' product (one that does not exist on Coinbase) |
+
+Set `live` to `yes`  **only if** you want the bot to execute **actual trades.** The bot will still collect data and calculate indicators when `live` is set to `no`. You may also wish to test functionality with a Coinbase Pro sandbox API key first.
 
 In config.yml you can list as many periods as you would like under the periods section. Periods will be used for trading logic only if their `trade:` attribute is set to `yes`, otherwise they are just used for gathering indicator data.
 
