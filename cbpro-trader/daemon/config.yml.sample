@@ -4,6 +4,7 @@ passphrase: mypassphrase
 sandbox: yes
 live: no
 frontend: curses
+web_config: no
 logging: no
 fiat: USD
 max_slippage: 0.10

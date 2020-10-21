@@ -69,17 +69,20 @@ class web(object):
 
         @app.route('/config/', methods=['GET', 'POST'])
         def config(periodName=None):
-            if request.method == 'POST':
-                self.trade_engine.close()
-                new_config = request.get_json()
-                self.config.update(new_config)
-                init_engine_and_indicators()
+            if self.config.get("web_config"):
+                if request.method == 'POST':
+                    self.trade_engine.close()
+                    new_config = request.get_json()
+                    self.config.update(new_config)
+                    init_engine_and_indicators()
 
-            # Remove key/secret info from the response
-            new_config = self.config.copy()
-            del new_config['key']
-            del new_config['secret']
-            del new_config['passphrase']
+                # Remove key/secret info from the response
+                new_config = self.config.copy()
+                del new_config['key']
+                del new_config['secret']
+                del new_config['passphrase']
+            else:
+                new_config = {'web_config': False}
 
             return jsonify(new_config)
 
