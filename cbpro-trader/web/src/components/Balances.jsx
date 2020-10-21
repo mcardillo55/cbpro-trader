@@ -5,9 +5,9 @@ function Balances(props) {
     return(
         <ul id="balances" className="sidebar-section">
             {
-                Object.keys(balances).map((currency) => {
+                Object.keys(balances).map((currency, idx) => {
                     return(
-                        <li className="currency"><span className="currency">{ currency.toUpperCase() }</span>: { balances[currency] }</li>
+                        <li key={idx} className="currency"><span className="currency">{ currency.toUpperCase() }</span>: { balances[currency] }</li>
                     )
                 })
             }

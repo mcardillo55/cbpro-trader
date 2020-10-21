@@ -6,18 +6,21 @@ function Orders(props) {
         <div id="orders" className="sidebar-section">
             <h2 className="first-h2">Orders</h2>
             <table>
-                <tr>
-                    <th>Product</th>
-                    <th>Side</th>
-                    <th>Size</th>
-                    <th>Price</th>
-                    <th>Filled</th>
-                    <th>Fee</th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Side</th>
+                        <th>Size</th>
+                        <th>Price</th>
+                        <th>Filled</th>
+                        <th>Fee</th>
+                    </tr>
+                </thead>
+                <tbody>
             {
-                orders['orders'].map((order) => {
+                orders['orders'].map((order, idx) => {
                     return(
-                        <tr>
+                        <tr key={idx}>
                             <td>{order.product_id}</td>
                             <td>{order.side.toUpperCase()}</td>
                             <td>{order.size}</td>
@@ -28,21 +31,25 @@ function Orders(props) {
                     )
                 })
             }
+                </tbody>
             </table>
             <h2>Fills</h2>
             <table>
-                <tr>
-                    <th>Product</th>
-                    <th>Side</th>
-                    <th>Size</th>
-                    <th>Price</th>
-                    <th>Fee</th>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Side</th>
+                        <th>Size</th>
+                        <th>Price</th>
+                        <th>Fee</th>
 
-                </tr>  
+                    </tr>
+                </thead>
+                <tbody>
             {
-                orders['fills'].map((fill) => {
+                orders['fills'].map((fill, idx) => {
                     return(
-                        <tr>
+                        <tr key={idx}>
                             <td>{fill.product_id}</td>
                             <td>{fill.side.toUpperCase()}</td>
                             <td>{fill.size}</td>
@@ -52,6 +59,7 @@ function Orders(props) {
                     )
                 })
             }
+                </tbody>
             </table>
         </div>
     )

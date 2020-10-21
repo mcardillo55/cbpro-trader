@@ -16,11 +16,11 @@ class SelectAvailable extends Component {
         }
     }
     render() {
-        let options = this.state.options.map(option => {
-            return <option value={option} onChange={this.handleChange} selected={option === this.props.selected ? true : ""}>{option}</option>
+        let options = this.state.options.map((option, idx) => {
+            return <option key={idx} value={option} onChange={this.handleChange}>{option}</option>
         })
         return (
-            <select name={this.props.name} onChange={this.props.onChange} value={this.state.selected}>
+            <select name={this.props.name} onChange={this.props.onChange} value={this.props.selected}>
                 {options}
             </select>
         )

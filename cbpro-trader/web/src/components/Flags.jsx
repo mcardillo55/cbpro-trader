@@ -6,10 +6,9 @@ function Flags(props) {
         <div id="flags" className="sidebar-section">
             <h2 className="first-h2">Flags</h2>
             {
-                Object.keys(flags).map((flag) => {
-                    return(
-                        
-                        <div class="flag">
+                Object.keys(flags).map((flag, idx) => {
+                    return(      
+                        <div key={idx} className="flag">
                             <span className="flag-title">{ flag.toUpperCase() }:</span> { flags[flag].toUpperCase() }
                         </div>
                     )

@@ -8,9 +8,9 @@ import Config from '../components/Config';
 function Sidebar(props) {
     const { active_period, period_list, primary_section, secondary_section, changePrimarySection, changeSecondarySection, changeActivePeriod } = props;
     
-    let period_list_map = period_list.map(period_name => {
+    let period_list_map = period_list.map((period_name, idx) => {
                                 return(
-                                    <li className={active_period === period_name ? "focused period" : "period"} 
+                                    <li key={idx} className={active_period === period_name ? "focused period" : "period"} 
                                         onClick={() => {changeActivePeriod(period_name)}}>{period_name}</li>
                                 )
                             })

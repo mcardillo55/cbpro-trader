@@ -127,11 +127,11 @@ class Config extends Component {
 
     render() {
         let periods_list = 
-            this.state.config["periods"].map((period, idx) => {
+            this.state.config["periods"].map((period) => {
                 return(
-                    Object.keys(period).map((period_value) => {
+                    Object.keys(period).map((period_value, idx) => {
                         return(
-                            <div>
+                            <div key={period.name + ',' + idx}>
                                 <label>
                                     {period_value}:
                                 </label>
@@ -142,17 +142,17 @@ class Config extends Component {
                 )
             });
         let config_list = 
-            Object.keys(this.state.config).map((config) => {
+            Object.keys(this.state.config).map((config, idx) => {
                 if (config === "periods") {
                     return(
-                        <div>
+                        <div key={idx}>
                             Periods:
                                 {periods_list}
                         </div>
                     )
                 } else {
                     return (
-                        <div>
+                        <div key={idx}>
                             <label>
                                 {config}:
                             </label>

@@ -8,11 +8,11 @@ function Details(props) {
             <div id="last-trade">{indicators.close && indicators.close.toFixed(2)}</div>
             <div id="indicators">
                 {
-                    Object.keys(indicators).map((indicator) => {
+                    Object.keys(indicators).map((indicator, idx) => {
                         return(
-                            <div class="indicator">
-                                <div class="indicator-title">{indicator.toUpperCase()}</div>
-                                <div class="indicator-data">{indicators[indicator]}</div>
+                            <div key={idx} className="indicator">
+                                <div className="indicator-title">{indicator.toUpperCase()}</div>
+                                <div className="indicator-data">{indicators[indicator]}</div>
                             </div>
                         )
                     })
