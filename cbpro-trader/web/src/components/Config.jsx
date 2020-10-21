@@ -100,11 +100,14 @@ class Config extends Component {
     createInput(label, value, period) {
         let type = this.parseType(value)
         let checked = type === "checkbox" && value ? "checked" : ""
+        let parsedLabel;
         if (period) {
-            label = label.split("+")[1]
+            parsedLabel = label.split("+")[1]
+        } else {
+            parsedLabel = label
         }
             
-        switch (label) 
+        switch (parsedLabel) 
         {
             case "product":
                 return <SelectAvailable selected={value}
@@ -127,11 +130,11 @@ class Config extends Component {
 
     render() {
         let periods_list = 
-            this.state.config["periods"].map((period) => {
+            this.state.config["periods"].map((period, idx) => {
                 return(
-                    Object.keys(period).map((period_value, idx) => {
+                    Object.keys(period).map((period_value, idx2) => {
                         return(
-                            <div key={period.name + ',' + idx}>
+                            <div key={idx + ',' + idx2}>
                                 <label>
                                     {period_value}:
                                 </label>
