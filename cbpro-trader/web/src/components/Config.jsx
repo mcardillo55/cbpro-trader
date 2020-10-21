@@ -128,6 +128,10 @@ class Config extends Component {
         }
     }
 
+    prettifyLabel(label) {
+        return label.charAt(0).toUpperCase() + label.replace('_', ' ').slice(1)
+    }
+
     render() {
         let periods_list = 
             this.state.config["periods"].map((period, idx) => {
@@ -136,7 +140,7 @@ class Config extends Component {
                         return(
                             <div key={idx + ',' + idx2}>
                                 <label>
-                                    {period_value}:
+                                    {this.prettifyLabel(period_value)}:
                                 </label>
                                 {this.createInput(idx + "+" + period_value, period[period_value], true)}
                             </div>
@@ -157,7 +161,7 @@ class Config extends Component {
                     return (
                         <div key={idx}>
                             <label>
-                                {config}:
+                                {this.prettifyLabel(config)}:
                             </label>
                             {this.createInput(config, this.state.config[config], false)}
                         </div>
