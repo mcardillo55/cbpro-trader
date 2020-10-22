@@ -10,10 +10,6 @@ function Chart (props) {
     const [hovering, setHovering] = React.useState(false); // True if hovering a data series;
     const [candlestickSeries, setCandlestickSeries] = React.useState(null);
     const { active_period, candlesticks } = props;
-    let clientWidth, clientHeight;
-
-    clientWidth = ref.current && ref.current.clientWidth;
-    clientHeight = ref.current && ref.current.clientHeight;
 
     if (ref.current && !chart) {
         setChart(LightweightCharts.createChart(ref.current, {
@@ -95,7 +91,7 @@ function Chart (props) {
 
     window.addEventListener('resize', () => resizeChart());
 
-    React.useEffect(resizeChart, [window.innerHeight, window.innerWidth, clientHeight, clientWidth]);
+    resizeChart();
 
     return (
         <div id="chart" ref={ref}>

@@ -1,13 +1,16 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { addPeriod, changeActivePeriod, updateCandlesticks, updateIndicators, updateFlags, updateOrders, updateBalances } from '../actions'
-import ChartContainer from '../containers/ChartContainer'
+import CollapseButton from '../components/CollapseButton'
 import SidebarContainer from '../containers/SidebarContainer'
+import ChartContainer from '../containers/ChartContainer'
 
 class ChartController extends Component {
     constructor() {
         super();
         this.SERVER = process.env.REACT_APP_SERVER || ''; 
+
+        this.state = {sidebarCollapsed: false};
     }
     
     componentDidMount() {
@@ -82,9 +85,10 @@ class ChartController extends Component {
     render() {
         this.update();
         return (
-            <div id="chart-controller">
+            <div className={this.state.sidebarCollapsed ? "collapsed" : ""} id="chart-controller">
                 <ChartContainer />
-                <SidebarContainer />
+                <CollapseButton collapsed={this.state.sidebarCollapsed} onClick={()=>{this.setState({sidebarCollapsed: !this.state.sidebarCollapsed})}} />
+                {!this.state.sidebarCollapsed && <SidebarContainer />}
             </div>
         )
     }

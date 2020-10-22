@@ -1,7 +1,17 @@
 #chart-controller {
   display: grid;
   height: 100vh;
-  grid-template-columns: 9fr 3fr;
+  grid-template-columns: 100fr 1fr 24fr;
+}
+#collapse-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: rgb(19, 23, 34);
+  background-color: rgb(217, 217, 217);
+}
+#collapse-button:hover {
+  background-color: #A6A6A6;
 }
 #config {
   padding: 10px;
@@ -15,7 +25,6 @@
 #sidebar {
   display: grid;
   grid-template-rows: 1fr 2fr;
-  border-left: 5px solid;
   max-height: 100vh;
 }
 #primary-selector {
@@ -60,6 +69,9 @@
 }
 .active-button{
   background-color: rgb(33, 56, 77);
+}
+.collapsed {
+  grid-template-columns: 124fr 1fr !important;
 }
 #balances {
   padding-top: 0px;
