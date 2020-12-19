@@ -65,10 +65,14 @@ class TradeEngine():
 
             if time.time() - self.last_order_update >= 1.0:
                 self.temp_recent_fills = []
+                self.temp_recent_fills_filtered = []
                 try:
                     for product in self.products:
                         self.temp_recent_fills += list(itertools.islice(self.auth_client.get_fills(product_id=product.product_id), 5))
-                        self.recent_fills = sorted(self.temp_recent_fills, key=lambda x: x['created_at'], reverse=True)[:5]
+                        for x in  self.temp_recent_fills:
+                            if (x != 'message'):
+                                self.temp_recent_fills_filtered.append(x)
+                        self.recent_fills = sorted(self.temp_recent_fills_filtered, key=lambda x: x['created_at'], reverse=True)[:5]
                 except Exception:
                     self.error_logger.exception(datetime.datetime.now())
                 if need_updating:
