@@ -14,7 +14,7 @@ lazy-object-proxy==1.4.3
 MarkupSafe==1.1.1
 mccabe==0.6.1
 more-itertools==4.3.0
-numpy==1.15.2
+numpy==1.22.0
 pluggy==0.8.0
 py==1.7.0
 pylint==2.4.4
